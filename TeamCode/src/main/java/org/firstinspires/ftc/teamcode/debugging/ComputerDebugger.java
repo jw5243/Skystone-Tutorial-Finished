@@ -80,7 +80,7 @@ public class ComputerDebugger {
         } else if(messageOption.ordinal() == MessageOption.POSITION.ordinal()) {
             //getMessageBuilder().append(Utilities.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append(getRobot().getFieldPosition());
         } else if(messageOption.ordinal() == MessageOption.VELOCITY.ordinal()) {
-            //getMessageBuilder().append(Utilities.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append(Speedometer.getCurrentVelocity());
+            //getMessageBuilder().append(Utilities.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append(Speedometer.getCurrentAngularVelocity());
         } else if(messageOption.ordinal() == MessageOption.ACCELERATION.ordinal()) {
             //getMessageBuilder().append(Utilities.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append(Speedometer.getCurrentAcceleration());
         } else if(messageOption.ordinal() == MessageOption.JERK.ordinal()) {
