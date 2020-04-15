@@ -13,3 +13,9 @@
 
 // Include common definitions from above.
 apply from: '../build.common.gradle'
+
+dependencies {
+    implementation 'org.openftc:ftc-opmode-tuner-common:0.2'
+    implementation 'org.openftc:rev-extensions-2:1.2'
+    implementation 'org.ejml:ejml-all:0.38'
+}
