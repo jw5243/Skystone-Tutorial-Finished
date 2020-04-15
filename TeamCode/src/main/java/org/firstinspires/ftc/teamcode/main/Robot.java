@@ -5,6 +5,8 @@ import org.firstinspires.ftc.teamcode.debugging.RobotDebug;
 import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
 
 public abstract class Robot implements RobotDebug {
+    private static boolean isUsingComputer;
+
     @Override
     public void init_debug() {
 
@@ -26,17 +28,15 @@ public abstract class Robot implements RobotDebug {
     }
 
     @Override
-    public void setUsingComputer(boolean usingComputer) {
-
-    }
-
-    @Override
-    public boolean isUsingComputer() {
-        return false;
-    }
-
-    @Override
     public Pose2d getFieldPosition() {
         return null;
+    }
+
+    public static boolean isUsingComputer() {
+        return isUsingComputer;
+    }
+
+    public static void setUsingComputer(boolean isUsingComputer) {
+        Robot.isUsingComputer = isUsingComputer;
     }
 }

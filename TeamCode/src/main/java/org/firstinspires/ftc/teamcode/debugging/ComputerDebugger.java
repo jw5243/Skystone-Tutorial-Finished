@@ -16,7 +16,7 @@ public class ComputerDebugger {
 
     public static void init(final Robot robot) {
         setRobot(robot);
-        if(!getRobot().isUsingComputer()) {
+        if(!Robot.isUsingComputer()) {
             return;
         }
 
@@ -27,8 +27,8 @@ public class ComputerDebugger {
     }
 
     public static void main(String[] args) {
+        Robot.setUsingComputer(true);
         Robot robot = new AutonomousRobot();
-        robot.setUsingComputer(true);
         init(robot);
         robot.init_debug();
 
@@ -58,7 +58,7 @@ public class ComputerDebugger {
     }
 
     public static void send(final MessageOption messageOption) {
-        if(!getRobot().isUsingComputer() || messageOption == null) {
+        if(!Robot.isUsingComputer() || messageOption == null) {
             return;
         }
 
@@ -95,7 +95,7 @@ public class ComputerDebugger {
     }
 
     public static void sendMessage() {
-        if(!getRobot().isUsingComputer()) {
+        if(!Robot.isUsingComputer()) {
             return;
         }
 

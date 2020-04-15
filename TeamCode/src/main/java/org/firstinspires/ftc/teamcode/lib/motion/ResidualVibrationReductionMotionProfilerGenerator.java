@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.lib.motion;
 
 import org.firstinspires.ftc.teamcode.lib.util.TimeProfiler;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
-import org.firstinspires.ftc.teamcode.team10515.control.StackTracker;
 
 /**
  * https://www.researchgate.net/publication/267794207_Motion_profile_planning_for_reduced_jerk_and_vibration_residuals
@@ -15,9 +14,6 @@ import org.firstinspires.ftc.teamcode.team10515.control.StackTracker;
  * .pdf
  */
 public class ResidualVibrationReductionMotionProfilerGenerator implements IMotionProfile {
-    private static final ResidualVibrationReductionMotionProfilerGenerator[] STANDARD_MOTION_PROFILES;
-    private static final ResidualVibrationReductionMotionProfilerGenerator FOUNDATION_MOTION_PROFILE;
-
     private static final double dt = 0.01d;
     private TimeProfiler timeProfiler;
     private double[] positions;
@@ -33,22 +29,6 @@ public class ResidualVibrationReductionMotionProfilerGenerator implements IMotio
     private double startTime;
     private boolean isNegative;
     private double initialPosition;
-
-    static {
-        STANDARD_MOTION_PROFILES = new ResidualVibrationReductionMotionProfilerGenerator[16];
-        FOUNDATION_MOTION_PROFILE = new ResidualVibrationReductionMotionProfilerGenerator(
-                0d, 24d, 30d, 50d
-        );
-    }
-
-    public static void init() {
-        for(int i = 0; i < STANDARD_MOTION_PROFILES.length / 2; i++) {
-            //STANDARD_MOTION_PROFILES[i] = new ResidualVibrationReductionMotionProfilerGenerator(0d, StackTracker.getExtensionHeight(i + 1), 20d * 6d, 200d * 6d);
-            STANDARD_MOTION_PROFILES[i] = new ResidualVibrationReductionMotionProfilerGenerator(0d, StackTracker.getExtensionHeight(i + 1), 12d, 50d);
-            //STANDARD_MOTION_PROFILES[i + STANDARD_MOTION_PROFILES.length / 2] = new ResidualVibrationReductionMotionProfilerGenerator(StackTracker.getExtensionHeight(i + 1), -StackTracker.getExtensionHeight(i + 1), 40d * 6d, 400d * 6d);
-            STANDARD_MOTION_PROFILES[i + STANDARD_MOTION_PROFILES.length / 2] = new ResidualVibrationReductionMotionProfilerGenerator(StackTracker.getExtensionHeight(i + 1), -StackTracker.getExtensionHeight(i + 1), 50d, 75d);
-        }
-    }
 
     public ResidualVibrationReductionMotionProfilerGenerator(double initialPosition, double displacement, double maxSpeed, double maxAcceleration) {
         setInitialPosition(initialPosition);
@@ -367,13 +347,5 @@ public class ResidualVibrationReductionMotionProfilerGenerator implements IMotio
             return ordinal() == ACCELERATE.ordinal() ? "Speeding Up" :
                     ordinal() == CRUISE.ordinal() ? "Cruising" : ordinal() == DECELERATE.ordinal() ? "Slowing Down" : "Finished";
         }
-    }
-
-    public static ResidualVibrationReductionMotionProfilerGenerator[] getStandardMotionProfiles() {
-        return STANDARD_MOTION_PROFILES;
-    }
-
-    public static ResidualVibrationReductionMotionProfilerGenerator getFoundationMotionProfile() {
-        return FOUNDATION_MOTION_PROFILE;
     }
 }

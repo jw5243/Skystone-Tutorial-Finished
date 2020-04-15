@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.lib.control;
 
 import org.firstinspires.ftc.teamcode.lib.util.TimeProfiler;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
-import org.firstinspires.ftc.teamcode.team10515.Robot;
 
 import java.util.function.Supplier;
 
@@ -53,7 +52,7 @@ public class MecanumDriveRunnableLQR implements Runnable {
 
     public void updateMPC() {
         if(canUpdate && lqrDrivetrain != null) {
-            Robot.setDriveMPC(lqrDrivetrain);
+            //Robot.setDriveMPC(lqrDrivetrain);
             policyTime = policyTimeProfiler.getDeltaTime(TimeUnits.SECONDS, true);
             canUpdate = false;
         }

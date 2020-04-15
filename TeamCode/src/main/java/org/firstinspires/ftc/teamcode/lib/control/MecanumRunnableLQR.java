@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.lib.control;
 import org.ejml.simple.SimpleMatrix;
 import org.firstinspires.ftc.teamcode.lib.util.TimeProfiler;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
-import org.firstinspires.ftc.teamcode.team10515.Robot;
 
 public class MecanumRunnableLQR implements Runnable {
     private TimeProfiler timeProfiler;
@@ -26,7 +25,7 @@ public class MecanumRunnableLQR implements Runnable {
 
     public MecanumDriveMPC lqr(SimpleMatrix desiredState) {
         MecanumDriveMPC mpc = new MecanumDriveMPC(true);
-        mpc.model = Robot.getDriveModel();
+        //mpc.model = Robot.getDriveModel();
         mpc.runLQR(desiredState);
         return mpc;
     }
@@ -58,7 +57,7 @@ public class MecanumRunnableLQR implements Runnable {
 
     public void updateMPC() {
         if(isReadyToUpdate() && getLqrDrivetrain() != null) {
-            Robot.setDriveMPC(getLqrDrivetrain());
+            //Robot.setDriveMPC(getLqrDrivetrain());
             setPolicyLag(getPolicyTimeProfiler().getDeltaTime(TimeUnits.SECONDS, true));
             setReadyToUpdate(false);
         }

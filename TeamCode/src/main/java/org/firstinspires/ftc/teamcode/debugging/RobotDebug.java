@@ -8,8 +8,5 @@ public interface RobotDebug {
     void loop_debug() throws IllegalMessageTypeException;
     void sendMotionProfileData();
 
-    void setUsingComputer(boolean usingComputer);
-    boolean isUsingComputer();
-
     Pose2d getFieldPosition();
 }

@@ -4,7 +4,6 @@ import org.ejml.simple.SimpleMatrix;
 import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Rotation2d;
 import org.firstinspires.ftc.teamcode.lib.physics.MecanumDriveModel;
-import org.firstinspires.ftc.teamcode.team10515.Robot;
 
 public class MecanumDriveMPC {
     public static final int HORIZON_STEP = 1000;
@@ -52,8 +51,8 @@ public class MecanumDriveMPC {
 
     public void initializeState() {
         //TODO: Simulate over policy lag
-        state = Robot.getState();
-        lastInput = Robot.getLastInput();
+        //state = Robot.getState();
+        //lastInput = Robot.getLastInput();
     }
 
     public void initializeState(Pose2d position) {
@@ -112,14 +111,14 @@ public class MecanumDriveMPC {
                 finalPosition.getTranslation().x() / 100d, 0, finalPosition.getTranslation().y() / 100d, 0, finalPosition.getRotation().getRadians(), 0
         });
 
-        runLQR(state, finalState, lastInput, Robot.isOptimizeInputChange());
+        //runLQR(state, finalState, lastInput, Robot.isOptimizeInputChange());
     }
 
     public void runLQR(SimpleMatrix finalState) {
         runLQR(state, new SimpleMatrix(6, 1, false, new double[] {
                 finalState.get(0) / 100, finalState.get(1) / 100, finalState.get(2) / 100,
                 finalState.get(3) / 100, finalState.get(4), finalState.get(5)
-        }), lastInput, Robot.isOptimizeInputChange());
+        }), lastInput, /*Robot.isOptimizeInputChange()*/false);
     }
 
     public void runLQR(SimpleMatrix initialState, SimpleMatrix finalState, SimpleMatrix lastInput, boolean optimizeInputChange) {
