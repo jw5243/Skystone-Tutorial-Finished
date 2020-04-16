@@ -1,9 +1,9 @@
 package org.firstinspires.ftc.teamcode.lib.physics;
 
-import java.util.function.DoubleSupplier;
+import java.util.function.DoubleUnaryOperator;
 
 public class MotorModel {
-    private static final double RPM_TO_RAD_PER_SECOND = Math.PI / 30d;
+    private static final double RPM_TO_RAD_PER_SECOND = Math.PI / 30d; //rad min / (rot s)
 
     private final double gearRatio;
 
@@ -11,18 +11,25 @@ public class MotorModel {
     private final double stallTorque; //N m
     private final double stallCurrent; //A
     private final double freeCurrent; //A
-    private final double freeSpeed; //RPM
+    private final double freeSpeed; //rad / s
     private final double efficiency;
     private final double resistance; //ohms
 
-    private final double kV;
-    private final double kT;
+    private final double kV; //V rad / s
+    private final double kT; //N m / A
 
-    private final DoubleSupplier inertia; //kg m^2
+    private final DoubleUnaryOperator inertia; //kg m^2
 
-    private double currentAngularPosition;
-    private double currentAngularVelocity;
-    private double lastAngularAcceleration;
+    //Define friction coefficients
+    private final double staticFriction; //N m
+    private final double coulombFriction; //N m
+    private final double viscousFriction; //N s
+    private final double stribeckPower;
+    private final double stribeckVelocity; //rad / s
+
+    private double currentAngularPosition; //rad
+    private double currentAngularVelocity; //rad / s
+    private double lastAngularAcceleration; //rad / s^2
 
     /**
      * Defines the parameters of the motors based on values that can easily be found on motor spec
@@ -52,20 +59,22 @@ public class MotorModel {
      * @param inertia        The amount of "stuff" preventing the motor from running at its free speed.
      *                       As this value can vary depending on the angular position of the motor
      *                       output shaft, this parameter is made a {@code DoubleSupplier}, enabling
-     *                       custom inputs for the inertia value.
+     *                       custom inputs for the inertia value based on the angular rotation of the
+     *                       motor output shaft.
      *
-     * @see DoubleSupplier
+     * @see DoubleUnaryOperator
      */
     public MotorModel(double gearRatio, double nominalVoltage, double stallTorque,
                       double stallCurrent, double freeCurrent, double freeSpeed, double efficiency,
-                      DoubleSupplier inertia) {
-        this.gearRatio = gearRatio;
+                      DoubleUnaryOperator inertia, double staticFriction, double coulombFriction,
+                      double viscousFriction, double stribeckPower, double stribeckVelocity) {
+        this.gearRatio      = gearRatio;
         this.nominalVoltage = nominalVoltage;
-        this.stallTorque = stallTorque * gearRatio * efficiency;
-        this.stallCurrent = stallCurrent;
-        this.freeCurrent = freeCurrent;
-        this.freeSpeed = freeSpeed * getRpmToRadPerSecond();
-        this.efficiency = efficiency;
+        this.stallTorque    = stallTorque * gearRatio * efficiency;
+        this.stallCurrent   = stallCurrent;
+        this.freeCurrent    = freeCurrent;
+        this.freeSpeed      = freeSpeed * getRpmToRadPerSecond();
+        this.efficiency     = efficiency;
 
         this.resistance = getNominalVoltage() / getStallCurrent();
 
@@ -73,6 +82,12 @@ public class MotorModel {
         this.kT = getStallTorque() / getStallCurrent();
 
         this.inertia = inertia;
+
+        this.staticFriction   = staticFriction;
+        this.coulombFriction  = coulombFriction;
+        this.viscousFriction  = viscousFriction;
+        this.stribeckPower    = stribeckPower;
+        this.stribeckVelocity = stribeckVelocity;
 
         setCurrentAngularPosition(0d);
         setCurrentAngularVelocity(0d);
@@ -82,13 +97,14 @@ public class MotorModel {
     public static void main(String... args) {
         MotorModel motorModel = new MotorModel(
                 20d, 12d, 3.36d, 166d,
-                1.3d, 5880d, 0.8d, () -> 2.66E-3d);
+                1.3d, 5880d, 0.8d, (motorPosition) -> 2d,
+                3E-3, 2E-3, 1E-4, 0.05d, 25d);
 
         System.out.println("Time\tθ\tω\tα");
-        final double dt = 0.00001d;
-        for(int i = 1; i < 200; i++) {
-            motorModel.update(dt, 12d);
-            System.out.print((int)(dt * i * 100000d) / 100000d + "\t");
+        final double dt = 0.001d;
+        for(int i = 1; i < 500; i++) {
+            motorModel.update(dt, 1d);
+            System.out.print((int)(dt * i * 1000d) / 1000d + "\t");
             System.out.println(motorModel);
         }
     }
@@ -106,11 +122,43 @@ public class MotorModel {
      * @return
      */
     public double calculateTorque(double voltageInput) {
-        return getkT() * getEfficiency() * getGearRatio() * (voltageInput - getkV() * getCurrentAngularVelocity() * getGearRatio()) / getResistance();
+        double torque = getkT() * getEfficiency() * getGearRatio() * (voltageInput - getkV() * getCurrentAngularVelocity() * getGearRatio()) / getResistance();;
+        double frictionTorque = getFrictionTorque();
+        return Math.signum(torque) != Math.signum(torque - frictionTorque) ? 0d : torque - frictionTorque;
     }
 
+    /**
+     * Determine the theoretical acceleration of the motor output shaft.
+     *
+     * @param voltageInput
+     * @return
+     */
     public double calculateAngularAcceleration(double voltageInput) {
-         return calculateTorque(voltageInput) / getInertia().getAsDouble();
+         return calculateTorque(voltageInput) / getInertia().applyAsDouble(getCurrentAngularPosition());
+    }
+
+    /**
+     * Converts angular displacement into linear displacement based on a given rotation diameter.
+     *
+     * @param rotationDiameter
+     * @return
+     */
+    public double getLinearPosition(double rotationDiameter) {
+        return getCurrentAngularPosition() * rotationDiameter / 2d;
+    }
+
+    public double getFrictionTorque() {
+        return Math.signum(getCurrentAngularVelocity()) != 0 ? Math.signum(getCurrentAngularVelocity()) * (getCoulombFriction() +
+                (getStaticFriction() - getCoulombFriction()) * Math.exp(-Math.pow(Math.abs(getCurrentAngularVelocity() /
+                        getStribeckVelocity()), getStribeckPower())) + getViscousFriction() * Math.abs(getCurrentAngularVelocity()))
+                : Math.signum(getStaticFriction()) * getStaticFriction();
+    }
+
+    public double getFrictionTorque(double angularVelocity) {
+        return Math.signum(angularVelocity) != 0 ? Math.signum(angularVelocity) * (getCoulombFriction() +
+                (getStaticFriction() - getCoulombFriction()) * Math.exp(-Math.pow(Math.abs(angularVelocity /
+                        getStribeckVelocity()), getStribeckPower())) + getViscousFriction() * Math.abs(angularVelocity))
+                : Math.signum(getStaticFriction()) * getStaticFriction();
     }
 
     @Override
@@ -160,7 +208,7 @@ public class MotorModel {
         return kT;
     }
 
-    public DoubleSupplier getInertia() {
+    public DoubleUnaryOperator getInertia() {
         return inertia;
     }
 
@@ -190,5 +238,25 @@ public class MotorModel {
 
     public void setLastAngularAcceleration(double lastAngularAcceleration) {
         this.lastAngularAcceleration = lastAngularAcceleration;
+    }
+
+    public double getStaticFriction() {
+        return staticFriction;
+    }
+
+    public double getCoulombFriction() {
+        return coulombFriction;
+    }
+
+    public double getViscousFriction() {
+        return viscousFriction;
+    }
+
+    public double getStribeckPower() {
+        return stribeckPower;
+    }
+
+    public double getStribeckVelocity() {
+        return stribeckVelocity;
     }
 }
