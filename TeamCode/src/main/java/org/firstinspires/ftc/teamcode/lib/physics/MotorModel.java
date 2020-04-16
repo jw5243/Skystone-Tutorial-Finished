@@ -147,6 +147,26 @@ public class MotorModel {
         return getCurrentAngularPosition() * rotationDiameter / 2d;
     }
 
+    /**
+     * Converts angular velocity into linear velocity based on a given rotation diameter.
+     *
+     * @param rotationDiameter
+     * @return
+     */
+    public double getLinearVelocity(double rotationDiameter) {
+        return getCurrentAngularVelocity() * rotationDiameter / 2d;
+    }
+
+    /**
+     * Converts angular acceleration into linear acceleration based on a given rotation diameter.
+     *
+     * @param rotationDiameter
+     * @return
+     */
+    public double getLinearAcceleration(double rotationDiameter) {
+        return getLastAngularAcceleration() * rotationDiameter / 2d;
+    }
+
     public double getFrictionTorque() {
         return Math.signum(getCurrentAngularVelocity()) != 0 ? Math.signum(getCurrentAngularVelocity()) * (getCoulombFriction() +
                 (getStaticFriction() - getCoulombFriction()) * Math.exp(-Math.pow(Math.abs(getCurrentAngularVelocity() /
