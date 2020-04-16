@@ -19,6 +19,7 @@ public class MotorModel {
     private final double kT; //N m / A
 
     private final DoubleUnaryOperator inertia; //kg m^2
+    private final DoubleUnaryOperator weightAppliedTorque; //N m
 
     //Define friction coefficients
     private final double staticFriction; //N m
@@ -66,8 +67,8 @@ public class MotorModel {
      */
     public MotorModel(double gearRatio, double nominalVoltage, double stallTorque,
                       double stallCurrent, double freeCurrent, double freeSpeed, double efficiency,
-                      DoubleUnaryOperator inertia, double staticFriction, double coulombFriction,
-                      double viscousFriction, double stribeckPower, double stribeckVelocity) {
+                      DoubleUnaryOperator inertia, DoubleUnaryOperator weightAppliedTorque, double staticFriction,
+                      double coulombFriction, double viscousFriction, double stribeckPower, double stribeckVelocity) {
         this.gearRatio      = gearRatio;
         this.nominalVoltage = nominalVoltage;
         this.stallTorque    = stallTorque * gearRatio * efficiency;
@@ -82,6 +83,7 @@ public class MotorModel {
         this.kT = getStallTorque() / getStallCurrent();
 
         this.inertia = inertia;
+        this.weightAppliedTorque = weightAppliedTorque;
 
         this.staticFriction   = staticFriction;
         this.coulombFriction  = coulombFriction;
@@ -97,7 +99,7 @@ public class MotorModel {
     public static void main(String... args) {
         MotorModel motorModel = new MotorModel(
                 20d, 12d, 3.36d, 166d,
-                1.3d, 5880d, 0.8d, (motorPosition) -> 2d,
+                1.3d, 5880d, 0.8d, (motorPosition) -> 2d, (motorPosition) -> 0d,
                 3E-3, 2E-3, 1E-4, 0.05d, 25d);
 
         System.out.println("Time\tθ\tω\tα");
@@ -110,9 +112,20 @@ public class MotorModel {
     }
 
     public void update(double dt, double voltageInput) {
-        setLastAngularAcceleration(calculateAngularAcceleration(voltageInput));
+        update(dt, voltageInput, 0d);
+    }
+
+    public void update(double dt, double voltageInput, double externalFriction) {
+        voltageInput = voltageInput > getNominalVoltage() ? getNominalVoltage() : voltageInput < -getNominalVoltage() ? -getNominalVoltage() : voltageInput;
+        setLastAngularAcceleration(calculateAngularAcceleration(voltageInput, externalFriction));
         setCurrentAngularVelocity(getCurrentAngularVelocity() + getLastAngularAcceleration() * dt);
         setCurrentAngularPosition(getCurrentAngularPosition() + getCurrentAngularVelocity() * dt);
+
+        //Assume that there is a physical stop preventing the system from backdriving past the 0
+        //position in the opposite direction of desired motion.
+        if(getCurrentAngularPosition() < 0d) {
+            setCurrentAngularPosition(0d);
+        }
     }
 
     /**
@@ -122,9 +135,21 @@ public class MotorModel {
      * @return
      */
     public double calculateTorque(double voltageInput) {
-        double torque = getkT() * getEfficiency() * getGearRatio() * (voltageInput - getkV() * getCurrentAngularVelocity() * getGearRatio()) / getResistance();;
-        double frictionTorque = getFrictionTorque();
-        return Math.signum(torque) != Math.signum(torque - frictionTorque) ? 0d : torque - frictionTorque;
+        return calculateTorque(voltageInput, 0d);
+    }
+
+    /**
+     * Determine the theoretical output torque of the motor in the case of additional friction aside
+     * from that inside the motor itself.
+     *
+     * @param voltageInput
+     * @return
+     */
+    public double calculateTorque(double voltageInput, double externalFriction) {
+        double torque = getkT() * getEfficiency() * getGearRatio() * (voltageInput - getkV() * getCurrentAngularVelocity() * getGearRatio()) / getResistance();
+        double frictionTorque = getFrictionTorque() + externalFriction;
+        return Math.abs(Math.signum(torque) - Math.signum(torque - frictionTorque)) == 2d ? 0d :
+                torque - frictionTorque - getWeightAppliedTorque().applyAsDouble(getCurrentAngularPosition());
     }
 
     /**
@@ -134,7 +159,18 @@ public class MotorModel {
      * @return
      */
     public double calculateAngularAcceleration(double voltageInput) {
-         return calculateTorque(voltageInput) / getInertia().applyAsDouble(getCurrentAngularPosition());
+         return calculateAngularAcceleration(voltageInput, 0d);
+    }
+
+    /**
+     * Determine the theoretical acceleration of the motor output shaft in the case of additional
+     * friction aside from that inside the motor shaft.
+     *
+     * @param voltageInput
+     * @return
+     */
+    public double calculateAngularAcceleration(double voltageInput, double externalFriction) {
+        return calculateTorque(voltageInput, externalFriction) / getInertia().applyAsDouble(getCurrentAngularPosition());
     }
 
     /**
@@ -278,5 +314,9 @@ public class MotorModel {
 
     public double getStribeckVelocity() {
         return stribeckVelocity;
+    }
+
+    public DoubleUnaryOperator getWeightAppliedTorque() {
+        return weightAppliedTorque;
     }
 }

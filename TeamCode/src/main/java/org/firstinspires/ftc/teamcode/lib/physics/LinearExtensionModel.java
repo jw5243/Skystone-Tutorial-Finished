@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode.lib.physics;
 
 public class LinearExtensionModel {
-    private final MotorModel                 motorModel;
-    private final double                     spoolDiameter; //m
+    private final MotorModel motorModel;
+    private final double     spoolDiameter; //m
+
+    private final double staticFriction;
+    private final double coulombFriction;
 
     private double position; //m
     private double velocity; //m / s
@@ -11,9 +14,12 @@ public class LinearExtensionModel {
 
     private double lastAcceleration; //m / s^2
 
-    public LinearExtensionModel(MotorModel motorModel, double spoolDiameter) {
+    public LinearExtensionModel(MotorModel motorModel, double spoolDiameter,
+                                double staticFriction, double coulombFriction) {
         this.motorModel      = motorModel;
         this.spoolDiameter   = spoolDiameter;
+        this.staticFriction  = staticFriction;
+        this.coulombFriction = coulombFriction;
 
         setPosition(0d);
         setVelocity(0d);
@@ -24,20 +30,23 @@ public class LinearExtensionModel {
     }
 
     public static void main(String... args) {
-        final double mechanismWeight   = 44.48d * 12d; //N, 120 lbs
-        final double gameElementWeight = 4.48d; //N, 1 lbs
-        final double spoolDiameter     = 3d * 0.0254d; //m, 3 in
+        final double backDriveTorque   = 4.448d * 0.03d * 5d / 1000d; //N m, 0.03 lbs + 5 mm
+        final double mechanismWeight   = 4.448d * 16.5d; //N, 16.5 lbs
+        final double gameElementWeight = 0d; //N, 0 lbs
+        final double spoolDiameter     = 0.55d * 0.0254d; //m, 0.55 in
         LinearExtensionModel linearExtensionModel = new LinearExtensionModel(
                 new MotorModel(
-                        20d, 12d, 3.36d, 166d,
-                        1.3d, 5880d, 0.8d, (motorPosition) -> (mechanismWeight + gameElementWeight) * spoolDiameter * spoolDiameter / 4d,
+                        1d, 12d, 0.519d * 2d, 9.901d,
+                        0.4d, 1479.93621621622d, 1d,
+                        (motorPosition) -> backDriveTorque,
+                        (motorPosition) -> (mechanismWeight + gameElementWeight) * spoolDiameter / 2d,
                         3E-3, 2E-3, 1E-4, 0.05d, 25d),
-                spoolDiameter
+                spoolDiameter, 0.0025d, 0.002d
         );
 
-        System.out.println("t\ty\tv\ta\tj");
+        System.out.println("t\ty\tv\ta");//\tj");
         final double dt = 0.001d;
-        for(int i = 0; i < 500; i++) {
+        for(int i = 0; i < 1000; i++) {
             linearExtensionModel.update(dt, 12d);
             System.out.print((int)(i * dt * 1000d) / 1000d + "\t");
             System.out.println(linearExtensionModel);
@@ -45,7 +54,7 @@ public class LinearExtensionModel {
     }
 
     public void update(double dt, double voltageInput) {
-        getMotorModel().update(dt, voltageInput);
+        getMotorModel().update(dt, voltageInput, getLinearSlideFrictionTorque());
         setLastAcceleration(getAcceleration());
 
         setPosition(getMotorModel().getLinearPosition(getSpoolDiameter()));
@@ -54,9 +63,13 @@ public class LinearExtensionModel {
         setJerk((getAcceleration() - getLastAcceleration()) / dt);
     }
 
+    public double getLinearSlideFrictionTorque() {
+        return (getVelocity() == 0 ? getStaticFriction() : getCoulombFriction()) * getSpoolDiameter() / 2d;
+    }
+
     @Override
     public String toString() {
-        return getPosition() / 0.0254d + "\t" + getVelocity() / 0.0254d + "\t" + getAcceleration() / 0.0254d + "\t" + getJerk() / 0.0254d;
+        return getPosition() / 0.0254d + "\t" + getVelocity() / 0.0254d + "\t" + getAcceleration() / 0.0254d; //+ "\t" + getJerk() / 0.0254d;
     }
 
     public MotorModel getMotorModel() {
@@ -105,5 +118,13 @@ public class LinearExtensionModel {
 
     public void setLastAcceleration(double lastAcceleration) {
         this.lastAcceleration = lastAcceleration;
+    }
+
+    public double getStaticFriction() {
+        return staticFriction;
+    }
+
+    public double getCoulombFriction() {
+        return coulombFriction;
     }
 }
