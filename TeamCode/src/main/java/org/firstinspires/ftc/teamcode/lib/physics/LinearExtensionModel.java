@@ -30,7 +30,7 @@ public class LinearExtensionModel {
     }
 
     public static void main(String... args) {
-        final double backDriveTorque   = 4.448d * 0.03d * 5d / 1000d; //N m, 0.03 lbs + 5 mm
+        final double backDriveTorque   = 0.01694772439999992d; //N m
         final double mechanismWeight   = 4.448d * 16.5d; //N, 16.5 lbs
         final double gameElementWeight = 0d; //N, 0 lbs
         final double spoolDiameter     = 0.55d * 0.0254d; //m, 0.55 in

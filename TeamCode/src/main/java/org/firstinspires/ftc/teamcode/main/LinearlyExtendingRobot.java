@@ -9,18 +9,18 @@ import org.firstinspires.ftc.teamcode.lib.physics.LinearExtensionModel;
 import org.firstinspires.ftc.teamcode.lib.physics.MotorModel;
 
 public class LinearlyExtendingRobot extends Robot {
-    private final double backDriveTorque   = 4.448d * 0.03d * 5d / 1000d; //N m, 0.03 lbs + 5 mm
+    private final double backDriveTorque   = 0.01694772439999992d; //N m
     private final double mechanismWeight   = 4.448d * 16.5d; //N, 16.5 lbs
     private final double gameElementWeight = 0d; //N, 0 lbs
     private final double spoolDiameter     = 0.55d * 0.0254d; //m, 0.55 in
     private LinearExtensionModel linearExtensionModel;
 
-    private final double kS = 6d; //V
+    private final double kS = 5.9d; //V
     private final double kV = (12d - kS) / 22d; //V s / in
     private final double kA = 0.001d; //V s^2 / in
     private final double kP = 1d; //V / in
     private final double kI = 0d; //V / (in s)
-    private final double kD = 0.1d; //V s / in
+    private final double kD = 1.2d; //V s / in
 
     private double runningSum = 0d;
     private double lastError  = 0d;
@@ -86,7 +86,7 @@ public class LinearlyExtendingRobot extends Robot {
     }
 
     public static void main(String... args) {
-        final double backDriveTorque   = 4.448d * 0.03d * 5d / 1000d; //N m, 0.03 lbs + 5 mm
+        final double backDriveTorque   = 0.01694772439999992d; //N m
         final double mechanismWeight   = 4.448d * 16.5d; //N, 16.5 lbs
         final double gameElementWeight = 0d; //N, 0 lbs
         final double spoolDiameter     = 0.55d * 0.0254d; //m, 0.55 in
@@ -106,12 +106,12 @@ public class LinearlyExtendingRobot extends Robot {
         //final double kI = 1d; //V / (in s)
         //final double kD = 1d; //V s / in
 
-        final double kS = 6d; //V
+        final double kS = 5.9d; //V
         final double kV = (12d - kS) / 22d; //V s / in
         final double kA = 0.001d; //V s^2 / in
         final double kP = 1d; //V / in
         final double kI = 0d; //V / (in s)
-        final double kD = 0.1d; //V s / in
+        final double kD = 1.2d; //V s / in
 
         double runningSum = 0d;
         double lastError  = 0d;
