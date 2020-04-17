@@ -116,7 +116,7 @@ public class Translation2d implements ITranslation2d<Translation2d> {
     @Override
     public String toString() {
         final DecimalFormat format = new DecimalFormat("#0.000");
-        return "(" + format.format(x_) + "," + format.format(y_) + ")";
+        return /*"(" +*/ format.format(x_) + "," + format.format(y_) /*+ ")"*/;
     }
 
     public static double dot(final Translation2d a, final Translation2d b) {

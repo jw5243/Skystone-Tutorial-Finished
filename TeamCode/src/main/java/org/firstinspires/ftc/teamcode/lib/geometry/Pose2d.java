@@ -188,7 +188,7 @@ public class Pose2d implements IPose2d<Pose2d> {
 
     @Override
     public String toString() {
-        return "T:" + translation_.toString() + ", R:" + rotation_.toString();
+        return /*"T:" +*/ translation_.toString() + /*", R:"*/ "," + rotation_.toString();
     }
 
     @Override

@@ -14,6 +14,11 @@ public enum MessageOption {
     ACCELERATION(null, "Acceleration,"),
     JERK(null, "Jerk,"),
     CLEAR_MOTION_PROFILE(null, "ProfileClear,"),
+    LINEAR_POSITION(Double.class, "LinearPosition,"),
+    STAGE_LENGTH(Double.class, "StageLength,"),
+    STAGE_COUNT(Integer.class, "StageCount,"),
+    CONTINUOUS(null, "Continuous"),
+    CASCADE(null, "Cascade"),
     STOP(null, null);
 
     private static final String END_MESSAGE_TAG = "%";

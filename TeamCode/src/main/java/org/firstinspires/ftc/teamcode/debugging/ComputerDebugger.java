@@ -4,6 +4,7 @@ import org.firstinspires.ftc.teamcode.lib.geometry.Line2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Translation2d;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
 import org.firstinspires.ftc.teamcode.main.AutonomousRobot;
+import org.firstinspires.ftc.teamcode.main.LinearlyExtendingRobot;
 import org.firstinspires.ftc.teamcode.main.Robot;
 
 import java.text.DecimalFormat;
@@ -28,7 +29,7 @@ public class ComputerDebugger {
 
     public static void main(String[] args) {
         Robot.setUsingComputer(true);
-        Robot robot = new AutonomousRobot();
+        Robot robot = new LinearlyExtendingRobot();
         init(robot);
         robot.init_debug();
 
@@ -67,13 +68,13 @@ public class ComputerDebugger {
         if(messageOption.ordinal() == MessageOption.ROBOT_LOCATION.ordinal()) {
             getMessageBuilder().append(getRobot().getFieldPosition());
         } else if(messageOption.ordinal() == MessageOption.KEY_POINT.ordinal()) {
-            final Translation2d keyPoint = (Translation2d) (messageOption.getSendValue());
+            final Translation2d keyPoint = (Translation2d)(messageOption.getSendValue());
             getMessageBuilder().append(keyPoint);
         } else if(messageOption.ordinal() == MessageOption.LOG_POINT.ordinal()) {
-            final Translation2d logPoint = (Translation2d) (messageOption.getSendValue());
+            final Translation2d logPoint = (Translation2d)(messageOption.getSendValue());
             getMessageBuilder().append(logPoint);
         } else if(messageOption.ordinal() == MessageOption.LINE.ordinal()) {
-            final Line2d line = (Line2d) (messageOption.getSendValue());
+            final Line2d line = (Line2d)(messageOption.getSendValue());
             getMessageBuilder().append(line);
         } else if(messageOption.ordinal() == MessageOption.CLEAR_LOG_POINTS.ordinal()) {
             //
@@ -87,6 +88,19 @@ public class ComputerDebugger {
             //getMessageBuilder().append(Utilities.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append(Speedometer.getCurrentJerk());
         } else if(messageOption.ordinal() == MessageOption.CLEAR_MOTION_PROFILE.ordinal()) {
             //
+        } else if(messageOption.ordinal() == MessageOption.LINEAR_POSITION.ordinal()) {
+            final double position = (Double)(messageOption.getSendValue());
+            getMessageBuilder().append(position);
+        } else if(messageOption.ordinal() == MessageOption.STAGE_LENGTH.ordinal()) {
+            final double length = (Double)(messageOption.getSendValue());
+            getMessageBuilder().append(length);
+        } else if(messageOption.ordinal() == MessageOption.STAGE_COUNT.ordinal()) {
+            final int stageCount = (Integer)(messageOption.getSendValue());
+            getMessageBuilder().append(stageCount);
+        } else if(messageOption.ordinal() == MessageOption.CASCADE.ordinal()) {
+
+        } else if(messageOption.ordinal() == MessageOption.CONTINUOUS.ordinal()) {
+
         } else {
             getUdpServer().close();
         }
@@ -101,7 +115,7 @@ public class ComputerDebugger {
 
         getMessageBuilder().append("CLEAR,%");
         getUdpServer().addMessage(getMessageBuilder().toString());
-        //System.out.println(getMessageBuilder().toString());
+        //System.out.println(getMessageBuilder());
         setMessageBuilder(new StringBuilder());
     }
 

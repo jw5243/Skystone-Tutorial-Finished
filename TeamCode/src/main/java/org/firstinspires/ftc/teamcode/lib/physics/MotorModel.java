@@ -116,6 +116,10 @@ public class MotorModel {
     }
 
     public void update(double dt, double voltageInput, double externalFriction) {
+        if(dt == 0d) {
+            return;
+        }
+
         voltageInput = voltageInput > getNominalVoltage() ? getNominalVoltage() : voltageInput < -getNominalVoltage() ? -getNominalVoltage() : voltageInput;
         setLastAngularAcceleration(calculateAngularAcceleration(voltageInput, externalFriction));
         setCurrentAngularVelocity(getCurrentAngularVelocity() + getLastAngularAcceleration() * dt);

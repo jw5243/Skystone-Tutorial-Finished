@@ -215,7 +215,7 @@ public class Rotation2d implements IRotation2d<Rotation2d> {
 
     @Override
     public String toString() {
-        return "(" + new DecimalFormat("#0.000").format(getDegrees()) + " deg)";
+        return /*"(" +*/ new DecimalFormat("#0.000").format(getDegrees()) /*+ " deg)"*/;
     }
 
     @Override
