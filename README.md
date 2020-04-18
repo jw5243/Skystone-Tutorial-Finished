@@ -133,7 +133,7 @@ Version 5.2 (20190905-083277)
 * Adds Skystone Vuforia image target data.
    * Includes sample Skystone Vuforia Navigation op modes (Java).
    * Includes sample Skystone Vuforia Navigation op modes (Blocks).
-* Adds TensorFlow inference model (.tflite) for Skystone game elements.
+* Adds TensorFlow inference driveModel (.tflite) for Skystone game elements.
    * Includes sample Skystone TensorFlow op modes (Java).
    * Includes sample Skystone TensorFlow op modes (Blocks).
 * Removes older (season-specific) sample op modes.
@@ -915,7 +915,7 @@ In this latest version of the FTC SDK (20150803_001) the following changes shoul
    - The init() and loop() methods are now required (i.e., need to be overridden in the user's op mode).
    - The start() and stop() methods are optional.
  * A new LinearOpMode class is introduced.
-   - Teams can use the LinearOpMode mode to create a linear (not event driven) program model.
+   - Teams can use the LinearOpMode mode to create a linear (not event driven) program driveModel.
    - Teams can use blocking statements like Thread.sleep() within a linear op mode.
  * The API for the Legacy Module and Core Device Interface Module have been updated.
    - Support for encoders with the Legacy Module is now working.

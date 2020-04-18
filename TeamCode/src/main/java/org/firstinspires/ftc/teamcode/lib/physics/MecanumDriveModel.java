@@ -39,6 +39,39 @@ public class MecanumDriveModel {
     private CoefficientManager coefficientManager;
 
     public MecanumDriveModel(int timeSteps, double dt, double robotMass, double wheelMass, double wheelInertiaSpinning, double wheelInertiaTurning,
+                             double robotMomentInertia, double wheelRadius, double L1, double L2, double D1, double D2, MotorModel motorModel) {
+        this.timeSteps            = timeSteps;
+        this.dt                   = dt;
+        this.robotMass            = robotMass;
+        this.wheelMass            = wheelMass;
+        this.wheelInertiaSpinning = wheelInertiaSpinning;
+        this.wheelInertiaTurning  = wheelInertiaTurning;
+        this.robotMomentInertia   = robotMomentInertia;
+        this.internalGearRatio    = 1d;
+        this.externalGearRatio    = motorModel.getGearRatio();
+        this.compoundGearRatio    = motorModel.getGearRatio();
+        this.wheelRadius          = wheelRadius;
+        this.nominalVoltage       = motorModel.getNominalVoltage();
+        this.stallTorque          = motorModel.getStallTorque();
+        this.stallCurrent         = motorModel.getStallCurrent();
+        this.freeSpeed            = motorModel.getFreeSpeed();
+        this.freeCurrent          = motorModel.getFreeCurrent();
+        this.efficiency           = motorModel.getEfficiency();
+        this.L1                   = L1;
+        this.L2                   = L2;
+        this.D1                   = D1;
+        this.D2                   = D2;
+
+        resistance = this.nominalVoltage / this.stallCurrent;
+        kV         = (this.nominalVoltage - this.resistance * this.freeCurrent) / (this.freeSpeed);
+        kT         = this.stallTorque / this.stallCurrent;
+
+        wheelRadiusSquared         = this.wheelRadius * this.wheelRadius;
+        wheelEffectiveSpinningMass = this.wheelInertiaSpinning / wheelRadiusSquared;
+        coefficientManager = new CoefficientManager(this);
+    }
+
+    public MecanumDriveModel(int timeSteps, double dt, double robotMass, double wheelMass, double wheelInertiaSpinning, double wheelInertiaTurning,
                              double robotMomentInertia, double wheelRadius, double internalGearRatio, double externalGearRatio, double nominalVoltage,
                              double stallTorque, double stallCurrent, double freeSpeed, double freeCurrent, double efficiency,
                              double L1, double L2, double D1, double D2) {
@@ -220,11 +253,13 @@ public class MecanumDriveModel {
     }
 
     private SimpleMatrix getMotorVelocities(SimpleMatrix state) {
-        return getWheelVelocities(state).scale(externalGearRatio);
+        return getWheelVelocities(state).scale(getCompoundGearRatio());
     }
 
     private SimpleMatrix getMotorTorques(SimpleMatrix state, SimpleMatrix input) {
-        return input.scale(nominalVoltage).plus(getMotorVelocities(state).scale(internalGearRatio * kV)).scale(efficiency * internalGearRatio * kT / resistance);
+        //return input.scale(nominalVoltage).plus(getMotorVelocities(state).scale(internalGearRatio * kV)).scale(efficiency * internalGearRatio * kT / resistance);
+        return input.scale(getNominalVoltage()).minus(getMotorVelocities(state).scale(getkV() * getCompoundGearRatio()))
+                .scale(getkT() * getEfficiency() * getCompoundGearRatio() / getResistance());
     }
 
     public SimpleMatrix simulate(SimpleMatrix state, SimpleMatrix input) {
@@ -269,12 +304,12 @@ public class MecanumDriveModel {
         double A35 = coefficientManager.get(3, 5);
 
         return state.plus(new SimpleMatrix(6, 6, false, new double[] {
-                1,   0, 0,   0, 0,   0,
-                0, A11, 1,   0, 0, A31,
-                0,   0, 0,   0, 1,   0,
-                0,   0, 0, A22, 0, A32,
-                0,   0, 0,   0, 0,   0,
-                0, A13, 0, A23, 0, A33
+                1, 0, 0, 0, 0, 0,
+                0, A11(heading), 0, A21(heading), 0, A31(heading),
+                0, 0, 1, 0, 0, 0,
+                0, A12(heading), 0, A22(heading), 0, A32(heading),
+                0, 0, 0, 0, 1, 0,
+                0, A13(heading), 0, A23(heading), 0, A33(heading)
         }).invert().mult(new SimpleMatrix(6, 1, false, new double[] {
                 state.get(1),
                 motorTorqueAccelerationX(torques, heading) - state.get(5) * (A14 * state.get(1) + A15 * state.get(3) + A16 * state.get(5)),

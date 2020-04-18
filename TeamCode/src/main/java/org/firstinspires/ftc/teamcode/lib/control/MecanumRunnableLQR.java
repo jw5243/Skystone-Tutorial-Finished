@@ -1,8 +1,9 @@
 package org.firstinspires.ftc.teamcode.lib.control;
 
-import org.ejml.simple.SimpleMatrix;
+import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.lib.util.TimeProfiler;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
+import org.firstinspires.ftc.teamcode.main.Robot;
 
 public class MecanumRunnableLQR implements Runnable {
     private TimeProfiler timeProfiler;
@@ -11,21 +12,21 @@ public class MecanumRunnableLQR implements Runnable {
     private boolean stop;
 
     private MecanumDriveMPC lqrDrivetrain;
-    private SimpleMatrix desiredState;
+    private Pose2d desiredPose;
     private double policyLag;
 
-    public MecanumRunnableLQR() {
+    public MecanumRunnableLQR(Pose2d desiredPose) {
         setTimeProfiler(new TimeProfiler(false));
         setPolicyTimeProfiler(new TimeProfiler(false));
         setReadyToUpdate(false);
         setStop(false);
         setPolicyLag(0d);
-        setDesiredState(null);
+        setDesiredPose(desiredPose);
     }
 
-    public MecanumDriveMPC lqr(SimpleMatrix desiredState) {
+    public MecanumDriveMPC lqr(Pose2d desiredState) {
         MecanumDriveMPC mpc = new MecanumDriveMPC(true);
-        //mpc.model = Robot.getDriveModel();
+        mpc.model = Robot.getDriveModel();
         mpc.runLQR(desiredState);
         return mpc;
     }
@@ -36,7 +37,7 @@ public class MecanumRunnableLQR implements Runnable {
         while(!isStop()) {
             if(!isReadyToUpdate()) {
                 getPolicyTimeProfiler().start();
-                setLqrDrivetrain(lqr(getDesiredState()));
+                setLqrDrivetrain(lqr(getDesiredPose()));
                 getTimeProfiler().update(true);
                 try {
                     Thread.sleep(10);
@@ -57,7 +58,7 @@ public class MecanumRunnableLQR implements Runnable {
 
     public void updateMPC() {
         if(isReadyToUpdate() && getLqrDrivetrain() != null) {
-            //Robot.setDriveMPC(getLqrDrivetrain());
+            Robot.setMecanumDriveMPC(getLqrDrivetrain());
             setPolicyLag(getPolicyTimeProfiler().getDeltaTime(TimeUnits.SECONDS, true));
             setReadyToUpdate(false);
         }
@@ -111,11 +112,11 @@ public class MecanumRunnableLQR implements Runnable {
         this.policyLag = policyLag;
     }
 
-    public SimpleMatrix getDesiredState() {
-        return desiredState;
+    public Pose2d getDesiredPose() {
+        return desiredPose;
     }
 
-    public void setDesiredState(SimpleMatrix desiredState) {
-        this.desiredState = desiredState;
+    public void setDesiredPose(Pose2d desiredPose) {
+        this.desiredPose = desiredPose;
     }
 }

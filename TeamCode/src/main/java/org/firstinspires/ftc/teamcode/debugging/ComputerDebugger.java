@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.debugging;
 
 import org.firstinspires.ftc.teamcode.lib.geometry.Line2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Translation2d;
+import org.firstinspires.ftc.teamcode.main.AutonomousRobot;
 import org.firstinspires.ftc.teamcode.main.CascadeLinearlyExtendingRobot;
 import org.firstinspires.ftc.teamcode.main.ContinuousLinearlyExtendingRobot;
 import org.firstinspires.ftc.teamcode.main.Robot;
@@ -28,7 +29,7 @@ public class ComputerDebugger {
 
     public static void main(String[] args) {
         Robot.setUsingComputer(true);
-        Robot robot = new CascadeLinearlyExtendingRobot();
+        Robot robot = new AutonomousRobot();
         init(robot);
         robot.init_debug();
 
@@ -46,7 +47,7 @@ public class ComputerDebugger {
             try {
                 robot.loop_debug();
 
-                Thread.sleep(50);
+                Thread.sleep(10);
 
                 send(MessageOption.ROBOT_LOCATION);
                 send(MessageOption.LOG_POINT.setSendValue(robot.getFieldPosition().getTranslation()));

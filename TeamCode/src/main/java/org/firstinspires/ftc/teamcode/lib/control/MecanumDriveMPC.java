@@ -4,6 +4,7 @@ import org.ejml.simple.SimpleMatrix;
 import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Rotation2d;
 import org.firstinspires.ftc.teamcode.lib.physics.MecanumDriveModel;
+import org.firstinspires.ftc.teamcode.main.Robot;
 
 public class MecanumDriveMPC {
     public static final int HORIZON_STEP = 1000;
@@ -51,16 +52,23 @@ public class MecanumDriveMPC {
 
     public void initializeState() {
         //TODO: Simulate over policy lag
-        //state = Robot.getState();
-        //lastInput = Robot.getLastInput();
+        state = Robot.getState();
+        lastInput = Robot.getInput();
     }
 
     public void initializeState(Pose2d position) {
         state = new SimpleMatrix(6, 1, false, new double[] {
-                position.getTranslation().x() / 100d, 0, position.getTranslation().y() / 100d, 0, position.getRotation().getRadians(), 0
+                position.getTranslation().x() * 0.0254d, 0, position.getTranslation().y() * 0.0254d, 0, position.getRotation().getRadians(), 0
         });
 
         lastInput = new SimpleMatrix(4, 1, false, new double[] {
+                0, 0, 0, 0
+        });
+    }
+
+    public void initializeState(SimpleMatrix state) {
+        this.state = state;
+        this.lastInput = new SimpleMatrix(4, 1, false, new double[] {
                 0, 0, 0, 0
         });
     }
@@ -108,16 +116,16 @@ public class MecanumDriveMPC {
      */
     public void runLQR(Pose2d finalPosition) {
         SimpleMatrix finalState = new SimpleMatrix(6, 1, false, new double[] {
-                finalPosition.getTranslation().x() / 100d, 0, finalPosition.getTranslation().y() / 100d, 0, finalPosition.getRotation().getRadians(), 0
+                finalPosition.getTranslation().x() * 0.0254d, 0, finalPosition.getTranslation().y() * 0.0254d, 0, finalPosition.getRotation().getRadians(), 0
         });
 
-        //runLQR(state, finalState, lastInput, Robot.isOptimizeInputChange());
+        runLQR(state, finalState, lastInput, /*Robot.isOptimizeInputChange()*/ false);
     }
 
     public void runLQR(SimpleMatrix finalState) {
         runLQR(state, new SimpleMatrix(6, 1, false, new double[] {
-                finalState.get(0) / 100, finalState.get(1) / 100, finalState.get(2) / 100,
-                finalState.get(3) / 100, finalState.get(4), finalState.get(5)
+                finalState.get(0) * 0.0254d, finalState.get(1) * 0.0254d, finalState.get(2) * 0.0254d,
+                finalState.get(3) * 0.0254d, finalState.get(4), finalState.get(5)
         }), lastInput, /*Robot.isOptimizeInputChange()*/false);
     }
 

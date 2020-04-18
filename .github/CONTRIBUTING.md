@@ -30,7 +30,7 @@ Alternatively, if you have a team repository forked from ftctechnh/ftc_app, and 
 
 The latter would be the "best" way to manage software among a large team. But as with all things git there are many options.
 
-Pull requests that do not fall into the category above are evaluated by the FTC Technology Team on a case-by-case basis.  Please note however that the deployment model of the SDK does not support direct pulls into ftctechnh/ftc_app.  
+Pull requests that do not fall into the category above are evaluated by the FTC Technology Team on a case-by-case basis.  Please note however that the deployment driveModel of the SDK does not support direct pulls into ftctechnh/ftc_app.
 
 ### Report bugs
 
