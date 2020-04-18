@@ -2,9 +2,8 @@ package org.firstinspires.ftc.teamcode.debugging;
 
 import org.firstinspires.ftc.teamcode.lib.geometry.Line2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Translation2d;
-import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
-import org.firstinspires.ftc.teamcode.main.AutonomousRobot;
-import org.firstinspires.ftc.teamcode.main.LinearlyExtendingRobot;
+import org.firstinspires.ftc.teamcode.main.CascadeLinearlyExtendingRobot;
+import org.firstinspires.ftc.teamcode.main.ContinuousLinearlyExtendingRobot;
 import org.firstinspires.ftc.teamcode.main.Robot;
 
 import java.text.DecimalFormat;
@@ -29,7 +28,7 @@ public class ComputerDebugger {
 
     public static void main(String[] args) {
         Robot.setUsingComputer(true);
-        Robot robot = new LinearlyExtendingRobot();
+        Robot robot = new CascadeLinearlyExtendingRobot();
         init(robot);
         robot.init_debug();
 

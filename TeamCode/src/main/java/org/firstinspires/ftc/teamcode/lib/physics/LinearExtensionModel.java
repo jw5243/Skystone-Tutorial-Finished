@@ -14,6 +14,16 @@ public class LinearExtensionModel {
 
     private double lastAcceleration; //m / s^2
 
+    /**
+     * This creates a linear extension model for slides that are ball-bearing based.
+     *
+     * @param motorModel
+     * @param spoolDiameter
+     */
+    public LinearExtensionModel(MotorModel motorModel, double spoolDiameter) {
+        this(motorModel, spoolDiameter, 0.0025d, 0.002d);
+    }
+
     public LinearExtensionModel(MotorModel motorModel, double spoolDiameter,
                                 double staticFriction, double coulombFriction) {
         this.motorModel      = motorModel;

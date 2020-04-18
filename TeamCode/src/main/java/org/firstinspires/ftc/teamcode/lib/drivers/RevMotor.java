@@ -45,7 +45,7 @@ public class RevMotor {
     public RevMotor(final ExpansionHubMotor motor, final boolean onMasterHub,
                     final boolean resetEncoder, final boolean brakeMode, final boolean reverse,
                     final Motor motorType) {
-        this(motor, onMasterHub, resetEncoder, brakeMode, reverse, motorType.getENCODER_TICKS_PER_REVOLUTION());
+        this(motor, onMasterHub, resetEncoder, brakeMode, reverse, motorType.getEncoderTicksPerRevolution());
     }
 
     public RevMotor(final ExpansionHubMotor motor, final boolean onMasterHub,
@@ -58,7 +58,7 @@ public class RevMotor {
     public RevMotor(final ExpansionHubMotor motor, final boolean onMasterHub,
                     final boolean resetEncoder, final boolean brakeMode, final boolean reverse,
                     final Motor motorType, final double rotationDiameter) {
-        this(motor, onMasterHub, resetEncoder, brakeMode, reverse, motorType.getENCODER_TICKS_PER_REVOLUTION(), rotationDiameter);
+        this(motor, onMasterHub, resetEncoder, brakeMode, reverse, motorType.getEncoderTicksPerRevolution(), rotationDiameter);
     }
 
     public RevMotor(final ExpansionHubMotor motor, final boolean onMasterHub,

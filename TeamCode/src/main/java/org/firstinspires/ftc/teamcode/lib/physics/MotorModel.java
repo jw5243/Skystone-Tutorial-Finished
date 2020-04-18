@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.lib.physics;
 
+import org.firstinspires.ftc.teamcode.lib.drivers.Motor;
+
 import java.util.function.DoubleUnaryOperator;
 
 public class MotorModel {
@@ -96,6 +98,20 @@ public class MotorModel {
         setLastAngularAcceleration(0d);
     }
 
+    public static MotorModel generateMotorModel(Motor motorType, int motorCount, double externalGearRatio, DoubleUnaryOperator inertia, DoubleUnaryOperator weightAppliedTorque) {
+        return new MotorModel(externalGearRatio, 12d, motorType.getStallTorque() * motorCount,
+                motorType.getStallCurrent(), motorType.getFreeCurrent(), motorType.getRPM(), 1d,
+                inertia, weightAppliedTorque, 3E-3d * motorCount, 2E-3d * motorCount, 1E-4d,
+                0.05d, 25d);
+    }
+
+    public static MotorModel generateMotorModel(Motor motorType, int motorCount, double externalGearRatio, DoubleUnaryOperator weightAppliedTorque) {
+        return new MotorModel(externalGearRatio, 12d, motorType.getStallTorque() * motorCount,
+                motorType.getStallCurrent(), motorType.getFreeCurrent(), motorType.getRPM(), 1d,
+                (motorPosition) -> motorType.getBackdriveTorque(), weightAppliedTorque, 3E-3d * motorCount,
+                2E-3d * motorCount, 1E-4d, 0.05d, 25d);
+    }
+
     public static void main(String... args) {
         MotorModel motorModel = new MotorModel(
                 20d, 12d, 3.36d, 166d,
@@ -175,6 +191,10 @@ public class MotorModel {
      */
     public double calculateAngularAcceleration(double voltageInput, double externalFriction) {
         return calculateTorque(voltageInput, externalFriction) / getInertia().applyAsDouble(getCurrentAngularPosition());
+    }
+
+    public static double getLinearPosition(double currentAngularPosition, double rotationDiameter) {
+        return currentAngularPosition * rotationDiameter / 2d;
     }
 
     /**
