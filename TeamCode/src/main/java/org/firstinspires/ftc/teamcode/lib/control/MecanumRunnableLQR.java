@@ -26,7 +26,7 @@ public class MecanumRunnableLQR implements Runnable {
 
     public MecanumDriveMPC lqr(Pose2d desiredState) {
         MecanumDriveMPC mpc = new MecanumDriveMPC(true);
-        mpc.model = Robot.getDriveModel();
+        mpc.setModel(Robot.getDriveModel());
         mpc.runLQR(desiredState);
         return mpc;
     }

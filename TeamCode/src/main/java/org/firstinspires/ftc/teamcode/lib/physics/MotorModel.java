@@ -104,11 +104,27 @@ public class MotorModel {
                 0.05d, 25d);
     }
 
+    public static MotorModel generateMotorModel(Motor motorType, double externalGearRatio, DoubleUnaryOperator inertia, DoubleUnaryOperator weightAppliedTorque) {
+        return generateMotorModel(motorType, 1, externalGearRatio, inertia, weightAppliedTorque);
+    }
+
+    public static MotorModel generateMotorModel(Motor motorType, DoubleUnaryOperator inertia, DoubleUnaryOperator weightAppliedTorque) {
+        return generateMotorModel(motorType, 1, 1d, inertia, weightAppliedTorque);
+    }
+
     public static MotorModel generateMotorModel(Motor motorType, int motorCount, double externalGearRatio, DoubleUnaryOperator weightAppliedTorque) {
         return new MotorModel(externalGearRatio, 12d, motorType.getStallTorque() * motorCount,
                 motorType.getStallCurrent(), motorType.getFreeCurrent(), motorType.getRPM(), 1d,
                 (motorPosition) -> motorType.getBackdriveTorque(), weightAppliedTorque, 3E-3d * motorCount,
                 2E-3d * motorCount, 1E-4d, 0.05d, 25d);
+    }
+
+    public static MotorModel generateMotorModel(Motor motorType, double externalGearRatio, DoubleUnaryOperator weightAppliedTorque) {
+        return generateMotorModel(motorType, 1, externalGearRatio, weightAppliedTorque);
+    }
+
+    public static MotorModel generateMotorModel(Motor motorType, DoubleUnaryOperator weightAppliedTorque) {
+        return generateMotorModel(motorType, 1, 1d, weightAppliedTorque);
     }
 
     public static void main(String... args) {

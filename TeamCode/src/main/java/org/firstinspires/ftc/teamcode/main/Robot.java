@@ -39,7 +39,7 @@ public abstract class Robot implements RobotDebug {
                 500, 0.001d, 18.14d, 0.315d, 0.315d * (0.1d * 0.1d + 0.032d * 0.032d) / 2d,
                 0.315d * (3d * (0.1d * 0.1d + 0.032d * 0.032d) + 0.05d * 0.05d) / 12d, 0.5613d,
                 0.1d / 2d, 7d * 0.0254d, 7d * 0.0254d, 6d * 0.0254d, 6d * 0.0254d,
-                MotorModel.generateMotorModel(Motor.GOBILDA_435_RPM, 1, 1d, null)));
+                MotorModel.generateMotorModel(Motor.GOBILDA_435_RPM, null)));
     }
 
     @Override
