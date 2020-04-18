@@ -59,7 +59,7 @@ public class Pose2d implements IPose2d<Pose2d> {
         double sin_theta = Math.sin(delta.dtheta);
         double cos_theta = Math.cos(delta.dtheta);
         double s, c;
-        if (Math.abs(delta.dtheta) < kEps) {
+        if(Math.abs(delta.dtheta) < kEps) {
             s = 1.0 - 1.0 / 6.0 * delta.dtheta * delta.dtheta;
             c = .5 * delta.dtheta;
         } else {
@@ -78,7 +78,7 @@ public class Pose2d implements IPose2d<Pose2d> {
         final double half_dtheta = 0.5 * dtheta;
         final double cos_minus_one = transform.getRotation().cos() - 1.0;
         double halftheta_by_tan_of_halfdtheta;
-        if (Math.abs(cos_minus_one) < kEps) {
+        if(Math.abs(cos_minus_one) < kEps) {
             halftheta_by_tan_of_halfdtheta = 1.0 - 1.0 / 12.0 * dtheta * dtheta;
         } else {
             halftheta_by_tan_of_halfdtheta = -(half_dtheta * transform.getRotation().sin()) / cos_minus_one;
@@ -131,11 +131,11 @@ public class Pose2d implements IPose2d<Pose2d> {
      */
     public Translation2d intersection(final Pose2d other) {
         final Rotation2d other_rotation = other.getRotation();
-        if (rotation_.isParallel(other_rotation)) {
+        if(rotation_.isParallel(other_rotation)) {
             // Lines are parallel.
             return new Translation2d(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
         }
-        if (Math.abs(rotation_.cos()) < Math.abs(other_rotation.cos())) {
+        if(Math.abs(rotation_.cos()) < Math.abs(other_rotation.cos())) {
             return intersectionInternal(this, other);
         } else {
             return intersectionInternal(other, this);
@@ -146,7 +146,7 @@ public class Pose2d implements IPose2d<Pose2d> {
      * Return true if this pose is (nearly) colinear with the another.
      */
     public boolean isColinear(final Pose2d other) {
-        if (!getRotation().isParallel(other.getRotation()))
+        if(!getRotation().isParallel(other.getRotation()))
             return false;
         final Twist2d twist = log(inverse().transformBy(other));
         return (Util.epsilonEquals(twist.dy, 0.0) && Util.epsilonEquals(twist.dtheta, 0.0));
@@ -166,7 +166,7 @@ public class Pose2d implements IPose2d<Pose2d> {
         final double tan_b = b_r.tan();
         final double t = ((a_t.x() - b_t.x()) * tan_b + b_t.y() - a_t.y())
                 / (a_r.sin() - a_r.cos() * tan_b);
-        if (Double.isNaN(t)) {
+        if(Double.isNaN(t)) {
             return new Translation2d(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
         }
         return a_t.translateBy(a_r.toTranslation().scale(t));
@@ -177,9 +177,9 @@ public class Pose2d implements IPose2d<Pose2d> {
      */
     @Override
     public Pose2d interpolate(final Pose2d other, double x) {
-        if (x <= 0) {
+        if(x <= 0) {
             return new Pose2d(this);
-        } else if (x >= 1) {
+        } else if(x >= 1) {
             return new Pose2d(other);
         }
         final Twist2d twist = Pose2d.log(inverse().transformBy(other));
@@ -198,7 +198,7 @@ public class Pose2d implements IPose2d<Pose2d> {
 
     @Override
     public boolean equals(final Object other) {
-        if (!(other instanceof Pose2d)) {
+        if(!(other instanceof Pose2d)) {
             return false;
         }
 

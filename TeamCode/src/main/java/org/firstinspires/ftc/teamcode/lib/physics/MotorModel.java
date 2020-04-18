@@ -64,20 +64,19 @@ public class MotorModel {
      *                       output shaft, this parameter is made a {@code DoubleSupplier}, enabling
      *                       custom inputs for the inertia value based on the angular rotation of the
      *                       motor output shaft.
-     *
      * @see DoubleUnaryOperator
      */
     public MotorModel(double gearRatio, double nominalVoltage, double stallTorque,
                       double stallCurrent, double freeCurrent, double freeSpeed, double efficiency,
                       DoubleUnaryOperator inertia, DoubleUnaryOperator weightAppliedTorque, double staticFriction,
                       double coulombFriction, double viscousFriction, double stribeckPower, double stribeckVelocity) {
-        this.gearRatio      = gearRatio;
+        this.gearRatio = gearRatio;
         this.nominalVoltage = nominalVoltage;
-        this.stallTorque    = stallTorque * gearRatio * efficiency;
-        this.stallCurrent   = stallCurrent;
-        this.freeCurrent    = freeCurrent;
-        this.freeSpeed      = freeSpeed * getRpmToRadPerSecond();
-        this.efficiency     = efficiency;
+        this.stallTorque = stallTorque * gearRatio * efficiency;
+        this.stallCurrent = stallCurrent;
+        this.freeCurrent = freeCurrent;
+        this.freeSpeed = freeSpeed * getRpmToRadPerSecond();
+        this.efficiency = efficiency;
 
         this.resistance = getNominalVoltage() / getStallCurrent();
 
@@ -87,10 +86,10 @@ public class MotorModel {
         this.inertia = inertia;
         this.weightAppliedTorque = weightAppliedTorque;
 
-        this.staticFriction   = staticFriction;
-        this.coulombFriction  = coulombFriction;
-        this.viscousFriction  = viscousFriction;
-        this.stribeckPower    = stribeckPower;
+        this.staticFriction = staticFriction;
+        this.coulombFriction = coulombFriction;
+        this.viscousFriction = viscousFriction;
+        this.stribeckPower = stribeckPower;
         this.stribeckVelocity = stribeckVelocity;
 
         setCurrentAngularPosition(0d);
@@ -122,7 +121,7 @@ public class MotorModel {
         final double dt = 0.001d;
         for(int i = 1; i < 500; i++) {
             motorModel.update(dt, 1d);
-            System.out.print((int)(dt * i * 1000d) / 1000d + "\t");
+            System.out.print((int) (dt * i * 1000d) / 1000d + "\t");
             System.out.println(motorModel);
         }
     }
@@ -179,7 +178,7 @@ public class MotorModel {
      * @return
      */
     public double calculateAngularAcceleration(double voltageInput) {
-         return calculateAngularAcceleration(voltageInput, 0d);
+        return calculateAngularAcceleration(voltageInput, 0d);
     }
 
     /**

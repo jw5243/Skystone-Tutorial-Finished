@@ -24,8 +24,8 @@ public enum MessageOption {
     private static final String END_MESSAGE_TAG = "%";
 
     private final Class<?> sendClass;
-    private final String   tag;
-    private       Object   sendValue;
+    private final String tag;
+    private Object sendValue;
 
     MessageOption(final Class<?> sendClass, final String tag) {
         this.sendClass = sendClass;

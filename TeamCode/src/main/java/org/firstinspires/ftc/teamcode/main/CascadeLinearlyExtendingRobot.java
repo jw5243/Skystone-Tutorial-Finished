@@ -10,10 +10,10 @@ import org.firstinspires.ftc.teamcode.lib.physics.LinearExtensionModel;
 import org.firstinspires.ftc.teamcode.lib.physics.MotorModel;
 
 public class CascadeLinearlyExtendingRobot extends Robot {
-    private final double mechanismWeight   = 4.448d * 16.5d; //N, 16.5 lbs
-    private final double spoolDiameter     = 0.55d * 0.0254d; //m, 0.55 in
-    private final double stageLength       = 18d; //in
-    private final int    stageCount        = 6;
+    private final double mechanismWeight = 4.448d * 16.5d; //N, 16.5 lbs
+    private final double spoolDiameter = 0.55d * 0.0254d; //m, 0.55 in
+    private final double stageLength = 18d; //in
+    private final int stageCount = 6;
     private LinearExtensionModel linearExtensionModel;
 
     private final double kS = 5.7d; //V
@@ -24,7 +24,7 @@ public class CascadeLinearlyExtendingRobot extends Robot {
     private final double kD = 4d; //V s / in
 
     private double runningSum = 0d;
-    private double lastError  = 0d;
+    private double lastError = 0d;
 
     private double setpoint = 15d; //in
 
@@ -66,25 +66,25 @@ public class CascadeLinearlyExtendingRobot extends Robot {
             runningSum += error * dt;
 
             double output = kS +
-                            kV * motionProfile.getVelocity() +
-                            kA * motionProfile.getAcceleration() +
-                            kP * error +
-                            kI * runningSum +
-                            kD * ((error - lastError) / dt - motionProfile.getVelocity());
+                    kV * motionProfile.getVelocity() +
+                    kA * motionProfile.getAcceleration() +
+                    kP * error +
+                    kI * runningSum +
+                    kD * ((error - lastError) / dt - motionProfile.getVelocity());
             output = output < -12d ? 12d : output > 12d ? 12d : output;
 
             linearExtensionModel.update(dt, output);
             lastError = error;
 
-            ComputerDebugger.send(MessageOption.LINEAR_POSITION.setSendValue((int)(1000d * linearExtensionModel.getPosition() * 6d / 0.0254d) / 1000d));
+            ComputerDebugger.send(MessageOption.LINEAR_POSITION.setSendValue((int) (1000d * linearExtensionModel.getPosition() * 6d / 0.0254d) / 1000d));
         } catch (IllegalMessageTypeException e) {
             e.printStackTrace();
         }
     }
 
     public static void main(String... args) {
-        final double mechanismWeight   = 4.448d * 16.5d; //N, 16.5 lbs
-        final double spoolDiameter     = 0.55d * 0.0254d; //m, 0.55 in
+        final double mechanismWeight = 4.448d * 16.5d; //N, 16.5 lbs
+        final double spoolDiameter = 0.55d * 0.0254d; //m, 0.55 in
         LinearExtensionModel linearExtensionModel = new LinearExtensionModel(
                 MotorModel.generateMotorModel(Motor.NEVEREST_3_7, 2, 1d,
                         (motorPosition) -> mechanismWeight * spoolDiameter / 2d),
@@ -105,7 +105,7 @@ public class CascadeLinearlyExtendingRobot extends Robot {
         final double kD = 1.2d; //V s / in
 
         double runningSum = 0d;
-        double lastError  = 0d;
+        double lastError = 0d;
 
         double setpoint = 15d; //in
 
@@ -120,17 +120,17 @@ public class CascadeLinearlyExtendingRobot extends Robot {
 
             double output =
                     kS +
-                    kV * motionProfile.getVelocity(timeStamp) +
-                    kA * motionProfile.getAcceleration(timeStamp) +
-                    kP * error +
-                    kI * runningSum +
-                    kD * ((error - lastError) / dt - motionProfile.getVelocity(timeStamp));
+                            kV * motionProfile.getVelocity(timeStamp) +
+                            kA * motionProfile.getAcceleration(timeStamp) +
+                            kP * error +
+                            kI * runningSum +
+                            kD * ((error - lastError) / dt - motionProfile.getVelocity(timeStamp));
             output = output < -12d ? 12d : output > 12d ? 12d : output;
 
             linearExtensionModel.update(dt, output);
             lastError = error;
 
-            System.out.print((int)(timeStamp * 1000d) / 1000d + "\t");
+            System.out.print((int) (timeStamp * 1000d) / 1000d + "\t");
             System.out.print(output + "\t");
             System.out.println(linearExtensionModel);
         }

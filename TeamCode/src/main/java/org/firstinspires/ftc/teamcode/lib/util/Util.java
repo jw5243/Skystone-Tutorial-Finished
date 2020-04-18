@@ -3,7 +3,8 @@ package org.firstinspires.ftc.teamcode.lib.util;
 public class Util {
     private static final double kEpsilon = 1E-12;
 
-    private Util() {}
+    private Util() {
+    }
 
     public static double limit(double x, double maxMagnitude) {
         return limit(x, -maxMagnitude, maxMagnitude);

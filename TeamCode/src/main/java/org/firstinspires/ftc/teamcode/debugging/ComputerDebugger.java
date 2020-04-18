@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.debugging;
 
 import org.firstinspires.ftc.teamcode.lib.geometry.Line2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Translation2d;
+import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
+import org.firstinspires.ftc.teamcode.lib.util.TimeUtil;
 import org.firstinspires.ftc.teamcode.main.AutonomousRobot;
 import org.firstinspires.ftc.teamcode.main.CascadeLinearlyExtendingRobot;
 import org.firstinspires.ftc.teamcode.main.ContinuousLinearlyExtendingRobot;
@@ -38,7 +40,7 @@ public class ComputerDebugger {
 
         try {
             Thread.sleep(1000);
-        } catch(InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
@@ -52,7 +54,7 @@ public class ComputerDebugger {
                 send(MessageOption.ROBOT_LOCATION);
                 send(MessageOption.LOG_POINT.setSendValue(robot.getFieldPosition().getTranslation()));
                 sendMessage();
-            } catch(InterruptedException | IllegalMessageTypeException e) {
+            } catch (InterruptedException | IllegalMessageTypeException e) {
                 e.printStackTrace();
             }
         }
@@ -68,18 +70,18 @@ public class ComputerDebugger {
         if(messageOption.ordinal() == MessageOption.ROBOT_LOCATION.ordinal()) {
             getMessageBuilder().append(getRobot().getFieldPosition());
         } else if(messageOption.ordinal() == MessageOption.KEY_POINT.ordinal()) {
-            final Translation2d keyPoint = (Translation2d)(messageOption.getSendValue());
+            final Translation2d keyPoint = (Translation2d) (messageOption.getSendValue());
             getMessageBuilder().append(keyPoint);
         } else if(messageOption.ordinal() == MessageOption.LOG_POINT.ordinal()) {
-            final Translation2d logPoint = (Translation2d)(messageOption.getSendValue());
+            final Translation2d logPoint = (Translation2d) (messageOption.getSendValue());
             getMessageBuilder().append(logPoint);
         } else if(messageOption.ordinal() == MessageOption.LINE.ordinal()) {
-            final Line2d line = (Line2d)(messageOption.getSendValue());
+            final Line2d line = (Line2d) (messageOption.getSendValue());
             getMessageBuilder().append(line);
         } else if(messageOption.ordinal() == MessageOption.CLEAR_LOG_POINTS.ordinal()) {
             //
         } else if(messageOption.ordinal() == MessageOption.POSITION.ordinal()) {
-            //getMessageBuilder().append(Utilities.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append(getRobot().getFieldPosition());
+            getMessageBuilder().append(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append(getRobot().getFieldPosition());
         } else if(messageOption.ordinal() == MessageOption.VELOCITY.ordinal()) {
             //getMessageBuilder().append(Utilities.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append(Speedometer.getCurrentAngularVelocity());
         } else if(messageOption.ordinal() == MessageOption.ACCELERATION.ordinal()) {
@@ -89,13 +91,13 @@ public class ComputerDebugger {
         } else if(messageOption.ordinal() == MessageOption.CLEAR_MOTION_PROFILE.ordinal()) {
             //
         } else if(messageOption.ordinal() == MessageOption.LINEAR_POSITION.ordinal()) {
-            final double position = (Double)(messageOption.getSendValue());
+            final double position = (Double) (messageOption.getSendValue());
             getMessageBuilder().append(position);
         } else if(messageOption.ordinal() == MessageOption.STAGE_LENGTH.ordinal()) {
-            final double length = (Double)(messageOption.getSendValue());
+            final double length = (Double) (messageOption.getSendValue());
             getMessageBuilder().append(length);
         } else if(messageOption.ordinal() == MessageOption.STAGE_COUNT.ordinal()) {
-            final int stageCount = (Integer)(messageOption.getSendValue());
+            final int stageCount = (Integer) (messageOption.getSendValue());
             getMessageBuilder().append(stageCount);
         } else if(messageOption.ordinal() == MessageOption.CASCADE.ordinal()) {
 

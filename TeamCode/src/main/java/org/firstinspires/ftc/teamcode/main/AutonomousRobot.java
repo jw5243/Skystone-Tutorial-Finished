@@ -23,7 +23,7 @@ public class AutonomousRobot extends Robot {
     public void loop_debug() {
         super.loop_debug();
         getMecanumDriveRunnableLQR().updateMPC();
-        setInput(getMecanumDriveMPC().getOptimalInput((int)((getMecanumDriveRunnableLQR().getTimeProfiler().getDeltaTime(TimeUnits.SECONDS, false) +
+        setInput(getMecanumDriveMPC().getOptimalInput((int) ((getMecanumDriveRunnableLQR().getTimeProfiler().getDeltaTime(TimeUnits.SECONDS, false) +
                 getMecanumDriveRunnableLQR().getPolicyLag()) / MecanumDriveMPC.dt), getState(), getInput(), false));
     }
 }

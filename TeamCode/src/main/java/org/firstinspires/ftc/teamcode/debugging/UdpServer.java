@@ -14,9 +14,9 @@ import java.util.concurrent.Semaphore;
 public class UdpServer implements Runnable {
     private static final int MAX_SEND_SIZE_PER_UPDATE = 600;
 
-    private final int       clientPort;
-    private       Semaphore sendLock;
-    private       boolean   closed;
+    private final int clientPort;
+    private Semaphore sendLock;
+    private boolean closed;
 
     private TimeProfiler timeProfiler;
     private long lastSendTime;
@@ -57,7 +57,7 @@ public class UdpServer implements Runnable {
                 }
 
                 getSendLock().release();
-            } catch(final InterruptedException e) {
+            } catch (final InterruptedException e) {
                 e.printStackTrace();
             }
         }
@@ -82,7 +82,7 @@ public class UdpServer implements Runnable {
             final DatagramPacket datagramPacket =
                     new DatagramPacket(message.getBytes(), message.length(), InetAddress.getLocalHost(), getClientPort());
             serverSocket.send(datagramPacket);
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

@@ -40,33 +40,33 @@ public class MecanumDriveModel {
 
     public MecanumDriveModel(int timeSteps, double dt, double robotMass, double wheelMass, double wheelInertiaSpinning, double wheelInertiaTurning,
                              double robotMomentInertia, double wheelRadius, double L1, double L2, double D1, double D2, MotorModel motorModel) {
-        this.timeSteps            = timeSteps;
-        this.dt                   = dt;
-        this.robotMass            = robotMass;
-        this.wheelMass            = wheelMass;
+        this.timeSteps = timeSteps;
+        this.dt = dt;
+        this.robotMass = robotMass;
+        this.wheelMass = wheelMass;
         this.wheelInertiaSpinning = wheelInertiaSpinning;
-        this.wheelInertiaTurning  = wheelInertiaTurning;
-        this.robotMomentInertia   = robotMomentInertia;
-        this.internalGearRatio    = 1d;
-        this.externalGearRatio    = motorModel.getGearRatio();
-        this.compoundGearRatio    = motorModel.getGearRatio();
-        this.wheelRadius          = wheelRadius;
-        this.nominalVoltage       = motorModel.getNominalVoltage();
-        this.stallTorque          = motorModel.getStallTorque();
-        this.stallCurrent         = motorModel.getStallCurrent();
-        this.freeSpeed            = motorModel.getFreeSpeed();
-        this.freeCurrent          = motorModel.getFreeCurrent();
-        this.efficiency           = motorModel.getEfficiency();
-        this.L1                   = L1;
-        this.L2                   = L2;
-        this.D1                   = D1;
-        this.D2                   = D2;
+        this.wheelInertiaTurning = wheelInertiaTurning;
+        this.robotMomentInertia = robotMomentInertia;
+        this.internalGearRatio = 1d;
+        this.externalGearRatio = motorModel.getGearRatio();
+        this.compoundGearRatio = motorModel.getGearRatio();
+        this.wheelRadius = wheelRadius;
+        this.nominalVoltage = motorModel.getNominalVoltage();
+        this.stallTorque = motorModel.getStallTorque();
+        this.stallCurrent = motorModel.getStallCurrent();
+        this.freeSpeed = motorModel.getFreeSpeed();
+        this.freeCurrent = motorModel.getFreeCurrent();
+        this.efficiency = motorModel.getEfficiency();
+        this.L1 = L1;
+        this.L2 = L2;
+        this.D1 = D1;
+        this.D2 = D2;
 
         resistance = this.nominalVoltage / this.stallCurrent;
-        kV         = (this.nominalVoltage - this.resistance * this.freeCurrent) / (this.freeSpeed);
-        kT         = this.stallTorque / this.stallCurrent;
+        kV = (this.nominalVoltage - this.resistance * this.freeCurrent) / (this.freeSpeed);
+        kT = this.stallTorque / this.stallCurrent;
 
-        wheelRadiusSquared         = this.wheelRadius * this.wheelRadius;
+        wheelRadiusSquared = this.wheelRadius * this.wheelRadius;
         wheelEffectiveSpinningMass = this.wheelInertiaSpinning / wheelRadiusSquared;
         coefficientManager = new CoefficientManager(this);
     }
@@ -75,33 +75,33 @@ public class MecanumDriveModel {
                              double robotMomentInertia, double wheelRadius, double internalGearRatio, double externalGearRatio, double nominalVoltage,
                              double stallTorque, double stallCurrent, double freeSpeed, double freeCurrent, double efficiency,
                              double L1, double L2, double D1, double D2) {
-        this.timeSteps            = timeSteps;
-        this.dt                   = dt;
-        this.robotMass            = robotMass;
-        this.wheelMass            = wheelMass;
+        this.timeSteps = timeSteps;
+        this.dt = dt;
+        this.robotMass = robotMass;
+        this.wheelMass = wheelMass;
         this.wheelInertiaSpinning = wheelInertiaSpinning;
-        this.wheelInertiaTurning  = wheelInertiaTurning;
-        this.robotMomentInertia   = robotMomentInertia;
-        this.internalGearRatio    = internalGearRatio;
-        this.externalGearRatio    = externalGearRatio;
-        this.compoundGearRatio    = internalGearRatio * externalGearRatio;
-        this.wheelRadius          = wheelRadius;
-        this.nominalVoltage       = nominalVoltage;
-        this.stallTorque          = efficiency * stallTorque;
-        this.stallCurrent         = stallCurrent;
-        this.freeSpeed            = internalGearRatio * freeSpeed;
-        this.freeCurrent          = freeCurrent;
-        this.efficiency           = efficiency;
-        this.L1                   = L1;
-        this.L2                   = L2;
-        this.D1                   = D1;
-        this.D2                   = D2;
+        this.wheelInertiaTurning = wheelInertiaTurning;
+        this.robotMomentInertia = robotMomentInertia;
+        this.internalGearRatio = internalGearRatio;
+        this.externalGearRatio = externalGearRatio;
+        this.compoundGearRatio = internalGearRatio * externalGearRatio;
+        this.wheelRadius = wheelRadius;
+        this.nominalVoltage = nominalVoltage;
+        this.stallTorque = efficiency * stallTorque;
+        this.stallCurrent = stallCurrent;
+        this.freeSpeed = internalGearRatio * freeSpeed;
+        this.freeCurrent = freeCurrent;
+        this.efficiency = efficiency;
+        this.L1 = L1;
+        this.L2 = L2;
+        this.D1 = D1;
+        this.D2 = D2;
 
         resistance = this.nominalVoltage / this.stallCurrent;
-        kV         = (this.nominalVoltage - this.resistance * this.freeCurrent) / (this.freeSpeed);
-        kT         = this.stallTorque / this.stallCurrent;
+        kV = (this.nominalVoltage - this.resistance * this.freeCurrent) / (this.freeSpeed);
+        kT = this.stallTorque / this.stallCurrent;
 
-        wheelRadiusSquared         = this.wheelRadius * this.wheelRadius;
+        wheelRadiusSquared = this.wheelRadius * this.wheelRadius;
         wheelEffectiveSpinningMass = this.wheelInertiaSpinning / wheelRadiusSquared;
         coefficientManager = new CoefficientManager(this);
     }
@@ -127,7 +127,7 @@ public class MecanumDriveModel {
             //state = model.simulate(state, input);
             state = model.stateTransitionMatrix(state, true).mult(state).plus(model.inputTransitionMatrix(state, false).mult(input));
             if(i % 10 == 0) {
-                System.out.println((int)(i * model.dt * 100000) / 100000d + "\t" + state.get(0) + "\t" + state.get(1) + "\t" + state.get(2) + "\t" + state.get(3) +
+                System.out.println((int) (i * model.dt * 100000) / 100000d + "\t" + state.get(0) + "\t" + state.get(1) + "\t" + state.get(2) + "\t" + state.get(3) +
                         "\t" + state.get(4) + "\t" + state.get(5));
             }
         }
@@ -379,30 +379,30 @@ public class MecanumDriveModel {
         final double v6 = 2 * A31 + A11 * cosPsi * (D1 - D2) + A11 * (L1 - L2) * sinPsi;
         final double v10 = cosPsi * (-L1 + L2) + (D1 - D2) * sinPsi;
 
-        double M11 = (2*compoundGearRatio*compoundGearRatio*efficiency*kT*kV*(-2*A23*A32 + 2*A22*A33 + A13*A22* v11) +
-                (-(A14*A23*A32) + A13*A24*A32 + A14*A22*A33 - A13*A22*A34)*psiDot*resistance*wheelRadius*wheelRadius)/ v;
-        double M13 = (2*A13*compoundGearRatio*compoundGearRatio*efficiency*kT*kV* v7 + (-(A15*A23*A32) + A13*A25*A32 + A15*A22*A33 - A13*A22*A35)*psiDot*resistance*wheelRadius*wheelRadius)/ v;
-        double M14 = (2*compoundGearRatio*compoundGearRatio*efficiency*kT*kV*((A23*A32 - A22*A33)*psiDot* v4 +
-                A13*(A32*psiDot* v5 + A22* v8 *xDot + A22* v9 *yDot)))/ v;
-        double M15 = (A23*A32*(2*compoundGearRatio*compoundGearRatio*efficiency*kT*kV* v9 - resistance*wheelRadius*wheelRadius* v12) + A13*A32* v3 -
-                A22*(2*A13*compoundGearRatio*compoundGearRatio*efficiency*kT*kV* v13 + 2*A33*compoundGearRatio*compoundGearRatio*efficiency*kT*kV* v11 -
-                        A33*resistance*wheelRadius*wheelRadius* v12 + A13*resistance*wheelRadius*wheelRadius*(A34*xDot + A35*yDot)))/ v;
-        double M31 = (2*A23*compoundGearRatio*compoundGearRatio*efficiency*kT*kV* v6 + (A14*A23*A31 - A13*A24*A31 + A11*A24*A33 - A11*A23*A34)*psiDot*resistance*
-                wheelRadius*wheelRadius)/ v;
-        double M33 = (2*compoundGearRatio*compoundGearRatio*efficiency*kT*kV*(-2*A13*A31 + 2*A11*A33 + A11*A23* v10) + (A15*A23*A31 - A13*A25*A31 + A11*A25*A33 - A11*A23*A35)*psiDot*resistance* wheelRadius*wheelRadius)/ v;
-        double M34 = (2*compoundGearRatio*compoundGearRatio*efficiency*kT*kV*(A23*A31*psiDot* v10 + A13*A31*psiDot* v11 +
-                A11*(A33*psiDot* v5 + A23* v8 *xDot + A23* v9 *yDot)))/ v;
-        double M35 = -(((A13*A31 - A11*A33)* v3 + A23* v1)/ v);
-        double M51 = -((2*A22*compoundGearRatio*compoundGearRatio*efficiency*kT*kV* v6 + (A14*A22*A31 + A11*A24*A32 - A11*A22*A34)*psiDot*resistance*wheelRadius*wheelRadius)/ v);
-        double M53 = -((2*A11*compoundGearRatio*compoundGearRatio*efficiency*kT*kV* v7 + (A15*A22*A31 + A11*A25*A32 - A11*A22*A35)*psiDot*resistance*wheelRadius*wheelRadius)/ v);
-        double M54 = (2*compoundGearRatio*compoundGearRatio*efficiency*kT*kV*(A22*A31*psiDot* v4 + A11*(A32*cosPsi*(D1 - D2)*psiDot + A32*(L1 - L2)*psiDot*sinPsi +
-                A22*cosPsi*(-(L1*xDot) + L2*xDot - D1*yDot + D2*yDot) + A22*sinPsi*(D1*xDot - D2*xDot - L1*yDot + L2*yDot))))/ v;
-        double M55 = (-(A11*A32* v3) + A22* v1)/ v;
+        double M11 = (2 * compoundGearRatio * compoundGearRatio * efficiency * kT * kV * (-2 * A23 * A32 + 2 * A22 * A33 + A13 * A22 * v11) +
+                (-(A14 * A23 * A32) + A13 * A24 * A32 + A14 * A22 * A33 - A13 * A22 * A34) * psiDot * resistance * wheelRadius * wheelRadius) / v;
+        double M13 = (2 * A13 * compoundGearRatio * compoundGearRatio * efficiency * kT * kV * v7 + (-(A15 * A23 * A32) + A13 * A25 * A32 + A15 * A22 * A33 - A13 * A22 * A35) * psiDot * resistance * wheelRadius * wheelRadius) / v;
+        double M14 = (2 * compoundGearRatio * compoundGearRatio * efficiency * kT * kV * ((A23 * A32 - A22 * A33) * psiDot * v4 +
+                A13 * (A32 * psiDot * v5 + A22 * v8 * xDot + A22 * v9 * yDot))) / v;
+        double M15 = (A23 * A32 * (2 * compoundGearRatio * compoundGearRatio * efficiency * kT * kV * v9 - resistance * wheelRadius * wheelRadius * v12) + A13 * A32 * v3 -
+                A22 * (2 * A13 * compoundGearRatio * compoundGearRatio * efficiency * kT * kV * v13 + 2 * A33 * compoundGearRatio * compoundGearRatio * efficiency * kT * kV * v11 -
+                        A33 * resistance * wheelRadius * wheelRadius * v12 + A13 * resistance * wheelRadius * wheelRadius * (A34 * xDot + A35 * yDot))) / v;
+        double M31 = (2 * A23 * compoundGearRatio * compoundGearRatio * efficiency * kT * kV * v6 + (A14 * A23 * A31 - A13 * A24 * A31 + A11 * A24 * A33 - A11 * A23 * A34) * psiDot * resistance *
+                wheelRadius * wheelRadius) / v;
+        double M33 = (2 * compoundGearRatio * compoundGearRatio * efficiency * kT * kV * (-2 * A13 * A31 + 2 * A11 * A33 + A11 * A23 * v10) + (A15 * A23 * A31 - A13 * A25 * A31 + A11 * A25 * A33 - A11 * A23 * A35) * psiDot * resistance * wheelRadius * wheelRadius) / v;
+        double M34 = (2 * compoundGearRatio * compoundGearRatio * efficiency * kT * kV * (A23 * A31 * psiDot * v10 + A13 * A31 * psiDot * v11 +
+                A11 * (A33 * psiDot * v5 + A23 * v8 * xDot + A23 * v9 * yDot))) / v;
+        double M35 = -(((A13 * A31 - A11 * A33) * v3 + A23 * v1) / v);
+        double M51 = -((2 * A22 * compoundGearRatio * compoundGearRatio * efficiency * kT * kV * v6 + (A14 * A22 * A31 + A11 * A24 * A32 - A11 * A22 * A34) * psiDot * resistance * wheelRadius * wheelRadius) / v);
+        double M53 = -((2 * A11 * compoundGearRatio * compoundGearRatio * efficiency * kT * kV * v7 + (A15 * A22 * A31 + A11 * A25 * A32 - A11 * A22 * A35) * psiDot * resistance * wheelRadius * wheelRadius) / v);
+        double M54 = (2 * compoundGearRatio * compoundGearRatio * efficiency * kT * kV * (A22 * A31 * psiDot * v4 + A11 * (A32 * cosPsi * (D1 - D2) * psiDot + A32 * (L1 - L2) * psiDot * sinPsi +
+                A22 * cosPsi * (-(L1 * xDot) + L2 * xDot - D1 * yDot + D2 * yDot) + A22 * sinPsi * (D1 * xDot - D2 * xDot - L1 * yDot + L2 * yDot)))) / v;
+        double M55 = (-(A11 * A32 * v3) + A22 * v1) / v;
 
         return new SimpleMatrix(6, 6, false, new double[] {
-                0,   0, 0,   0, 0,   0,
+                0, 0, 0, 0, 0, 0,
                 1, M11, 0, M31, 0, M51,
-                0,   0, 0,   0, 0,   0,
+                0, 0, 0, 0, 0, 0,
                 0, M13, 1, M33, 0, M53,
                 0, M14, 0, M34, 0, M54,
                 0, M15, 0, M35, 1, M55
@@ -435,18 +435,18 @@ public class MecanumDriveModel {
         final double v = (A13 * A22 * A31 + A11 * A23 * A32 - A11 * A22 * A33) * resistance * wheelRadius;
         final double v1 = (A23 * A32 - A22 * A33) * (cosPsi + sinPsi);
         final double v2 = (A23 * A32 - A22 * A33) * (cosPsi - sinPsi);
-        double B10 = -((compoundGearRatio*efficiency*kT*nominalVoltage*(A13*A22*(D1 + L1) + A13*A32*(-cosPsi + sinPsi) - v1))/ v);
-        double B11 = (compoundGearRatio*efficiency*kT*nominalVoltage*(A13*A22*(D2 + L1) + v2 - A13*A32*(cosPsi + sinPsi)))/ v;
-        double B12 = -((compoundGearRatio*efficiency*kT*nominalVoltage*(A13*A22*(D1 + L2) - v2 + A13*A32*(cosPsi + sinPsi)))/ v);
-        double B13 = (compoundGearRatio*efficiency*kT*nominalVoltage*(A13*A22*(D2 + L2) + A13*A32*(cosPsi - sinPsi) + v1))/ v;
-        double B30 = -((compoundGearRatio*efficiency*kT*nominalVoltage*(A11*A23*(D1 + L1) + A13*A31*(cosPsi - sinPsi) + A11*A33*(-cosPsi + sinPsi) + A23*A31*(cosPsi + sinPsi)))/ v);
-        double B31 = (compoundGearRatio*efficiency*kT*nominalVoltage*(A11*A23*(D2 + L1) + A23*A31*(-cosPsi + sinPsi) + A13*A31*(cosPsi + sinPsi) - A11*A33*(cosPsi + sinPsi)))/ v;
-        double B32 = (compoundGearRatio*efficiency*kT*nominalVoltage*(-(A23*(A11*(D1 + L2) + A31*(cosPsi - sinPsi))) + A13*A31*(cosPsi + sinPsi) - A11*A33*(cosPsi + sinPsi)))/ v;
-        double B33 = (compoundGearRatio*efficiency*kT*nominalVoltage*(A11*A23*(D2 + L2) + A11*A33*(cosPsi - sinPsi) + A13*A31*(-cosPsi + sinPsi) - A23*A31*(cosPsi + sinPsi)))/ v;
-        double B50 = (compoundGearRatio*efficiency*kT*nominalVoltage*(A11*A22*(D1 + L1) + A11*A32*(-cosPsi + sinPsi) + A22*A31*(cosPsi + sinPsi)))/ v;
-        double B51 = (compoundGearRatio*efficiency*kT*nominalVoltage*(-(A11*A22*(D2 + L1)) + A22*A31*(cosPsi - sinPsi) + A11*A32*(cosPsi + sinPsi)))/ v;
-        double B52 = (compoundGearRatio*efficiency*kT*nominalVoltage*(A11*A22*(D1 + L2) + A22*A31*(cosPsi - sinPsi) + A11*A32*(cosPsi + sinPsi)))/ v;
-        double B53 = (compoundGearRatio*efficiency*kT*nominalVoltage*(-(A11*A22*(D2 + L2)) + A11*A32*(-cosPsi + sinPsi) + A22*A31*(cosPsi + sinPsi)))/ v;
+        double B10 = -((compoundGearRatio * efficiency * kT * nominalVoltage * (A13 * A22 * (D1 + L1) + A13 * A32 * (-cosPsi + sinPsi) - v1)) / v);
+        double B11 = (compoundGearRatio * efficiency * kT * nominalVoltage * (A13 * A22 * (D2 + L1) + v2 - A13 * A32 * (cosPsi + sinPsi))) / v;
+        double B12 = -((compoundGearRatio * efficiency * kT * nominalVoltage * (A13 * A22 * (D1 + L2) - v2 + A13 * A32 * (cosPsi + sinPsi))) / v);
+        double B13 = (compoundGearRatio * efficiency * kT * nominalVoltage * (A13 * A22 * (D2 + L2) + A13 * A32 * (cosPsi - sinPsi) + v1)) / v;
+        double B30 = -((compoundGearRatio * efficiency * kT * nominalVoltage * (A11 * A23 * (D1 + L1) + A13 * A31 * (cosPsi - sinPsi) + A11 * A33 * (-cosPsi + sinPsi) + A23 * A31 * (cosPsi + sinPsi))) / v);
+        double B31 = (compoundGearRatio * efficiency * kT * nominalVoltage * (A11 * A23 * (D2 + L1) + A23 * A31 * (-cosPsi + sinPsi) + A13 * A31 * (cosPsi + sinPsi) - A11 * A33 * (cosPsi + sinPsi))) / v;
+        double B32 = (compoundGearRatio * efficiency * kT * nominalVoltage * (-(A23 * (A11 * (D1 + L2) + A31 * (cosPsi - sinPsi))) + A13 * A31 * (cosPsi + sinPsi) - A11 * A33 * (cosPsi + sinPsi))) / v;
+        double B33 = (compoundGearRatio * efficiency * kT * nominalVoltage * (A11 * A23 * (D2 + L2) + A11 * A33 * (cosPsi - sinPsi) + A13 * A31 * (-cosPsi + sinPsi) - A23 * A31 * (cosPsi + sinPsi))) / v;
+        double B50 = (compoundGearRatio * efficiency * kT * nominalVoltage * (A11 * A22 * (D1 + L1) + A11 * A32 * (-cosPsi + sinPsi) + A22 * A31 * (cosPsi + sinPsi))) / v;
+        double B51 = (compoundGearRatio * efficiency * kT * nominalVoltage * (-(A11 * A22 * (D2 + L1)) + A22 * A31 * (cosPsi - sinPsi) + A11 * A32 * (cosPsi + sinPsi))) / v;
+        double B52 = (compoundGearRatio * efficiency * kT * nominalVoltage * (A11 * A22 * (D1 + L2) + A22 * A31 * (cosPsi - sinPsi) + A11 * A32 * (cosPsi + sinPsi))) / v;
+        double B53 = (compoundGearRatio * efficiency * kT * nominalVoltage * (-(A11 * A22 * (D2 + L2)) + A11 * A32 * (-cosPsi + sinPsi) + A22 * A31 * (cosPsi + sinPsi))) / v;
 
         return new SimpleMatrix(6, 4, false, new double[] {
                 0, B10, 0, B30, 0, B50,

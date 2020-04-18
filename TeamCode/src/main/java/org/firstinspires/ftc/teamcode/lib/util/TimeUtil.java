@@ -8,7 +8,7 @@ public class TimeUtil {
     private static final double SECONDS_PER_MINUTE = 60d;
     private static final double MILLISECONDS_PER_SECOND = 1000d;
     private static final double NANOSECONDS_PER_MILLISECOND = 1000d;
-    private static long         startTime;
+    private static long startTime;
 
     public static void startTime() {
         setStartTime(getAbsoluteTimeMilliseconds());

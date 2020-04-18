@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.lib.physics;
 
 public class LinearExtensionModel {
     private final MotorModel motorModel;
-    private final double     spoolDiameter; //m
+    private final double spoolDiameter; //m
 
     private final double staticFriction;
     private final double coulombFriction;
@@ -26,9 +26,9 @@ public class LinearExtensionModel {
 
     public LinearExtensionModel(MotorModel motorModel, double spoolDiameter,
                                 double staticFriction, double coulombFriction) {
-        this.motorModel      = motorModel;
-        this.spoolDiameter   = spoolDiameter;
-        this.staticFriction  = staticFriction;
+        this.motorModel = motorModel;
+        this.spoolDiameter = spoolDiameter;
+        this.staticFriction = staticFriction;
         this.coulombFriction = coulombFriction;
 
         setPosition(0d);
@@ -40,10 +40,10 @@ public class LinearExtensionModel {
     }
 
     public static void main(String... args) {
-        final double backDriveTorque   = 0.01694772439999992d; //N m
-        final double mechanismWeight   = 4.448d * 16.5d; //N, 16.5 lbs
+        final double backDriveTorque = 0.01694772439999992d; //N m
+        final double mechanismWeight = 4.448d * 16.5d; //N, 16.5 lbs
         final double gameElementWeight = 0d; //N, 0 lbs
-        final double spoolDiameter     = 0.55d * 0.0254d; //m, 0.55 in
+        final double spoolDiameter = 0.55d * 0.0254d; //m, 0.55 in
         LinearExtensionModel linearExtensionModel = new LinearExtensionModel(
                 new MotorModel(
                         1d, 12d, 0.519d * 2d, 9.901d,
@@ -58,7 +58,7 @@ public class LinearExtensionModel {
         final double dt = 0.001d;
         for(int i = 0; i < 1000; i++) {
             linearExtensionModel.update(dt, 12d);
-            System.out.print((int)(i * dt * 1000d) / 1000d + "\t");
+            System.out.print((int) (i * dt * 1000d) / 1000d + "\t");
             System.out.println(linearExtensionModel);
         }
     }

@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.lib.util;
 
 public class Time implements Comparable<Time> {
-    private double    timeValue;
+    private double timeValue;
     private TimeUnits units;
 
     public Time(final double timeValue, final TimeUnits units) {
@@ -35,6 +35,6 @@ public class Time implements Comparable<Time> {
 
     @Override
     public int compareTo(Time another) {
-        return (int)(getTimeValue(TimeUnits.NANOSECONDS) - another.getTimeValue(TimeUnits.NANOSECONDS));
+        return (int) (getTimeValue(TimeUnits.NANOSECONDS) - another.getTimeValue(TimeUnits.NANOSECONDS));
     }
 }

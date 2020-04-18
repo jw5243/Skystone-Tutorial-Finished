@@ -20,9 +20,9 @@ public class MecanumDriveMPC {
     });
 
     private static final SimpleMatrix INTERMEDIARY_STATE_COST = new SimpleMatrix(6, 6, false, new double[] {
+            1E-19, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0,
+            0, 0, 1E-19, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 1E-20, 0,
             0, 0, 0, 0, 0, 0,
@@ -199,7 +199,7 @@ public class MecanumDriveMPC {
 
     public SimpleMatrix simulate(boolean optimizeInputChange, double dt) {
         state = model.simulateDynamics(state, getOptimalInput(timeStep, state, lastInput, optimizeInputChange), dt);
-        timeStep += (int)(dt / MecanumDriveMPC.dt);
+        timeStep += (int) (dt / MecanumDriveMPC.dt);
         return state;
     }
 
@@ -239,7 +239,7 @@ public class MecanumDriveMPC {
         SimpleMatrix R = (optimizeInputChange ? INPUT_CHANGE_COST : INPUT_COST);
         SimpleMatrix inverse = R.plus(B.transpose().mult(P[timeStep].mult(B))).pseudoInverse();
         P[timeStep - 1] = Q.plus(A.transpose().mult(P[timeStep].mult(A))).minus(A.transpose().mult(P[timeStep].mult(B.mult(inverse).mult(B.transpose().mult(P[timeStep].mult(A))))));
-        K[timeStep - 1] = new SimpleMatrix(4, optimizeInputChange ? 10 : 6).minus(inverse.mult(B.transpose()).mult(P[timeStep]).mult(A));
+        K[timeStep - 1] = inverse.mult(B.transpose()).mult(P[timeStep]).mult(A).negative();
         solveRiccatiEquation(--timeStep, A, B, optimizeInputChange);
     }
 
@@ -275,7 +275,7 @@ public class MecanumDriveMPC {
         SimpleMatrix Q = timeStep >= HORIZON_STEP - 1 ? TERMINATION_COST : INTERMEDIARY_STATE_COST;
         SimpleMatrix R = INPUT_COST;
         if(optimizeInputChange) {
-            return new SimpleMatrix(10, 10, false, new double[]{
+            return new SimpleMatrix(10, 10, false, new double[] {
                     Q.get(0, 0), Q.get(1, 0), Q.get(2, 0), Q.get(3, 0), Q.get(4, 0), Q.get(5, 0), 0, 0, 0, 0,
                     Q.get(0, 1), Q.get(1, 1), Q.get(2, 1), Q.get(3, 1), Q.get(4, 1), Q.get(5, 1), 0, 0, 0, 0,
                     Q.get(0, 2), Q.get(1, 2), Q.get(2, 2), Q.get(3, 2), Q.get(4, 2), Q.get(5, 2), 0, 0, 0, 0,
@@ -294,7 +294,7 @@ public class MecanumDriveMPC {
 
     private static SimpleMatrix getStateTransitionMatrix(SimpleMatrix A, SimpleMatrix B, boolean optimizeInputChange) {
         if(optimizeInputChange) {
-            return new SimpleMatrix(10, 10, false, new double[]{
+            return new SimpleMatrix(10, 10, false, new double[] {
                     A.get(0, 0), A.get(1, 0), A.get(2, 0), A.get(3, 0), A.get(4, 0), A.get(5, 0), 0, 0, 0, 0,
                     A.get(0, 1), A.get(1, 1), A.get(2, 1), A.get(3, 1), A.get(4, 1), A.get(5, 1), 0, 0, 0, 0,
                     A.get(0, 2), A.get(1, 2), A.get(2, 2), A.get(3, 2), A.get(4, 2), A.get(5, 2), 0, 0, 0, 0,
@@ -313,7 +313,7 @@ public class MecanumDriveMPC {
 
     private static SimpleMatrix getInputTransitionMatrix(SimpleMatrix B, boolean optimizeInputChange) {
         if(optimizeInputChange) {
-            return new SimpleMatrix(10, 4, false, new double[]{
+            return new SimpleMatrix(10, 4, false, new double[] {
                     B.get(0, 0), B.get(1, 0), B.get(2, 0), B.get(3, 0), B.get(4, 0), B.get(5, 0), 1, 0, 0, 0,
                     B.get(0, 1), B.get(1, 1), B.get(2, 1), B.get(3, 1), B.get(4, 1), B.get(5, 1), 0, 1, 0, 0,
                     B.get(0, 2), B.get(1, 2), B.get(2, 2), B.get(3, 2), B.get(4, 2), B.get(5, 2), 0, 0, 1, 0,

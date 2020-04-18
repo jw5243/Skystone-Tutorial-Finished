@@ -32,19 +32,19 @@ public class Rotation2d implements IRotation2d<Rotation2d> {
     }
 
     public Rotation2d(double radians, boolean normalize) {
-        if (normalize) {
+        if(normalize) {
             radians = WrapRadians(radians);
         }
         radians_ = radians;
     }
 
     public Rotation2d(double x, double y, boolean normalize) {
-        if (normalize) {
+        if(normalize) {
             // From trig, we know that sin^2 + cos^2 == 1, but as we do math on this object
             // we might accumulate rounding errors.
             // Normalizing forces us to re-scale the sin and cos to reset rounding errors.
             double magnitude = Math.hypot(x, y);
-            if (magnitude > Util.getEpsilon()) {
+            if(magnitude > Util.getEpsilon()) {
                 sin_angle_ = y / magnitude;
                 cos_angle_ = x / magnitude;
             } else {
@@ -87,8 +87,8 @@ public class Rotation2d implements IRotation2d<Rotation2d> {
 
     public double tan() {
         ensureTrigComputed();
-        if (Math.abs(cos_angle_) < Util.getEpsilon()) {
-            if (sin_angle_ >= 0.0) {
+        if(Math.abs(cos_angle_) < Util.getEpsilon()) {
+            if(sin_angle_ >= 0.0) {
                 return Double.POSITIVE_INFINITY;
             } else {
                 return Double.NEGATIVE_INFINITY;
@@ -115,7 +115,7 @@ public class Rotation2d implements IRotation2d<Rotation2d> {
      * @return This rotation rotated by other.
      */
     public Rotation2d rotateBy(final Rotation2d other) {
-        if (hasTrig() && other.hasTrig()) {
+        if(hasTrig() && other.hasTrig()) {
             return new Rotation2d(cos_angle_ * other.cos_angle_ - sin_angle_ * other.sin_angle_,
                     cos_angle_ * other.sin_angle_ + sin_angle_ * other.cos_angle_, true);
         } else {
@@ -124,7 +124,7 @@ public class Rotation2d implements IRotation2d<Rotation2d> {
     }
 
     public Rotation2d normal() {
-        if (hasTrig()) {
+        if(hasTrig()) {
             return new Rotation2d(-sin_angle_, cos_angle_, false);
         } else {
             return fromRadians(getRadians() - Math.PI / 2.0);
@@ -137,7 +137,7 @@ public class Rotation2d implements IRotation2d<Rotation2d> {
      * @return The opposite of this rotation.
      */
     public Rotation2d inverse() {
-        if (hasTrig()) {
+        if(hasTrig()) {
             return new Rotation2d(cos_angle_, -sin_angle_, false);
         } else {
             return fromRadians(-getRadians());
@@ -145,10 +145,10 @@ public class Rotation2d implements IRotation2d<Rotation2d> {
     }
 
     public boolean isParallel(final Rotation2d other) {
-        if (hasRadians() && other.hasRadians()) {
+        if(hasRadians() && other.hasRadians()) {
             return Util.epsilonEquals(radians_, other.radians_)
                     || Util.epsilonEquals(radians_, WrapRadians(other.radians_ + Math.PI));
-        } else if (hasTrig() && other.hasTrig()) {
+        } else if(hasTrig() && other.hasTrig()) {
             return Util.epsilonEquals(sin_angle_, other.sin_angle_) && Util.epsilonEquals(cos_angle_, other.cos_angle_);
         } else {
             // Use public, checked version.
@@ -170,7 +170,7 @@ public class Rotation2d implements IRotation2d<Rotation2d> {
         final double k2Pi = 2.0 * Math.PI;
         radians = radians % k2Pi;
         radians = (radians + k2Pi) % k2Pi;
-        if (radians > Math.PI)
+        if(radians > Math.PI)
             radians -= k2Pi;
         return radians;
     }
@@ -184,8 +184,8 @@ public class Rotation2d implements IRotation2d<Rotation2d> {
     }
 
     private void ensureTrigComputed() {
-        if (!hasTrig()) {
-            if (Double.isNaN(radians_)) {
+        if(!hasTrig()) {
+            if(Double.isNaN(radians_)) {
                 System.err.println("HEY");
             }
             sin_angle_ = Math.sin(radians_);
@@ -194,8 +194,8 @@ public class Rotation2d implements IRotation2d<Rotation2d> {
     }
 
     private void ensureRadiansComputed() {
-        if (!hasRadians()) {
-            if (Double.isNaN(cos_angle_) || Double.isNaN(sin_angle_)) {
+        if(!hasRadians()) {
+            if(Double.isNaN(cos_angle_) || Double.isNaN(sin_angle_)) {
                 System.err.println("HEY");
             }
             radians_ = Math.atan2(sin_angle_, cos_angle_);
@@ -204,9 +204,9 @@ public class Rotation2d implements IRotation2d<Rotation2d> {
 
     @Override
     public Rotation2d interpolate(final Rotation2d other, double x) {
-        if (x <= 0.0) {
+        if(x <= 0.0) {
             return new Rotation2d(this);
-        } else if (x >= 1.0) {
+        } else if(x >= 1.0) {
             return new Rotation2d(other);
         }
         double angle_diff = inverse().rotateBy(other).getRadians();
@@ -225,7 +225,7 @@ public class Rotation2d implements IRotation2d<Rotation2d> {
 
     @Override
     public boolean equals(final Object other) {
-        if (!(other instanceof Rotation2d)) {
+        if(!(other instanceof Rotation2d)) {
             return false;
         }
 

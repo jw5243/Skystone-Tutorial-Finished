@@ -94,7 +94,7 @@ public class Pose2dWithCurvature implements IPose2d<Pose2dWithCurvature>, ICurva
 
     @Override
     public boolean equals(final Object other) {
-        if (!(other instanceof Pose2dWithCurvature)) {
+        if(!(other instanceof Pose2dWithCurvature)) {
             return false;
         }
 

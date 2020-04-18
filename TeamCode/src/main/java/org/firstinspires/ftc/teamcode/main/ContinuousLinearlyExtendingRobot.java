@@ -13,11 +13,11 @@ import java.util.function.DoubleToIntFunction;
 import java.util.function.IntToDoubleFunction;
 
 public class ContinuousLinearlyExtendingRobot extends Robot {
-    private final double slideWeight     = 4.448d * 2d; //N, 2 lbs
+    private final double slideWeight = 4.448d * 2d; //N, 2 lbs
     private final double mechanismWeight = 4.448d * 5d; //N, 5 lbs
-    private final double spoolDiameter   = 1d * 0.0254d; //m, 1 in
-    private final double stageLength     = 18d; //in
-    private final int    stageCount      = 3;
+    private final double spoolDiameter = 1d * 0.0254d; //m, 1 in
+    private final double stageLength = 18d; //in
+    private final int stageCount = 3;
     private LinearExtensionModel linearExtensionModel;
 
     private final double kS = 2.2d; //V
@@ -28,7 +28,7 @@ public class ContinuousLinearlyExtendingRobot extends Robot {
     private final double kD = 4d; //V s / in
 
     private double runningSum = 0d;
-    private double lastError  = 0d;
+    private double lastError = 0d;
 
     private double setpoint = 30d; //in
 
@@ -37,7 +37,7 @@ public class ContinuousLinearlyExtendingRobot extends Robot {
     @Override
     public void init_debug() {
         super.init_debug();
-        DoubleToIntFunction currentStage = (motorPosition) -> (int)(1 + MotorModel.getLinearPosition(motorPosition, spoolDiameter) / (0.0254d * stageLength));
+        DoubleToIntFunction currentStage = (motorPosition) -> (int) (1 + MotorModel.getLinearPosition(motorPosition, spoolDiameter) / (0.0254d * stageLength));
         IntToDoubleFunction effectiveLoad = (stage) -> (stage < 1 ? 0d : mechanismWeight + slideWeight / 2d +
                 (stage < stageCount ? slideWeight * (stage - 1) : slideWeight * (stageCount - 1))) * spoolDiameter / 2d;
 
@@ -74,17 +74,17 @@ public class ContinuousLinearlyExtendingRobot extends Robot {
             runningSum += error * dt;
 
             double output = kS +
-                            kV * motionProfile.getVelocity() +
-                            kA * motionProfile.getAcceleration() +
-                            kP * error +
-                            kI * runningSum +
-                            kD * ((error - lastError) / dt - motionProfile.getVelocity());
+                    kV * motionProfile.getVelocity() +
+                    kA * motionProfile.getAcceleration() +
+                    kP * error +
+                    kI * runningSum +
+                    kD * ((error - lastError) / dt - motionProfile.getVelocity());
             output = output < -12d ? -12d : output > 12d ? 12d : output;
 
             linearExtensionModel.update(dt, output);
             lastError = error;
 
-            ComputerDebugger.send(MessageOption.LINEAR_POSITION.setSendValue((int)(1000d * linearExtensionModel.getPosition() / 0.0254d) / 1000d));
+            ComputerDebugger.send(MessageOption.LINEAR_POSITION.setSendValue((int) (1000d * linearExtensionModel.getPosition() / 0.0254d) / 1000d));
         } catch (IllegalMessageTypeException e) {
             e.printStackTrace();
         }

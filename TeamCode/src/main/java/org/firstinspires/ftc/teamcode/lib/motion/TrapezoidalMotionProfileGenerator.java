@@ -37,7 +37,7 @@ public class TrapezoidalMotionProfileGenerator implements IMotionProfile {
                 (2 * getMaxAcceleration()) - getMaxSpeed() * getMaxSpeed() / (2 * getMaxAcceleration())) / getMaxSpeed());
         setPhaseTimes();
         setDuration(getAccelerationTime() + getCruisingTime() + getDecelerationTime());
-        setTimeSteps((int)(Math.ceil(getDuration() / dt())));
+        setTimeSteps((int) (Math.ceil(getDuration() / dt())));
         setPositions(new double[getTimeSteps()]);
         setVelocities(new double[getTimeSteps()]);
         setAccelerations(new double[getTimeSteps()]);
@@ -118,7 +118,7 @@ public class TrapezoidalMotionProfileGenerator implements IMotionProfile {
     @Override
     public double getPosition(double timeStamp) {
         timeStamp = timeStamp < 0d ? 0d : timeStamp;
-        int timeStep = (int)(timeStamp / dt());
+        int timeStep = (int) (timeStamp / dt());
         if(timeStep < getPositions().length) {
             return (isNegative() ? -1 : 1) * getPositions()[timeStep];
         }
@@ -129,7 +129,7 @@ public class TrapezoidalMotionProfileGenerator implements IMotionProfile {
     @Override
     public double getVelocity(double timeStamp) {
         timeStamp = timeStamp < 0d ? 0d : timeStamp;
-        int timeStep = (int)(timeStamp / dt());
+        int timeStep = (int) (timeStamp / dt());
         if(timeStep < getVelocities().length) {
             return (isNegative() ? -1 : 1) * getVelocities()[timeStep];
         }
@@ -140,7 +140,7 @@ public class TrapezoidalMotionProfileGenerator implements IMotionProfile {
     @Override
     public double getAcceleration(double timeStamp) {
         timeStamp = timeStamp < 0d ? 0d : timeStamp;
-        int timeStep = (int)(timeStamp / dt());
+        int timeStep = (int) (timeStamp / dt());
         if(timeStep < getAccelerations().length) {
             return (isNegative() ? -1 : 1) * getAccelerations()[timeStep];
         }

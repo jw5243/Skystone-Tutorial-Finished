@@ -93,9 +93,9 @@ public class Translation2d implements ITranslation2d<Translation2d> {
 
     @Override
     public Translation2d interpolate(final Translation2d other, double x) {
-        if (x <= 0) {
+        if(x <= 0) {
             return new Translation2d(this);
-        } else if (x >= 1) {
+        } else if(x >= 1) {
             return new Translation2d(other);
         }
         return extrapolate(other, x);
@@ -125,7 +125,7 @@ public class Translation2d implements ITranslation2d<Translation2d> {
 
     public static Rotation2d getAngle(final Translation2d a, final Translation2d b) {
         double cos_angle = dot(a, b) / (a.norm() * b.norm());
-        if (Double.isNaN(cos_angle)) {
+        if(Double.isNaN(cos_angle)) {
             return new Rotation2d();
         }
         return Rotation2d.fromRadians(Math.acos(Util.limit(cos_angle, 1.0)));
@@ -142,7 +142,7 @@ public class Translation2d implements ITranslation2d<Translation2d> {
 
     @Override
     public boolean equals(final Object other) {
-        if (!(other instanceof Translation2d)) {
+        if(!(other instanceof Translation2d)) {
             return false;
         }
 

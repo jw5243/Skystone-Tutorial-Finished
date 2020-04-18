@@ -33,13 +33,13 @@ public class Twist2d {
 
     public double norm() {
         // Common case of dy == 0
-        if (dy == 0.0)
+        if(dy == 0.0)
             return Math.abs(dx);
         return Math.hypot(dx, dy);
     }
 
     public double curvature() {
-        if (Math.abs(dtheta) < Util.getEpsilon() && norm() < Util.getEpsilon())
+        if(Math.abs(dtheta) < Util.getEpsilon() && norm() < Util.getEpsilon())
             return 0.0;
         return dtheta / norm();
     }

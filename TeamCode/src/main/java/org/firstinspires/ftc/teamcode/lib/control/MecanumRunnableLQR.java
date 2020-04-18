@@ -41,7 +41,7 @@ public class MecanumRunnableLQR implements Runnable {
                 getTimeProfiler().update(true);
                 try {
                     Thread.sleep(10);
-                } catch(InterruptedException e) {
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 
@@ -50,7 +50,7 @@ public class MecanumRunnableLQR implements Runnable {
 
             try {
                 Thread.sleep(1);
-            } catch(InterruptedException e) {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }

@@ -5,11 +5,11 @@ import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
 
 /**
  * https://www.researchgate.net/publication/267794207_Motion_profile_planning_for_reduced_jerk_and_vibration_residuals
- *
+ * <p>
  * https://core.ac.uk/download/pdf/143892523.pdf
- *
+ * <p>
  * https://hal.archives-ouvertes.fr/hal-01064647/document
- *
+ * <p>
  * http://www.dii.unimore.it/~lbiagiotti/Papers/Optimal%20Trajectories%20for%20Vibration%20Reduction%20Based%20on%20Exponential%20Filters_PostPrint
  * .pdf
  */
@@ -49,7 +49,7 @@ public class ResidualVibrationReductionMotionProfilerGenerator implements IMotio
             setTotalTime(2 * getAccelerationTime());
         }
 
-        final int timeSteps = (int)(Math.ceil(getTotalTime() / getDt()));
+        final int timeSteps = (int) (Math.ceil(getTotalTime() / getDt()));
         setPositions(new double[timeSteps]);
         setVelocities(new double[timeSteps]);
         setAccelerations(new double[timeSteps]);
@@ -218,7 +218,7 @@ public class ResidualVibrationReductionMotionProfilerGenerator implements IMotio
                 2 * (getTargetDisplacement() - 2 * Math.pow(getMaxSpeed(), 2) / getMaxAcceleration()) / (getMaxAcceleration() * getAccelerationTime()) :
                 0d;
     }
-    
+
     public static double getDt() {
         return dt;
     }
