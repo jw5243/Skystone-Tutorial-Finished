@@ -4,6 +4,10 @@ import org.firstinspires.ftc.teamcode.lib.drivers.Motor;
 
 import java.util.function.DoubleUnaryOperator;
 
+/**
+ * This {@code class} simulates and stores the basic components of a motor, including torque, speed,
+ * and currently four types of friction. 
+ */
 public class MotorModel {
     private static final double RPM_TO_RAD_PER_SECOND = Math.PI / 30d; //rad min / (rot s)
 

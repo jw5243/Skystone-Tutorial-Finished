@@ -15,7 +15,7 @@ public class TimeUtil {
     }
 
     public static double getCurrentRuntime(final TimeUnits units) {
-        return TimeUnits.MILLISECONDS.in(units, getAbsoluteTimeMilliseconds() - getStartTime());
+        return (int)(1000d * TimeUnits.MILLISECONDS.in(units, getAbsoluteTimeMilliseconds() - getStartTime())) / 1000d;
     }
 
     public static Time getCurrentRuntime() {

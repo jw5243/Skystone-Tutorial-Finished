@@ -19,6 +19,10 @@ public enum MessageOption {
     STAGE_COUNT(Integer.class, "StageCount,"),
     CONTINUOUS(null, "Continuous"),
     CASCADE(null, "Cascade"),
+    LIFT_POSITION(Double.class, "LiftPosition,"),
+    LIFT_VELOCITY(Double.class, "LiftVelocity,"),
+    LIFT_ACCELERATION(Double.class, "LiftAcceleration,"),
+    LIFT_JERK(Double.class, "LiftJerk,"),
     STOP(null, null);
 
     private static final String END_MESSAGE_TAG = "%";

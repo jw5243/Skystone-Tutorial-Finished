@@ -21,8 +21,8 @@ public class UdpServer implements Runnable {
     private TimeProfiler timeProfiler;
     private long lastSendTime;
 
-    private String lastMessage;
-    private String currentMessage;
+    private volatile String lastMessage;
+    private volatile String currentMessage;
 
     public UdpServer(final int clientPort) {
         this.clientPort = clientPort;

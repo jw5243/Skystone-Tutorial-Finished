@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.lib.physics.MecanumDriveModel;
 import org.firstinspires.ftc.teamcode.lib.physics.MotorModel;
 import org.firstinspires.ftc.teamcode.lib.util.TimeProfiler;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
+import org.firstinspires.ftc.teamcode.lib.util.TimeUtil;
 
 public abstract class Robot implements RobotDebug {
     private static final SimpleMatrix INITIAL_STATE = new SimpleMatrix(6, 1, false, new double[] {
@@ -45,6 +46,7 @@ public abstract class Robot implements RobotDebug {
     @Override
     public void start_debug() {
         getTimeProfiler().start();
+        TimeUtil.startTime();
     }
 
     @Override

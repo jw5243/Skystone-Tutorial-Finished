@@ -31,12 +31,13 @@ public class ComputerDebugger {
 
     public static void main(String[] args) {
         Robot.setUsingComputer(true);
-        Robot robot = new AutonomousRobot();
+        Robot robot = new CascadeLinearlyExtendingRobot();
         init(robot);
         robot.init_debug();
 
         send(MessageOption.CLEAR_LOG_POINTS);
         send(MessageOption.CLEAR_MOTION_PROFILE);
+        sendMessage();
 
         try {
             Thread.sleep(1000);
@@ -48,6 +49,7 @@ public class ComputerDebugger {
         while(true) {
             try {
                 robot.loop_debug();
+                robot.sendMotionProfileData();
 
                 Thread.sleep(10);
 
@@ -83,26 +85,34 @@ public class ComputerDebugger {
         } else if(messageOption.ordinal() == MessageOption.POSITION.ordinal()) {
             getMessageBuilder().append(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append(getRobot().getFieldPosition());
         } else if(messageOption.ordinal() == MessageOption.VELOCITY.ordinal()) {
-            //getMessageBuilder().append(Utilities.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append(Speedometer.getCurrentAngularVelocity());
+            //getMessageBuilder().append(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append(Speedometer.getCurrentAngularVelocity());
         } else if(messageOption.ordinal() == MessageOption.ACCELERATION.ordinal()) {
-            //getMessageBuilder().append(Utilities.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append(Speedometer.getCurrentAcceleration());
+            //getMessageBuilder().append(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append(Speedometer.getCurrentAcceleration());
         } else if(messageOption.ordinal() == MessageOption.JERK.ordinal()) {
-            //getMessageBuilder().append(Utilities.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append(Speedometer.getCurrentJerk());
+            //getMessageBuilder().append(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append(Speedometer.getCurrentJerk());
         } else if(messageOption.ordinal() == MessageOption.CLEAR_MOTION_PROFILE.ordinal()) {
             //
         } else if(messageOption.ordinal() == MessageOption.LINEAR_POSITION.ordinal()) {
-            final double position = (Double) (messageOption.getSendValue());
+            final double position = (Double)(messageOption.getSendValue());
             getMessageBuilder().append(position);
         } else if(messageOption.ordinal() == MessageOption.STAGE_LENGTH.ordinal()) {
-            final double length = (Double) (messageOption.getSendValue());
+            final double length = (Double)(messageOption.getSendValue());
             getMessageBuilder().append(length);
         } else if(messageOption.ordinal() == MessageOption.STAGE_COUNT.ordinal()) {
-            final int stageCount = (Integer) (messageOption.getSendValue());
+            final int stageCount = (Integer)(messageOption.getSendValue());
             getMessageBuilder().append(stageCount);
         } else if(messageOption.ordinal() == MessageOption.CASCADE.ordinal()) {
 
         } else if(messageOption.ordinal() == MessageOption.CONTINUOUS.ordinal()) {
 
+        } else if(messageOption.equals(MessageOption.LIFT_POSITION)) {
+            getMessageBuilder().append(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append((double)(messageOption.getSendValue()));
+        } else if(messageOption.equals(MessageOption.LIFT_VELOCITY)) {
+            getMessageBuilder().append(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append((double)(messageOption.getSendValue()));
+        } else if(messageOption.equals(MessageOption.LIFT_ACCELERATION)) {
+            getMessageBuilder().append(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append((double)(messageOption.getSendValue()));
+        } else if(messageOption.equals(MessageOption.LIFT_JERK)) {
+            getMessageBuilder().append(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append((double)(messageOption.getSendValue()));
         } else {
             getUdpServer().close();
         }
