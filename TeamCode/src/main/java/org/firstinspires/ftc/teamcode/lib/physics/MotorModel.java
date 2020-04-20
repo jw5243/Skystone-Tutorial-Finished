@@ -188,7 +188,7 @@ public class MotorModel {
         double torque = getkT() * getEfficiency() * getGearRatio() * (voltageInput - getkV() * getCurrentAngularVelocity() * getGearRatio()) / getResistance();
         double frictionTorque = getFrictionTorque() + externalFriction;
         return Math.abs(Math.signum(torque) - Math.signum(torque - frictionTorque)) == 2d ? 0d :
-                torque - frictionTorque - getWeightAppliedTorque().applyAsDouble(getCurrentAngularPosition());
+                torque - frictionTorque - (getWeightAppliedTorque() == null ? 0d : getWeightAppliedTorque().applyAsDouble(getCurrentAngularPosition()));
     }
 
     /**

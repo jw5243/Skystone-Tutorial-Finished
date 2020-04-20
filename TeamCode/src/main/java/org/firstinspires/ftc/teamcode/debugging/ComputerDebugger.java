@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.lib.util.TimeUtil;
 import org.firstinspires.ftc.teamcode.main.AutonomousRobot;
 import org.firstinspires.ftc.teamcode.main.CascadeLinearlyExtendingRobot;
 import org.firstinspires.ftc.teamcode.main.ContinuousLinearlyExtendingRobot;
+import org.firstinspires.ftc.teamcode.main.PurePursuitRobot;
 import org.firstinspires.ftc.teamcode.main.Robot;
 
 import java.text.DecimalFormat;
@@ -31,7 +32,7 @@ public class ComputerDebugger {
 
     public static void main(String[] args) {
         Robot.setUsingComputer(true);
-        Robot robot = new CascadeLinearlyExtendingRobot();
+        Robot robot = new AutonomousRobot();
         init(robot);
         robot.init_debug();
 
@@ -72,13 +73,13 @@ public class ComputerDebugger {
         if(messageOption.ordinal() == MessageOption.ROBOT_LOCATION.ordinal()) {
             getMessageBuilder().append(getRobot().getFieldPosition());
         } else if(messageOption.ordinal() == MessageOption.KEY_POINT.ordinal()) {
-            final Translation2d keyPoint = (Translation2d) (messageOption.getSendValue());
+            final Translation2d keyPoint = (Translation2d)(messageOption.getSendValue());
             getMessageBuilder().append(keyPoint);
         } else if(messageOption.ordinal() == MessageOption.LOG_POINT.ordinal()) {
-            final Translation2d logPoint = (Translation2d) (messageOption.getSendValue());
+            final Translation2d logPoint = (Translation2d)(messageOption.getSendValue());
             getMessageBuilder().append(logPoint);
         } else if(messageOption.ordinal() == MessageOption.LINE.ordinal()) {
-            final Line2d line = (Line2d) (messageOption.getSendValue());
+            final Line2d line = (Line2d)(messageOption.getSendValue());
             getMessageBuilder().append(line);
         } else if(messageOption.ordinal() == MessageOption.CLEAR_LOG_POINTS.ordinal()) {
             //
