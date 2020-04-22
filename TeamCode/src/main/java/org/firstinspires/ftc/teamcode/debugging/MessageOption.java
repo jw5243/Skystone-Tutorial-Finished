@@ -23,6 +23,7 @@ public enum MessageOption {
     LIFT_VELOCITY(Double.class, "LiftVelocity,"),
     LIFT_ACCELERATION(Double.class, "LiftAcceleration,"),
     LIFT_JERK(Double.class, "LiftJerk,"),
+    LIFT_INPUT(Double.class, "LiftInput,"),
     STOP(null, null);
 
     private static final String END_MESSAGE_TAG = "%";

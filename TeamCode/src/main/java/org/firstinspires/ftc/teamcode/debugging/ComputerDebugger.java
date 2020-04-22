@@ -4,12 +4,7 @@ import org.firstinspires.ftc.teamcode.lib.geometry.Line2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Translation2d;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUtil;
-import org.firstinspires.ftc.teamcode.main.AutonomousRobot;
-import org.firstinspires.ftc.teamcode.main.CascadeLinearlyExtendingRobot;
-import org.firstinspires.ftc.teamcode.main.CascadeLinearlyExtendingRobotMPC;
-import org.firstinspires.ftc.teamcode.main.ContinuousLinearlyExtendingRobot;
-import org.firstinspires.ftc.teamcode.main.PurePursuitRobot;
-import org.firstinspires.ftc.teamcode.main.Robot;
+import org.firstinspires.ftc.teamcode.main.*;
 
 import java.text.DecimalFormat;
 
@@ -114,6 +109,8 @@ public class ComputerDebugger {
         } else if(messageOption.equals(MessageOption.LIFT_ACCELERATION)) {
             getMessageBuilder().append(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append((double)(messageOption.getSendValue()));
         } else if(messageOption.equals(MessageOption.LIFT_JERK)) {
+            getMessageBuilder().append(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append((double)(messageOption.getSendValue()));
+        } else if(messageOption.equals(MessageOption.LIFT_INPUT)) {
             getMessageBuilder().append(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append((double)(messageOption.getSendValue()));
         } else {
             getUdpServer().close();

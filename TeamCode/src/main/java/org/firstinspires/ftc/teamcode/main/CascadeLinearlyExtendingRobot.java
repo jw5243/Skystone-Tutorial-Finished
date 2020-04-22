@@ -48,7 +48,7 @@ public class CascadeLinearlyExtendingRobot extends Robot {
                 spoolDiameter, 0.0025d, 0.002d
         );
 
-        motionProfile = new ResidualVibrationReductionMotionProfilerGenerator(0d, setpoint, 20d, 10d);
+        motionProfile = new ResidualVibrationReductionMotionProfilerGenerator(0d, setpoint, 25d, 20d);
     }
 
     @Override
@@ -71,12 +71,14 @@ public class CascadeLinearlyExtendingRobot extends Robot {
                     kP * error +
                     kI * runningSum +
                     kD * ((error - lastError) / dt - motionProfile.getVelocity());
-            output = output < -12d ? 12d : output > 12d ? 12d : output;
+            output = output < -12d ? -12d : output > 12d ? 12d : output;
+
+            ComputerDebugger.send(MessageOption.LIFT_INPUT.setSendValue(output));
 
             linearExtensionModel.update(dt, output);
             lastError = error;
 
-            ComputerDebugger.send(MessageOption.LINEAR_POSITION.setSendValue((int)(1000d * linearExtensionModel.getPosition() * 6d / 0.0254d) / 1000d));
+            ComputerDebugger.send(MessageOption.LINEAR_POSITION.setSendValue((int)(1000d * linearExtensionModel.getPosition() * (stageCount - 1) / 0.0254d) / 1000d));
         } catch (IllegalMessageTypeException e) {
             e.printStackTrace();
         }
@@ -86,12 +88,12 @@ public class CascadeLinearlyExtendingRobot extends Robot {
     public void sendMotionProfileData() {
         super.sendMotionProfileData();
         try {
-            ComputerDebugger.send(MessageOption.LIFT_POSITION.setSendValue((int)(1000d * linearExtensionModel.getPosition() * 6d / 0.0254d) / 1000d));
-            ComputerDebugger.send(MessageOption.LIFT_VELOCITY.setSendValue((int)(1000d * linearExtensionModel.getVelocity() * 6d / 0.0254d) / 1000d));
-            ComputerDebugger.send(MessageOption.LIFT_ACCELERATION.setSendValue((int)(1000d * linearExtensionModel.getAcceleration() * 6d / 0.0254d) / 1000d));
+            ComputerDebugger.send(MessageOption.LIFT_POSITION.setSendValue((int)(1000d * linearExtensionModel.getPosition() /** (stageCount - 1)*/ / 0.0254d) / 1000d));
+            ComputerDebugger.send(MessageOption.LIFT_VELOCITY.setSendValue((int)(1000d * linearExtensionModel.getVelocity() /** (stageCount - 1)*/ / 0.0254d) / 1000d));
+            ComputerDebugger.send(MessageOption.LIFT_ACCELERATION.setSendValue((int)(1000d * linearExtensionModel.getAcceleration() /** (stageCount - 1)*/ / 0.0254d) / 1000d));
             //ComputerDebugger.send(MessageOption.LIFT_JERK.setSendValue((int)(1000d * linearExtensionModel.getJerk() * 6d / 0.0254d) / 1000d));
 
-            ComputerDebugger.send(MessageOption.LIFT_JERK.setSendValue((int)(1000d * motionProfile.getPosition() * 6d) / 1000d));
+            ComputerDebugger.send(MessageOption.LIFT_JERK.setSendValue((int)(1000d * motionProfile.getPosition()) /** (stageCount - 1)*/ / 1000d));
             //System.out.println(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS) + "\t" + (int)(1000d * linearExtensionModel.getAcceleration() * 6d / 0.0254d) / 1000d);
         } catch (IllegalMessageTypeException e) {
             e.printStackTrace();

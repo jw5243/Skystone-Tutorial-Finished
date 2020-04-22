@@ -9,35 +9,24 @@ import org.firstinspires.ftc.teamcode.lib.motion.ResidualVibrationReductionMotio
 import org.firstinspires.ftc.teamcode.lib.physics.LinearExtensionModel;
 import org.firstinspires.ftc.teamcode.lib.physics.MotorModel;
 
-import java.util.function.DoubleToIntFunction;
-import java.util.function.IntToDoubleFunction;
-
-public class ContinuousLinearlyExtendingRobot extends Robot {
-    private final double slideWeight = 4.448d * 2d; //N, 2 lbs
-    private final double mechanismWeight = 4.448d * 5d; //N, 5 lbs
-    private final double spoolDiameter = 1d * 0.0254d; //m, 1 in
+public class CascadeLinearlyExtendingRobotPractice extends Robot {
+    private final double mechanismWeight = 4.448d * 16.5d; //N, 16.5 lbs
+    private final double spoolDiameter = 2d * 0.0254d; //m, 2 in
     private final double stageLength = 18d; //in
-    private final int stageCount = 3;
+    private final int stageCount = 7;
     private LinearExtensionModel linearExtensionModel;
 
-    //private final double kS = 2.2d; //V
-    //private final double kV = 0d; //V s / in
-    //private final double kA = 0d; //V s^2 / in
-    //private final double kP = 4d; //V / in
-    //private final double kI = 0.05d; //V / (in s)
-    //private final double kD = 4d; //V s / in
-
-    private final double kS = 2.2d; //V
+    private final double kS = 0d; //V
     private final double kV = 0d; //V s / in
     private final double kA = 0d; //V s^2 / in
-    private final double kP = 96d; //V / in
+    private final double kP = 0d;//4d; //V / in
     private final double kI = 0d; //V / (in s)
-    private final double kD = 20d; //V s / in
+    private final double kD = 0d;//4d; //V s / in
 
     private double runningSum = 0d;
     private double lastError = 0d;
 
-    private double setpoint = 30d; //in
+    private double setpoint = 15d;//5d; //in
 
     private IMotionProfile motionProfile;
 
@@ -45,7 +34,7 @@ public class ContinuousLinearlyExtendingRobot extends Robot {
     public void init_debug() {
         super.init_debug();
         try {
-            ComputerDebugger.send(MessageOption.CONTINUOUS);
+            ComputerDebugger.send(MessageOption.CASCADE);
             ComputerDebugger.send(MessageOption.STAGE_COUNT.setSendValue(stageCount));
             ComputerDebugger.send(MessageOption.STAGE_LENGTH.setSendValue(stageLength));
             ComputerDebugger.send(MessageOption.LINEAR_POSITION.setSendValue(0d));
@@ -53,17 +42,15 @@ public class ContinuousLinearlyExtendingRobot extends Robot {
             e.printStackTrace();
         }
 
-        DoubleToIntFunction currentStage = (motorPosition) -> (int) (1 + MotorModel.getLinearPosition(motorPosition, spoolDiameter) / (0.0254d * stageLength));
-        IntToDoubleFunction effectiveLoad = (stage) -> (stage < 1 ? 0d : mechanismWeight + slideWeight / 2d +
-                (stage < stageCount ? slideWeight * (stage - 1) : slideWeight * (stageCount - 1))) * spoolDiameter / 2d;
-
         linearExtensionModel = new LinearExtensionModel(
-                MotorModel.generateMotorModel(Motor.GOBILDA_435_RPM, 2, 1d,
-                        (motorPosition) -> effectiveLoad.applyAsDouble(currentStage.applyAsInt(motorPosition))),
+                MotorModel.generateMotorModel(Motor.GOBILDA_312_RPM, 2, 1d,
+                        (motorPosition) -> mechanismWeight * spoolDiameter / 2d),
                 spoolDiameter, 0.0025d, 0.002d
         );
 
-        motionProfile = new ResidualVibrationReductionMotionProfilerGenerator(0d, 0d, 22d, 200d);
+        //linearExtensionModel.overridePosition(15d * 0.0254d);
+
+        motionProfile = new ResidualVibrationReductionMotionProfilerGenerator(0d, setpoint, 20d, 10d);
     }
 
     @Override
@@ -77,7 +64,7 @@ public class ContinuousLinearlyExtendingRobot extends Robot {
         try {
             super.loop_debug();
             double dt = getDt();
-            double error = setpoint/*motionProfile.getPosition()*/ - linearExtensionModel.getPosition() / 0.0254d;
+            double error = setpoint - linearExtensionModel.getPosition() / 0.0254d;//motionProfile.getPosition() - linearExtensionModel.getPosition() / 0.0254d;
             runningSum += error * dt;
 
             double output = kS +
@@ -85,7 +72,7 @@ public class ContinuousLinearlyExtendingRobot extends Robot {
                     kA * motionProfile.getAcceleration() +
                     kP * error +
                     kI * runningSum +
-                    kD * ((error - lastError) / dt - motionProfile.getVelocity());
+                    kD * ((error - lastError) / dt); //- motionProfile.getVelocity());
             output = output < -12d ? -12d : output > 12d ? 12d : output;
 
             ComputerDebugger.send(MessageOption.LIFT_INPUT.setSendValue(output));
@@ -93,7 +80,7 @@ public class ContinuousLinearlyExtendingRobot extends Robot {
             linearExtensionModel.update(dt, output);
             lastError = error;
 
-            ComputerDebugger.send(MessageOption.LINEAR_POSITION.setSendValue((int) (1000d * linearExtensionModel.getPosition() / 0.0254d) / 1000d));
+            ComputerDebugger.send(MessageOption.LINEAR_POSITION.setSendValue((int)(1000d * linearExtensionModel.getPosition() * 6d / 0.0254d) / 1000d));
         } catch (IllegalMessageTypeException e) {
             e.printStackTrace();
         }
@@ -103,11 +90,12 @@ public class ContinuousLinearlyExtendingRobot extends Robot {
     public void sendMotionProfileData() {
         super.sendMotionProfileData();
         try {
-            ComputerDebugger.send(MessageOption.LIFT_POSITION.setSendValue((int)(1000d * linearExtensionModel.getPosition() / 0.0254d) / 1000d));
-            ComputerDebugger.send(MessageOption.LIFT_VELOCITY.setSendValue((int)(1000d * linearExtensionModel.getVelocity() / 0.0254d) / 1000d));
-            //ComputerDebugger.send(MessageOption.LIFT_ACCELERATION.setSendValue((int)(1000d * linearExtensionModel.getAcceleration() / 0.0254d) / 1000d));
+            ComputerDebugger.send(MessageOption.LIFT_POSITION.setSendValue((int)(1000d * linearExtensionModel.getPosition() * 6d / 0.0254d) / 1000d));
+            ComputerDebugger.send(MessageOption.LIFT_VELOCITY.setSendValue((int)(1000d * linearExtensionModel.getVelocity() * 6d / 0.0254d) / 1000d));
+            //ComputerDebugger.send(MessageOption.LIFT_ACCELERATION.setSendValue((int)(1000d * linearExtensionModel.getAcceleration() * 6d / 0.0254d) / 1000d));
+            //ComputerDebugger.send(MessageOption.LIFT_JERK.setSendValue((int)(1000d * linearExtensionModel.getJerk() * 6d / 0.0254d) / 1000d));
 
-            //ComputerDebugger.send(MessageOption.LIFT_JERK.setSendValue((int)(1000d * motionProfile.getPosition()) / 1000d));
+            ComputerDebugger.send(MessageOption.LIFT_JERK.setSendValue((int)(1000d * motionProfile.getPosition() * 6d) / 1000d));
             //System.out.println(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS) + "\t" + (int)(1000d * linearExtensionModel.getAcceleration() * 6d / 0.0254d) / 1000d);
         } catch (IllegalMessageTypeException e) {
             e.printStackTrace();

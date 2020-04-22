@@ -98,6 +98,11 @@ public class LinearExtensionModel {
         return stateTransitionMatrix(dt).mult(state).plus(inputTransitionMatrix(dt).scale(input));
     }
 
+    public void overridePosition(double linearPosition) {
+        setPosition(linearPosition);
+        getMotorModel().setCurrentAngularPosition(2d * linearPosition / getSpoolDiameter());
+    }
+
     @Override
     public String toString() {
         return getPosition() / 0.0254d + "\t" + getVelocity() / 0.0254d + "\t" + getAcceleration() / 0.0254d; //+ "\t" + getJerk() / 0.0254d;
