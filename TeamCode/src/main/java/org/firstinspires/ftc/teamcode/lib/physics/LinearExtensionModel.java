@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.lib.physics;
 
+import org.ejml.simple.SimpleMatrix;
+
 public class LinearExtensionModel {
     private final MotorModel motorModel;
     private final double spoolDiameter; //m
@@ -75,6 +77,25 @@ public class LinearExtensionModel {
 
     public double getLinearSlideFrictionTorque() {
         return (getVelocity() == 0 ? getStaticFriction() : getCoulombFriction()) * getSpoolDiameter() / 2d;
+    }
+
+    public SimpleMatrix stateTransitionMatrix(double dt) {
+        return new SimpleMatrix(2, 2, true, new double[] {
+                0, 1,
+                -getMotorModel().getkT() * getMotorModel().getkV() * getMotorModel().getGearRatio() *
+                        getMotorModel().getGearRatio() * getMotorModel().getEfficiency() / getMotorModel().getResistance(), 0
+        }).scale(dt).plus(SimpleMatrix.identity(2));
+    }
+
+    public SimpleMatrix inputTransitionMatrix(double dt) {
+        return new SimpleMatrix(2, 1, true, new double[] {
+                0, getMotorModel().getkT() * getMotorModel().getGearRatio() * getMotorModel().getEfficiency() *
+                getSpoolDiameter() / (2d * getMotorModel().getResistance())
+        }).scale(dt);
+    }
+
+    public SimpleMatrix simulateDynamics(SimpleMatrix state, double input, double dt) {
+        return stateTransitionMatrix(dt).mult(state).plus(inputTransitionMatrix(dt).scale(input));
     }
 
     @Override

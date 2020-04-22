@@ -2,9 +2,15 @@ package org.firstinspires.ftc.teamcode.lib.control;
 
 import org.ejml.simple.SimpleMatrix;
 import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
+import org.firstinspires.ftc.teamcode.lib.geometry.Rectangle;
 import org.firstinspires.ftc.teamcode.lib.geometry.Rotation2d;
+import org.firstinspires.ftc.teamcode.lib.geometry.Translation2d;
 import org.firstinspires.ftc.teamcode.lib.physics.MecanumDriveModel;
+import org.firstinspires.ftc.teamcode.lib.util.MatrixUtil;
 import org.firstinspires.ftc.teamcode.main.Robot;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MecanumDriveMPC {
     private static final int    HORIZON_STEP = 1000;
@@ -94,6 +100,42 @@ public class MecanumDriveMPC {
             System.out.print(lqr.state);
             System.out.println(lqr.lastInput);
         }
+    }
+
+    public List<Translation2d> disallowedPositions(List<Rectangle> obstacles, SimpleMatrix A, SimpleMatrix B, SimpleMatrix state) {
+        List<Translation2d> disallowedPositions = new ArrayList<>();
+        SimpleMatrix C = new SimpleMatrix(2, 6, true, new double[] {
+                1, 0, 0, 0, 0, 0,
+                0, 0, 1, 0, 0, 0
+        });
+
+        SimpleMatrix tildaA = A.plus(B.mult(K[0]));
+        SimpleMatrix tildaB = B.mult(K[0]).negative();
+        SimpleMatrix F = MatrixUtil.expAt(tildaA, getDt());
+        SimpleMatrix G = tildaA.invert().mult(F.minus(SimpleMatrix.identity(6))).mult(tildaB);
+        for(int i = 0; i < getHorizonStep(); i++) {
+            for(Rectangle obstacle : obstacles) {
+                for(SimpleMatrix matrix : obstacle.minkowskiSum(C.mult(F).mult(state).negative())) {
+                    System.out.println(C.mult(G));
+                    SimpleMatrix disallowedPosition = C.mult(G).invert().mult(matrix);
+                    disallowedPositions.add(new Translation2d(disallowedPosition.get(0) / 0.0254d, disallowedPosition.get(1) / 0.0254d));
+                }
+            }
+
+            if(i + 1 < getHorizonStep()) {
+                tildaA = A.plus(B.mult(K[i + 1]));
+                tildaB = B.mult(K[i + 1]).negative();
+                F = F.mult(MatrixUtil.expAt(tildaA, getDt()));
+                G = G.mult(tildaA.invert().mult(F.minus(SimpleMatrix.identity(6))).mult(tildaB));
+            }
+        }
+
+        return disallowedPositions;
+    }
+
+    public List<Translation2d> disallowedPositions(List<Rectangle> obstacles, SimpleMatrix state) {
+        return disallowedPositions(obstacles, getModel().stateTransitionMatrix(state, getDt(), true),
+                getModel().inputTransitionMatrix(state, getDt(), false), state);
     }
 
     /**

@@ -6,6 +6,7 @@ import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUtil;
 import org.firstinspires.ftc.teamcode.main.AutonomousRobot;
 import org.firstinspires.ftc.teamcode.main.CascadeLinearlyExtendingRobot;
+import org.firstinspires.ftc.teamcode.main.CascadeLinearlyExtendingRobotMPC;
 import org.firstinspires.ftc.teamcode.main.ContinuousLinearlyExtendingRobot;
 import org.firstinspires.ftc.teamcode.main.PurePursuitRobot;
 import org.firstinspires.ftc.teamcode.main.Robot;
@@ -32,7 +33,7 @@ public class ComputerDebugger {
 
     public static void main(String[] args) {
         Robot.setUsingComputer(true);
-        Robot robot = new AutonomousRobot();
+        Robot robot = new CascadeLinearlyExtendingRobot();
         init(robot);
         robot.init_debug();
 
