@@ -28,7 +28,7 @@ public class ComputerDebugger {
 
     public static void main(String[] args) {
         Robot.setUsingComputer(true);
-        Robot robot = new CascadeLinearlyExtendingRobot();
+        Robot robot = new AutonomousRobot();
         init(robot);
         robot.init_debug();
 

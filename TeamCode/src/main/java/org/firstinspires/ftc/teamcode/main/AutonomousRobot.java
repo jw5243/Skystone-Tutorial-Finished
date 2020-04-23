@@ -6,16 +6,29 @@ import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Rotation2d;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AutonomousRobot extends Robot {
-    private Pose2d finalPosition = new Pose2d(10 * 12d, 10 * 12d, new Rotation2d(Math.toRadians(180d), false));
+    private List<Pose2d> positions = new ArrayList<>();
+
+    {
+        positions.add(new Pose2d(100d, 50d, new Rotation2d(Math.toRadians(-135d), false)));
+        //positions.add(new Pose2d(116d, 120d, new Rotation2d(Math.toRadians(0d), false)));
+        positions.add(new Pose2d(104d, 120d, new Rotation2d(Math.toRadians(0d), false)));
+        positions.add(new Pose2d(112d, 40d, new Rotation2d(Math.toRadians(-135), false)));
+        positions.add(new Pose2d(104d, 120d, new Rotation2d(Math.toRadians(0d), false)));
+        positions.add(new Pose2d(108d, 46d, new Rotation2d(Math.toRadians(-135), false)));
+        positions.add(new Pose2d(104d, 120d, new Rotation2d(Math.toRadians(0d), false)));
+    }
 
     @Override
     public void init_debug() {
         super.init_debug();
         setMecanumDriveMPC(new MecanumDriveMPC(true));
         getMecanumDriveMPC().setModel(getDriveModel());
-        getMecanumDriveMPC().runLQR(finalPosition);
-        setMecanumDriveRunnableLQR(new MecanumRunnableLQR(finalPosition));
+        getMecanumDriveMPC().runLQR(positions.get(0));
+        setMecanumDriveRunnableLQR(new MecanumRunnableLQR(positions.get(0)));
         new Thread(getMecanumDriveRunnableLQR()).start();
     }
 
@@ -25,5 +38,11 @@ public class AutonomousRobot extends Robot {
         getMecanumDriveRunnableLQR().updateMPC();
         setInput(getMecanumDriveMPC().getOptimalInput((int) ((getMecanumDriveRunnableLQR().getTimeProfiler().getDeltaTime(TimeUnits.SECONDS, false) +
                 getMecanumDriveRunnableLQR().getPolicyLag()) / MecanumDriveMPC.getDt()), getState(), getInput()));
+
+        if(getFieldPosition().getTranslation().epsilonEquals(positions.get(0).getTranslation(), 0.1d) && positions.size() > 1) {
+            positions.remove(0);
+            getMecanumDriveMPC().runLQR(positions.get(0));
+            getMecanumDriveRunnableLQR().setDesiredPose(positions.get(0));
+        }
     }
 }
