@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.lib.geometry.Rotation2d;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class AutonomousRobot extends Robot {
@@ -25,10 +26,11 @@ public class AutonomousRobot extends Robot {
     @Override
     public void init_debug() {
         super.init_debug();
-        setMecanumDriveMPC(new MecanumDriveMPC(true));
+        setMecanumDriveMPC(new MecanumDriveMPC());
         getMecanumDriveMPC().setModel(getDriveModel());
-        getMecanumDriveMPC().runLQR(positions.get(0));
-        setMecanumDriveRunnableLQR(new MecanumRunnableLQR(positions.get(0)));
+        getMecanumDriveMPC().runLQR(getState());
+        //Arrays.stream(getMecanumDriveMPC().getK()).forEach(matrix -> matrix.scale(1 / 0.0254d).print());
+        setMecanumDriveRunnableLQR(new MecanumRunnableLQR());
         new Thread(getMecanumDriveRunnableLQR()).start();
     }
 
@@ -36,13 +38,12 @@ public class AutonomousRobot extends Robot {
     public void loop_debug() {
         super.loop_debug();
         getMecanumDriveRunnableLQR().updateMPC();
-        setInput(getMecanumDriveMPC().getOptimalInput((int) ((getMecanumDriveRunnableLQR().getTimeProfiler().getDeltaTime(TimeUnits.SECONDS, false) +
-                getMecanumDriveRunnableLQR().getPolicyLag()) / MecanumDriveMPC.getDt()), getState(), getInput()));
+        setInput(getMecanumDriveMPC().getOptimalInput((int)((getMecanumDriveRunnableLQR().getTimeProfiler().getDeltaTime(TimeUnits.SECONDS, false) +
+                getMecanumDriveRunnableLQR().getPolicyLag()) / MecanumDriveMPC.getDt()), getState(), positions.get(0)));
 
         if(getFieldPosition().getTranslation().epsilonEquals(positions.get(0).getTranslation(), 0.1d) && positions.size() > 1) {
             positions.remove(0);
-            getMecanumDriveMPC().runLQR(positions.get(0));
-            getMecanumDriveRunnableLQR().setDesiredPose(positions.get(0));
+            getMecanumDriveMPC().runLQR(getState());
         }
     }
 }

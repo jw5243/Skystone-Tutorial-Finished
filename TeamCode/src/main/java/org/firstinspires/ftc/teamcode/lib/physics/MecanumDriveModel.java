@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.lib.physics;
 import org.ejml.simple.SimpleMatrix;
 
 public class MecanumDriveModel {
-    private final int timeSteps;
     private final double dt;
 
     //Roller angles 2 and 3 are -45 degrees
@@ -38,9 +37,8 @@ public class MecanumDriveModel {
 
     private CoefficientManager coefficientManager;
 
-    public MecanumDriveModel(int timeSteps, double dt, double robotMass, double wheelMass, double wheelInertiaSpinning, double wheelInertiaTurning,
+    public MecanumDriveModel(double dt, double robotMass, double wheelMass, double wheelInertiaSpinning, double wheelInertiaTurning,
                              double robotMomentInertia, double wheelRadius, double L1, double L2, double D1, double D2, MotorModel motorModel) {
-        this.timeSteps = timeSteps;
         this.dt = dt;
         this.robotMass = robotMass;
         this.wheelMass = wheelMass;
@@ -71,11 +69,10 @@ public class MecanumDriveModel {
         coefficientManager = new CoefficientManager(this);
     }
 
-    public MecanumDriveModel(int timeSteps, double dt, double robotMass, double wheelMass, double wheelInertiaSpinning, double wheelInertiaTurning,
+    public MecanumDriveModel(double dt, double robotMass, double wheelMass, double wheelInertiaSpinning, double wheelInertiaTurning,
                              double robotMomentInertia, double wheelRadius, double internalGearRatio, double externalGearRatio, double nominalVoltage,
                              double stallTorque, double stallCurrent, double freeSpeed, double freeCurrent, double efficiency,
                              double L1, double L2, double D1, double D2) {
-        this.timeSteps = timeSteps;
         this.dt = dt;
         this.robotMass = robotMass;
         this.wheelMass = wheelMass;
@@ -107,7 +104,7 @@ public class MecanumDriveModel {
     }
 
     public static void main(String... args) {
-        MecanumDriveModel model = new MecanumDriveModel(500, 0.001, 15.75d, 0.315d, 0.315d * (0.1 * 0.1 + 0.032 * 0.032) / 2,
+        MecanumDriveModel model = new MecanumDriveModel(0.001, 15.75d, 0.315d, 0.315d * (0.1 * 0.1 + 0.032 * 0.032) / 2,
                 0.315d * (3 * (0.1 * 0.1 + 0.032 * 0.032) + 0.05 * 0.05) / 12, 0.5613d,
                 0.1d / 2, 13.7d, 2d, 12d, 0.187d, 9.2d,
                 435 * 2 * Math.PI / 60d, 0.25d, 0.6d,
@@ -118,7 +115,7 @@ public class MecanumDriveModel {
         });
 
         SimpleMatrix input = new SimpleMatrix(4, 1, false, new double[] {
-                1, 0, 1, 0
+                1, 1, 1, 1
         });
 
         System.out.println("Time\tx\tVx\ty\tVy\tpsi\tVpsi");
@@ -127,7 +124,7 @@ public class MecanumDriveModel {
             //state = model.simulate(state, input);
             state = model.stateTransitionMatrix(state, true).mult(state).plus(model.inputTransitionMatrix(state, false).mult(input));
             if(i % 10 == 0) {
-                System.out.println((int) (i * model.dt * 100000) / 100000d + "\t" + state.get(0) + "\t" + state.get(1) + "\t" + state.get(2) + "\t" + state.get(3) +
+                System.out.println((int) (i * model.dt * 100000) / 100000d + "\t" + state.get(0) / 0.0254d + "\t" + state.get(1) / 0.0254d + "\t" + state.get(2) / 0.0254d + "\t" + state.get(3) / 0.0254d +
                         "\t" + state.get(4) + "\t" + state.get(5));
             }
         }
@@ -321,18 +318,20 @@ public class MecanumDriveModel {
     }
 
     public SimpleMatrix simulateRungeKutta(SimpleMatrix state, SimpleMatrix input) {
-        SimpleMatrix k1 = simulate(state, input, dt);
-        SimpleMatrix k2 = simulate(state.plus(k1.scale(dt / 2)), input, dt / 2);
-        SimpleMatrix k3 = simulate(state.plus(k2.scale(dt / 2)), input, dt / 2);
-        SimpleMatrix k4 = simulate(state.plus(k3.scale(dt)), input, dt);
-        return state.plus(k1.plus(k2.scale(2).plus(k3.scale(2).plus(k4))).scale(dt / 6));
+        return simulateRungeKutta(state, input, getDt());
     }
 
     public SimpleMatrix simulateRungeKutta(SimpleMatrix state, SimpleMatrix input, double dt) {
-        SimpleMatrix k1 = simulate(state, input, dt);
-        SimpleMatrix k2 = simulate(state.plus(k1.scale(dt / 2)), input, dt / 2);
-        SimpleMatrix k3 = simulate(state.plus(k2.scale(dt / 2)), input, dt / 2);
-        SimpleMatrix k4 = simulate(state.plus(k3.scale(dt)), input, dt);
+        SimpleMatrix A = stateTransitionMatrix(state, dt, true);
+        SimpleMatrix B = inputTransitionMatrix(state, dt, false);
+        SimpleMatrix k1 = A.mult(state).plus(B.mult(input));
+        SimpleMatrix k2 = A.mult(state.plus(k1.scale(1 / 2d))).plus(B.mult(input));
+        SimpleMatrix k3 = A.mult(state.plus(k2.scale(1 / 2d))).plus(B.mult(input));
+        SimpleMatrix k4 = A.mult(state.plus(k3)).plus(B.mult(input));
+        //SimpleMatrix k1 = simulate(state, input, dt);
+        //SimpleMatrix k2 = simulate(state.plus(k1.scale(dt / 2)), input, dt / 2);
+        //SimpleMatrix k3 = simulate(state.plus(k2.scale(dt / 2)), input, dt / 2);
+        //SimpleMatrix k4 = simulate(state.plus(k3.scale(dt)), input, dt);
         return state.plus(k1.plus(k2.scale(2).plus(k3.scale(2).plus(k4))).scale(dt / 6));
     }
 
@@ -466,10 +465,6 @@ public class MecanumDriveModel {
 
     public SimpleMatrix simulateDynamics(SimpleMatrix state, SimpleMatrix input) {
         return stateTransitionMatrix(state, true).mult(state).plus(inputTransitionMatrix(state, false).mult(input));
-    }
-
-    public int getTimeSteps() {
-        return timeSteps;
     }
 
     public double getDt() {

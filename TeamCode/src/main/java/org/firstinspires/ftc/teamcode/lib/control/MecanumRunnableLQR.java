@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.lib.control;
 
-import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.lib.util.TimeProfiler;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
 import org.firstinspires.ftc.teamcode.main.Robot;
@@ -12,22 +11,20 @@ public class MecanumRunnableLQR implements Runnable {
     private boolean stop;
 
     private MecanumDriveMPC lqrDrivetrain;
-    private Pose2d desiredPose;
     private double policyLag;
 
-    public MecanumRunnableLQR(Pose2d desiredPose) {
+    public MecanumRunnableLQR() {
         setTimeProfiler(new TimeProfiler(false));
         setPolicyTimeProfiler(new TimeProfiler(false));
         setReadyToUpdate(false);
         setStop(false);
         setPolicyLag(0d);
-        setDesiredPose(desiredPose);
     }
 
-    public MecanumDriveMPC lqr(Pose2d desiredState) {
-        MecanumDriveMPC mpc = new MecanumDriveMPC(true);
+    public MecanumDriveMPC lqr() {
+        MecanumDriveMPC mpc = new MecanumDriveMPC();
         mpc.setModel(Robot.getDriveModel());
-        mpc.runLQR(desiredState);
+        mpc.runLQR(Robot.getState());
         return mpc;
     }
 
@@ -37,7 +34,7 @@ public class MecanumRunnableLQR implements Runnable {
         while(!isStop()) {
             if(!isReadyToUpdate()) {
                 getPolicyTimeProfiler().start();
-                setLqrDrivetrain(lqr(getDesiredPose()));
+                setLqrDrivetrain(lqr());
                 getTimeProfiler().update(true);
                 try {
                     Thread.sleep(10);
@@ -110,13 +107,5 @@ public class MecanumRunnableLQR implements Runnable {
 
     public void setPolicyLag(double policyLag) {
         this.policyLag = policyLag;
-    }
-
-    public Pose2d getDesiredPose() {
-        return desiredPose;
-    }
-
-    public void setDesiredPose(Pose2d desiredPose) {
-        this.desiredPose = desiredPose;
     }
 }

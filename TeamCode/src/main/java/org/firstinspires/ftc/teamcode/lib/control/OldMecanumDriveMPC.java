@@ -80,7 +80,7 @@ public class OldMecanumDriveMPC {
     }
 
     public static void main(String... args) {
-        MecanumDriveModel model = new MecanumDriveModel(3000, 0.001, 15.75d, 0.315d, 0.315d * (0.1 * 0.1 + 0.032 * 0.032) / 2,
+        MecanumDriveModel model = new MecanumDriveModel(0.001, 15.75d, 0.315d, 0.315d * (0.1 * 0.1 + 0.032 * 0.032) / 2,
                 0.315d * (3 * (0.1 * 0.1 + 0.032 * 0.032) + 0.05 * 0.05) / 12, 0.5613d,
                 0.1d / 2, 13.7d, 2d, 12d, 0.187d, 9.2d,
                 435 * 2 * Math.PI / 60d, 0.25d, 0.6d,
