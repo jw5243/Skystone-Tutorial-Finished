@@ -3,7 +3,9 @@ package org.firstinspires.ftc.teamcode.main;
 import org.ejml.simple.SimpleMatrix;
 import org.firstinspires.ftc.teamcode.debugging.RobotDebug;
 import org.firstinspires.ftc.teamcode.lib.control.MecanumDriveMPC;
+import org.firstinspires.ftc.teamcode.lib.control.MecanumDriveSLQ;
 import org.firstinspires.ftc.teamcode.lib.control.MecanumRunnableLQR;
+import org.firstinspires.ftc.teamcode.lib.control.MecanumRunnableSLQ;
 import org.firstinspires.ftc.teamcode.lib.drivers.Motor;
 import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Rotation2d;
@@ -15,7 +17,8 @@ import org.firstinspires.ftc.teamcode.lib.util.TimeUtil;
 
 public abstract class Robot implements RobotDebug {
     private static final SimpleMatrix INITIAL_STATE = new SimpleMatrix(6, 1, false, new double[] {
-            (12d * 12d - 9d) * 0.0254d, 0d, 48d * 0.0254d, 0d, Math.toRadians(-180d), 0d
+            //(12d * 12d - 9d) * 0.0254d, 0d, 48d * 0.0254d, 0d, Math.toRadians(-180d), 0d
+            9d * 0.0254d, 0d, 9d * 0.0254d, 0d, Math.toRadians(0d), 0d
     });
 
     private static boolean isUsingComputer;
@@ -29,6 +32,9 @@ public abstract class Robot implements RobotDebug {
     private static MecanumDriveModel driveModel;
     private static MecanumDriveMPC mecanumDriveMPC;
     private MecanumRunnableLQR mecanumDriveRunnableLQR;
+
+    private static MecanumDriveSLQ mecanumDriveSLQ;
+    private MecanumRunnableSLQ mecanumRunnableSLQ;
 
     @Override
     public void init_debug() {
@@ -131,5 +137,21 @@ public abstract class Robot implements RobotDebug {
 
     public void setMecanumDriveRunnableLQR(MecanumRunnableLQR mecanumDriveRunnableLQR) {
         this.mecanumDriveRunnableLQR = mecanumDriveRunnableLQR;
+    }
+
+    public static MecanumDriveSLQ getMecanumDriveSLQ() {
+        return mecanumDriveSLQ;
+    }
+
+    public static void setMecanumDriveSLQ(MecanumDriveSLQ mecanumDriveSLQ) {
+        Robot.mecanumDriveSLQ = mecanumDriveSLQ;
+    }
+
+    public MecanumRunnableSLQ getMecanumRunnableSLQ() {
+        return mecanumRunnableSLQ;
+    }
+
+    public void setMecanumRunnableSLQ(MecanumRunnableSLQ mecanumRunnableSLQ) {
+        this.mecanumRunnableSLQ = mecanumRunnableSLQ;
     }
 }

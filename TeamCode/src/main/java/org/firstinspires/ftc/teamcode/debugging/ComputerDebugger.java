@@ -28,7 +28,7 @@ public class ComputerDebugger {
 
     public static void main(String[] args) {
         Robot.setUsingComputer(true);
-        Robot robot = new AutonomousRobot();
+        Robot robot = new RobotSLQ();
         init(robot);
         robot.init_debug();
 

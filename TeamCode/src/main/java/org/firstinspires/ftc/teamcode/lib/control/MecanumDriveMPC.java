@@ -8,8 +8,8 @@ import org.firstinspires.ftc.teamcode.lib.physics.MecanumDriveModel;
 import org.firstinspires.ftc.teamcode.lib.physics.MotorModel;
 
 public class MecanumDriveMPC {
-    private static final int    HORIZON_STEP = 1000;
-    private static final double dt           = 0.01d;
+    private static final int    HORIZON_STEP = 1500;
+    private static final double dt           = 0.001d;
 
     private static final SimpleMatrix TERMINATION_COST = new SimpleMatrix(6, 6, false, new double[] {
             100, 0, 0, 0, 0, 0,
@@ -21,24 +21,28 @@ public class MecanumDriveMPC {
     });
 
     private static final SimpleMatrix INTERMEDIARY_STATE_COST = new SimpleMatrix(6, 6, false, new double[] {
-            1E-19, 0, 0, 0, 0, 0,
+            10, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
-            0, 0, 1E-19, 0, 0, 0,
+            0, 0, 10, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 1E-20, 0,
+            0, 0, 0, 0, 1, 0,
             0, 0, 0, 0, 0, 0,
     });
 
     private static final SimpleMatrix INPUT_COST = new SimpleMatrix(4, 4, false, new double[] {
-            1E-20, 0, 0, 0,
-            0, 1E-20, 0, 0,
-            0, 0, 1E-20, 0,
-            0, 0, 0, 1E-20
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
     });
 
     private MecanumDriveModel model;
     private SimpleMatrix[] P;
     private SimpleMatrix[] K;
+
+    public MecanumDriveMPC(MecanumDriveModel model) {
+        setModel(model);
+    }
 
     public static void main(String... args) {
         MecanumDriveModel model = new MecanumDriveModel(
@@ -47,16 +51,17 @@ public class MecanumDriveMPC {
                 0.1d / 2d, 7d * 0.0254d, 7d * 0.0254d, 6d * 0.0254d, 6d * 0.0254d,
                 MotorModel.generateMotorModel(Motor.GOBILDA_435_RPM, null));
 
-        MecanumDriveMPC lqr = new MecanumDriveMPC();
+        MecanumDriveMPC lqr = new MecanumDriveMPC(model);
         SimpleMatrix state = new SimpleMatrix(6, 1, true, new double[] {
                 0d, 0d, 0d, 0d, 0d, 0d
         });
 
-        lqr.model = model;
         lqr.runLQR(state);
+        System.out.println("t\tx\tvx\ty\tvy\tpsi\tvpsi");
         for(int i = 0; i < HORIZON_STEP; i++) {
-            state = model.simulateDynamics(state, lqr.getOptimalInput(i, state, new Pose2d(10, 0, new Rotation2d(Math.toRadians(0d), true))));
-            System.out.print(state);
+            state = model.simulateDynamics(state, lqr.getOptimalInput(i, state, new Pose2d(10, 10, new Rotation2d(Math.toRadians(90d), true))), getDt());
+            System.out.println((int)(1000d * i * MecanumDriveMPC.getDt()) / 1000d + "\t" + state.get(0) / 0.0254d + "\t" + state.get(1) / 0.0254d + "\t" +
+                    state.get(2) / 0.0254d + "\t" + state.get(3) / 0.0254d + "\t" + state.get(4) * 180d / Math.PI + "\t" + state.get(5) * 180d / Math.PI);
         }
     }
 
@@ -107,7 +112,7 @@ public class MecanumDriveMPC {
         });
     }
 
-    private static SimpleMatrix getStateCost(int timeStep) {
+    public static SimpleMatrix getStateCost(int timeStep) {
         return timeStep >= HORIZON_STEP - 1 ? TERMINATION_COST : INTERMEDIARY_STATE_COST;
     }
 
@@ -117,5 +122,29 @@ public class MecanumDriveMPC {
 
     public void setModel(MecanumDriveModel model) {
         this.model = model;
+    }
+
+    public MecanumDriveModel getModel() {
+        return model;
+    }
+
+    public static int getHorizonStep() {
+        return HORIZON_STEP;
+    }
+
+    public SimpleMatrix[] getK() {
+        return K;
+    }
+
+    public static SimpleMatrix getTerminationCost() {
+        return TERMINATION_COST;
+    }
+
+    public static SimpleMatrix getIntermediaryStateCost() {
+        return INTERMEDIARY_STATE_COST;
+    }
+
+    public static SimpleMatrix getInputCost() {
+        return INPUT_COST;
     }
 }

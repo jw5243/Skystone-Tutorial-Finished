@@ -7,10 +7,9 @@ import org.firstinspires.ftc.teamcode.lib.geometry.Rotation2d;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class AutonomousRobot extends Robot {
+public class RobotMPC extends Robot {
     private List<Pose2d> positions = new ArrayList<>();
 
     {
@@ -26,8 +25,7 @@ public class AutonomousRobot extends Robot {
     @Override
     public void init_debug() {
         super.init_debug();
-        setMecanumDriveMPC(new MecanumDriveMPC());
-        getMecanumDriveMPC().setModel(getDriveModel());
+        setMecanumDriveMPC(new MecanumDriveMPC(getDriveModel()));
         getMecanumDriveMPC().runLQR(getState());
         //Arrays.stream(getMecanumDriveMPC().getK()).forEach(matrix -> matrix.scale(1 / 0.0254d).print());
         setMecanumDriveRunnableLQR(new MecanumRunnableLQR());
