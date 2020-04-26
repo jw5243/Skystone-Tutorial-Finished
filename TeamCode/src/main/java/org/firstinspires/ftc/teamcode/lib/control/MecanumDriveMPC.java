@@ -84,7 +84,12 @@ public class MecanumDriveMPC {
 
     public SimpleMatrix getOptimalInput(int timeStep, SimpleMatrix state, SimpleMatrix desiredState) {
         if(timeStep < K.length) {
-            return limitInput(K[timeStep].mult(state.minus(desiredState)));
+            SimpleMatrix A = getModel().stateTransitionMatrix(state, getDt(), true);
+            SimpleMatrix B = getModel().inputTransitionMatrix(state, getDt(), false);
+            SimpleMatrix inverse = INPUT_COST.plus(B.transpose().mult(P[timeStep].mult(B))).pseudoInverse();
+            SimpleMatrix K = inverse.mult(B.transpose()).mult(P[timeStep]).mult(A).negative();
+            return limitInput(K.mult(state.minus(desiredState)));
+            //return limitInput(K[timeStep].mult(state.minus(desiredState)));
         }
 
         return new SimpleMatrix(4, 1);

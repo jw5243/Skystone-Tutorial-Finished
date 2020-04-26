@@ -1,13 +1,10 @@
 package org.firstinspires.ftc.teamcode.lib.control;
 
-import org.ejml.simple.SimpleBase;
 import org.ejml.simple.SimpleMatrix;
 import org.firstinspires.ftc.teamcode.lib.drivers.Motor;
 import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.lib.physics.MecanumDriveModel;
 import org.firstinspires.ftc.teamcode.lib.physics.MotorModel;
-
-import java.util.Arrays;
 
 public class MecanumDriveSLQ {
     private MecanumDriveMPC mecanumDriveMPC;
@@ -39,22 +36,16 @@ public class MecanumDriveSLQ {
         });
 
         SimpleMatrix desiredState = new SimpleMatrix(6, 1, true, new double[] {
-                10d * 0.0254d, 0d, 10d * 0.0254d, 0d, Math.toRadians(90d), 0d
+                10d * 0.0254d, 0d, 0d * 0.0254d, 0d, Math.toRadians(0d), 0d
         });
 
+        int iterations = 5;
         slq.initialIteration(state, desiredState);
-        slq.simulateIteration();
-        slq.runSLQ();
-        slq.simulateIteration();
-        slq.runSLQ();
-        slq.simulateIteration();
-        slq.runSLQ();
-        slq.simulateIteration();
-        slq.runSLQ();
-        slq.simulateIteration();
-        slq.runSLQ();
-        slq.simulateIteration();
-        slq.runSLQ();
+        for(int i = 0; i < iterations; i++) {
+            slq.simulateIteration();
+            slq.runSLQ();
+        }
+
         System.out.println("t\tx\tvx\ty\tvy\tpsi\tvpsi");
         for(int i = 0; i < MecanumDriveMPC.getHorizonStep() - 1; i++) {
             state = slq.getMecanumDriveMPC().getModel().stateTransitionMatrix(state, MecanumDriveMPC.getDt(), true).mult(state)
@@ -132,6 +123,7 @@ public class MecanumDriveSLQ {
         p = new SimpleMatrix[MecanumDriveMPC.getHorizonStep()];
         P[P.length - 1] = MecanumDriveMPC.getTerminationCost();
         p[p.length - 1] = getLinearStateCost(MecanumDriveMPC.getHorizonStep(), MecanumDriveMPC.getTerminationCost());
+        //l[l.length - 1] = getLinearStateCost(MecanumDriveMPC.getHorizonStep(), MecanumDriveMPC.getTerminationCost());
         solveRiccatiEquations(MecanumDriveMPC.getHorizonStep() - 1);
     }
 
@@ -142,7 +134,7 @@ public class MecanumDriveSLQ {
 
         SimpleMatrix A = getA()[timeStep];
         SimpleMatrix B = getB()[timeStep];
-        SimpleMatrix oldK = getMecanumDriveMPC().getK()[timeStep - 1];
+        SimpleMatrix oldK = K[timeStep - 1];//getMecanumDriveMPC().getK()[timeStep - 1];
 
         SimpleMatrix Q = MecanumDriveMPC.getStateCost(timeStep);
         SimpleMatrix R = MecanumDriveMPC.getInputCost();
@@ -157,15 +149,40 @@ public class MecanumDriveSLQ {
         SimpleMatrix g = r.plus(B.transpose().mult(p[timeStep]));
 
         p[timeStep - 1] = q.plus(A.transpose().mult(p[timeStep])).plus(oldK.transpose().mult(H)
-                .mult(l[timeStep]))./*plus(l[timeStep].transpose().mult(G)).*/plus(G.transpose().mult(l[timeStep]).scale(2));
+                .mult(l[timeStep])).plus(G.transpose().mult(l[timeStep]).scale(2));
         l[timeStep - 1] = H.invert().mult(g).negative();
+
+        /*SimpleMatrix Q = MecanumDriveMPC.getStateCost(timeStep);
+        SimpleMatrix R = MecanumDriveMPC.getInputCost();
+        SimpleMatrix inverse = R.plus(B.transpose().mult(P[timeStep].mult(B))).pseudoInverse();
+        P[timeStep - 1] = Q.plus(A.transpose().mult(P[timeStep].mult(A))).minus(A.transpose().mult(P[timeStep].mult(B.mult(inverse).mult(B.transpose().mult(P[timeStep].mult(A))))));
+        K[timeStep - 1] = inverse.mult(B.transpose()).mult(P[timeStep]).mult(A).negative();
+
+        SimpleMatrix S = P[timeStep].minus(P[timeStep].mult(B).mult(inverse.invert()).mult(B.transpose()).mult(P[timeStep]));
+        l[timeStep - 1] = A.transpose().mult(S).mult(P[timeStep].invert()).mult(l[timeStep]);*/
 
         solveRiccatiEquations(--timeStep);
     }
 
     public SimpleMatrix getOptimalInput(int timeStep, SimpleMatrix state, double alpha) {
         if(timeStep < getSimulatedInputs().length - 1) {
-            return MecanumDriveMPC.limitInput(getSimulatedInputs()[timeStep].plus(l[timeStep].scale(alpha)).plus(K[timeStep].mult(state.minus(getSimulatedStates()[timeStep]))));
+            //return MecanumDriveMPC.limitInput(getSimulatedInputs()[timeStep].plus(K[timeStep].mult(state.minus(getSimulatedStates()[timeStep]))).minus(
+            //        MecanumDriveMPC.getInputCost().plus(getB()[timeStep].transpose().mult(P[timeStep])
+            //                .mult(B[timeStep])).invert().mult(B[timeStep].transpose()).mult(l[timeStep]).scale(1 / 2d)
+            //));
+
+            SimpleMatrix A = getMecanumDriveMPC().getModel().stateTransitionMatrix(state, MecanumDriveMPC.getDt(), true);
+            SimpleMatrix B = getMecanumDriveMPC().getModel().inputTransitionMatrix(state, MecanumDriveMPC.getDt(), false);
+            SimpleMatrix inverse = MecanumDriveMPC.getInputCost().plus(B.transpose().mult(P[timeStep].mult(B))).pseudoInverse();
+            SimpleMatrix K = inverse.mult(B.transpose()).mult(P[timeStep]).mult(A).negative();
+
+            SimpleMatrix H = MecanumDriveMPC.getInputCost().plus(B.transpose().mult(P[timeStep].mult(B)));
+            SimpleMatrix r = getLinearInputCost(timeStep, MecanumDriveMPC.getInputCost());
+            SimpleMatrix g = r.plus(B.transpose().mult(p[timeStep]));
+            SimpleMatrix l = H.invert().mult(g).negative();
+            return MecanumDriveMPC.limitInput(getSimulatedInputs()[timeStep].plus(l.scale(alpha)).plus(K.mult(state.minus(getSimulatedStates()[timeStep]))));
+
+            //return MecanumDriveMPC.limitInput(getSimulatedInputs()[timeStep].plus(l[timeStep].scale(alpha)).plus(K[timeStep].mult(state.minus(getSimulatedStates()[timeStep]))));
         }
 
         return new SimpleMatrix(4, 1, true, new double[] {

@@ -13,13 +13,21 @@ public class RobotMPC extends Robot {
     private List<Pose2d> positions = new ArrayList<>();
 
     {
-        positions.add(new Pose2d(100d, 50d, new Rotation2d(Math.toRadians(-135d), false)));
+        //positions.add(new Pose2d(120d, 120d, new Rotation2d(Math.toRadians(180d * 3), false)));
+        /*positions.add(new Pose2d(100d, 50d, new Rotation2d(Math.toRadians(-135d), false)));
         //positions.add(new Pose2d(116d, 120d, new Rotation2d(Math.toRadians(0d), false)));
         positions.add(new Pose2d(104d, 120d, new Rotation2d(Math.toRadians(0d), false)));
         positions.add(new Pose2d(112d, 40d, new Rotation2d(Math.toRadians(-135), false)));
         positions.add(new Pose2d(104d, 120d, new Rotation2d(Math.toRadians(0d), false)));
         positions.add(new Pose2d(108d, 46d, new Rotation2d(Math.toRadians(-135), false)));
-        positions.add(new Pose2d(104d, 120d, new Rotation2d(Math.toRadians(0d), false)));
+        positions.add(new Pose2d(104d, 120d, new Rotation2d(Math.toRadians(0d), false)));*/
+
+        positions.add(new Pose2d(144d - 100d, 50d, new Rotation2d(Math.toRadians(- -135d - 180), false)));
+        positions.add(new Pose2d(144d - 104d, 120d, new Rotation2d(Math.toRadians(-0d - 180), false)));
+        positions.add(new Pose2d(144d - 112d, 40d, new Rotation2d(Math.toRadians(- -135 - 180), false)));
+        positions.add(new Pose2d(144d - 104d, 120d, new Rotation2d(Math.toRadians(-0d - 180), false)));
+        positions.add(new Pose2d(144d - 108d, 46d, new Rotation2d(Math.toRadians(- -135 - 180), false)));
+        positions.add(new Pose2d(144d - 104d, 120d, new Rotation2d(Math.toRadians(-0d - 180), false)));
     }
 
     @Override
