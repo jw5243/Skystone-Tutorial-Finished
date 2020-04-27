@@ -6,7 +6,11 @@ import org.firstinspires.ftc.teamcode.lib.drivers.Motor;
 import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.lib.physics.MecanumDriveModel;
 import org.firstinspires.ftc.teamcode.lib.physics.MotorModel;
+import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
+import org.firstinspires.ftc.teamcode.lib.util.TimeUtil;
 import org.firstinspires.ftc.teamcode.main.RobotSLQ;
+
+import java.util.NoSuchElementException;
 
 public class MecanumDriveSLQ {
     private MecanumDriveMPC mecanumDriveMPC;
@@ -22,8 +26,12 @@ public class MecanumDriveSLQ {
     private SimpleMatrix initialState;
     private SimpleMatrix desiredState;
 
+    private double currentRuntime;
+    private boolean isFirstIteration;
+
     public MecanumDriveSLQ(MecanumDriveMPC mecanumDriveMPC) {
         setMecanumDriveMPC(mecanumDriveMPC);
+        setFirstIteration(true);
     }
 
     public static void main(String... args) {
@@ -49,6 +57,7 @@ public class MecanumDriveSLQ {
         }
 
         System.out.println("t\tx\tvx\ty\tvy\tpsi\tvpsi");
+        TimeUtil.startTime();
         for(int i = 0; i < MecanumDriveMPC.getHorizonStep() - 1; i++) {
             state = slq.getMecanumDriveMPC().getModel().stateTransitionMatrix(state, MecanumDriveMPC.getDt(), true).mult(state)
                     .plus(slq.getMecanumDriveMPC().getModel().inputTransitionMatrix(state, MecanumDriveMPC.getDt(), false).mult(
@@ -126,7 +135,9 @@ public class MecanumDriveSLQ {
         P[P.length - 1] = MecanumDriveMPC.getTerminationCost();
         //p[p.length - 1] = getLinearStateCost(MecanumDriveMPC.getHorizonStep(), MecanumDriveMPC.getTerminationCost());
         l[l.length - 1] = getLinearStateCost(MecanumDriveMPC.getHorizonStep(), MecanumDriveMPC.getTerminationCost());
+        setCurrentRuntime(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS));
         solveRiccatiEquations(MecanumDriveMPC.getHorizonStep() - 1);
+        setFirstIteration(false);
     }
 
     public void solveRiccatiEquations(int timeStep) {
@@ -156,14 +167,13 @@ public class MecanumDriveSLQ {
                 .mult(l[timeStep])).plus(G.transpose().mult(l[timeStep]).scale(2));
         l[timeStep - 1] = H.invert().mult(g).negative();*/
 
-        SimpleMatrix obstacleQ = getObstacleQuadraticCost(timeStep);
-        SimpleMatrix Q = MecanumDriveMPC.getStateCost(timeStep).plus(obstacleQ);
+        SimpleMatrix Q = MecanumDriveMPC.getStateCost(timeStep).plus(getObstacleQuadraticCost(timeStep)).plus(getWaypointQuadraticCost(timeStep));
         SimpleMatrix R = MecanumDriveMPC.getInputCost();
         SimpleMatrix inverse = R.plus(B.transpose().mult(P[timeStep].mult(B))).pseudoInverse();
         P[timeStep - 1] = Q.plus(A.transpose().mult(P[timeStep].mult(A))).minus(A.transpose().mult(P[timeStep].mult(B.mult(inverse).mult(B.transpose().mult(P[timeStep].mult(A))))));
         K[timeStep - 1] = inverse.mult(B.transpose()).mult(P[timeStep]).mult(A).negative();
 
-        SimpleMatrix q = /*getLinearStateCost(timeStep, Q).minus*/(obstacleQ.mult(getSimulatedStates()[timeStep])).plus(getObstacleLinearCost(timeStep));
+        SimpleMatrix q = /*obstacleQ.mult(getSimulatedStates()[timeStep]).plus*/(getObstacleLinearCost(timeStep)).plus(getWaypointLinearCost(timeStep));
 
         SimpleMatrix S = P[timeStep].minus(P[timeStep].mult(B).mult(inverse.invert()).mult(B.transpose()).mult(P[timeStep]));
         l[timeStep - 1] = A.transpose().mult(S).mult(P[timeStep].invert()).mult(l[timeStep].plus(q));
@@ -210,6 +220,47 @@ public class MecanumDriveSLQ {
         });
     }
 
+    public SimpleMatrix getWaypointQuadraticCost(int timeStep) {
+        SimpleMatrix Q = new SimpleMatrix(6, 6, true, new double[] {
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0
+        });
+
+        if(!isFirstIteration()) {
+            try {
+                for(Waypoint waypoint : RobotSLQ.getWaypoints()) {
+                    Q = Q.plus(waypoint.getQuadraticCost(getCurrentRuntime() + timeStep * MecanumDriveMPC.getDt()));
+                }
+            } catch(NoSuchElementException e) {
+
+            }
+        }
+
+        return Q;
+    }
+
+    public SimpleMatrix getWaypointLinearCost(int timeStep) {
+        SimpleMatrix Q = new SimpleMatrix(6, 1, true, new double[] {
+                0, 0, 0, 0, 0, 0
+        });
+
+        if(!isFirstIteration()) {
+            try {
+                for(Waypoint waypoint : RobotSLQ.getWaypoints()) {
+                    Q = Q.plus(getLinearStateCost(waypoint.getWaypointState(), getWaypointQuadraticCost(timeStep)));
+                }
+            } catch(NoSuchElementException e) {
+
+            }
+        }
+
+        return Q;
+    }
+
     public SimpleMatrix getObstacleQuadraticCost(int timeStep) {
         SimpleMatrix Q = new SimpleMatrix(6, 6, true, new double[] {
                 0, 0, 0, 0, 0, 0,
@@ -221,7 +272,7 @@ public class MecanumDriveSLQ {
         });
 
         for(Obstacle obstacle : RobotSLQ.getObstacles()) {
-            Q.plus(obstacle.getQuadraticCost(getSimulatedStates()[timeStep]));
+            Q = Q.plus(obstacle.getQuadraticCost(getSimulatedStates()[timeStep]));
         }
 
         return Q;
@@ -233,10 +284,14 @@ public class MecanumDriveSLQ {
         });
 
         for(Obstacle obstacle : RobotSLQ.getObstacles()) {
-            Q.plus(obstacle.getLinearCost(getSimulatedStates()[timeStep]));
+            Q = Q.plus(obstacle.getLinearCost(getSimulatedStates()[timeStep]));
         }
 
         return Q;
+    }
+
+    public SimpleMatrix getLinearStateCost(SimpleMatrix state, SimpleMatrix cost) {
+        return cost.plus(cost.transpose()).mult(state).scale(-1 / 2d);
     }
 
     public SimpleMatrix getLinearStateCost(int timeStep, SimpleMatrix cost) {
@@ -303,5 +358,21 @@ public class MecanumDriveSLQ {
 
     public void setDesiredState(SimpleMatrix desiredState) {
         this.desiredState = desiredState;
+    }
+
+    public double getCurrentRuntime() {
+        return currentRuntime;
+    }
+
+    public void setCurrentRuntime(double currentRuntime) {
+        this.currentRuntime = currentRuntime;
+    }
+
+    public boolean isFirstIteration() {
+        return isFirstIteration;
+    }
+
+    public void setFirstIteration(boolean firstIteration) {
+        isFirstIteration = firstIteration;
     }
 }

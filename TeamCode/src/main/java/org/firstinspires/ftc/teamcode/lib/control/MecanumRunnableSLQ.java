@@ -42,10 +42,7 @@ public class MecanumRunnableSLQ implements Runnable {
             slq.runSLQ();
         }
 
-        if(getMaxIterations() == 0) {
-            slq.simulateIteration();
-        }
-
+        slq.simulateIteration();
         return slq;
     }
 
@@ -67,7 +64,7 @@ public class MecanumRunnableSLQ implements Runnable {
             }
 
             try {
-                Thread.sleep(1);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

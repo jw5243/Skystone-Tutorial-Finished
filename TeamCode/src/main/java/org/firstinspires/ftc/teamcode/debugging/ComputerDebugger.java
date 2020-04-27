@@ -51,9 +51,9 @@ public class ComputerDebugger {
                 Thread.sleep(10);
 
                 send(MessageOption.ROBOT_LOCATION);
-                send(MessageOption.LOG_POINT.setSendValue(robot.getFieldPosition().getTranslation()));
+                //send(MessageOption.LOG_POINT.setSendValue(robot.getFieldPosition().getTranslation()));
                 sendMessage();
-            } catch (InterruptedException | IllegalMessageTypeException e) {
+            } catch (InterruptedException e) { //| IllegalMessageTypeException e) {
                 e.printStackTrace();
             }
         }

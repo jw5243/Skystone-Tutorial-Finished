@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.main;
 
+import org.ejml.simple.SimpleMatrix;
 import org.firstinspires.ftc.teamcode.debugging.ComputerDebugger;
 import org.firstinspires.ftc.teamcode.debugging.IllegalMessageTypeException;
 import org.firstinspires.ftc.teamcode.debugging.MessageOption;
@@ -7,19 +8,22 @@ import org.firstinspires.ftc.teamcode.lib.control.MecanumDriveMPC;
 import org.firstinspires.ftc.teamcode.lib.control.MecanumDriveSLQ;
 import org.firstinspires.ftc.teamcode.lib.control.MecanumRunnableSLQ;
 import org.firstinspires.ftc.teamcode.lib.control.Obstacle;
+import org.firstinspires.ftc.teamcode.lib.control.Waypoint;
 import org.firstinspires.ftc.teamcode.lib.geometry.Circle2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Line2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Rotation2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Translation2d;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
+import org.firstinspires.ftc.teamcode.lib.util.TimeUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RobotSLQ extends Robot {
-    private static List<Pose2d> positions = new ArrayList<>();
+    private static List<Pose2d> positions   = new ArrayList<>();
     private static List<Obstacle> obstacles = new ArrayList<>();
+    private static List<Waypoint> waypoints = new ArrayList<>();
 
     static {
         //positions.add(new Pose2d(120, 120, new Rotation2d(Math.toRadians(180d), false)));
@@ -30,10 +34,24 @@ public class RobotSLQ extends Robot {
         positions.add(new Pose2d(108d, 46d, new Rotation2d(Math.toRadians(-135), false)));
         positions.add(new Pose2d(104d, 120d, new Rotation2d(Math.toRadians(0d), false)));
 
-        //obstacles.add(new Obstacle(94d, 64d, 4d, 10d));
-        //obstacles.add(new Obstacle(94d, 70d, 4d, 10d));
-        //obstacles.add(new Obstacle(94d, 76d, 4d, 1000d));
-        obstacles.add(new Obstacle(94d, 82d, 4d, 0d));
+        obstacles.add(new Obstacle(94d, 64d, 3d, 0.05d));
+        //obstacles.add(new Obstacle(94d, 70d, 3d, 0.01d));
+        //obstacles.add(new Obstacle(94d, 76d, 3d, 0.01d));
+        obstacles.add(new Obstacle(94d, 82d, 3d, 0.1d));
+
+        //obstacles.add(new Obstacle(88d, 45d, 3d, 1d));
+        //obstacles.add(new Obstacle(67d, 51d, 3d, 1d));
+
+        /*waypoints.add(new Waypoint(new SimpleMatrix(6, 6, true, new double[] {
+                10000, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 10000, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0
+        }), 1d, 1.2d, new Pose2d(
+                36, 50, new Rotation2d(Math.toRadians(360d), false)
+        )));*/
     }
 
     @Override
@@ -60,7 +78,7 @@ public class RobotSLQ extends Robot {
         setInput(getMecanumDriveSLQ().getOptimalInput((int)((getMecanumRunnableSLQ().getTimeProfiler().getDeltaTime(TimeUnits.SECONDS, false) +
                 getMecanumRunnableSLQ().getPolicyLag()) / MecanumDriveMPC.getDt()), getState(), 0.001d));
 
-        if(getFieldPosition().getTranslation().epsilonEquals(positions.get(0).getTranslation(), 0.75d) && positions.size() > 1) {
+        if(getFieldPosition().getTranslation().epsilonEquals(positions.get(0).getTranslation(), 2d) && positions.size() > 1) {
             positions.remove(0);
             getMecanumRunnableSLQ().setDesiredState(positions.get(0));
         }
@@ -83,6 +101,16 @@ public class RobotSLQ extends Robot {
                         getObstacles().get(j).getLocation(), getObstacles().get(j).getObstacleRadius() / 0.0254d
                 )));
             }
+
+            for(int j = 0; j < getWaypoints().size(); j++) {
+                if(getWaypoints().get(j).getDesiredTime() /*+ getWaypoints().get(j).getTemporalSpread()*/ < TimeUtil.getCurrentRuntime(TimeUnits.SECONDS)) {
+                    getWaypoints().remove(j--);
+                }
+
+                if(!getWaypoints().isEmpty() && j >= 0) {
+                    ComputerDebugger.send(MessageOption.KEY_POINT.setSendValue(getWaypoints().get(j).getLocation()));
+                }
+            }
         } catch (IllegalMessageTypeException e) {
             e.printStackTrace();
         }
@@ -90,5 +118,9 @@ public class RobotSLQ extends Robot {
 
     public static List<Obstacle> getObstacles() {
         return obstacles;
+    }
+
+    public static List<Waypoint> getWaypoints() {
+        return waypoints;
     }
 }
