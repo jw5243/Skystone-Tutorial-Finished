@@ -58,7 +58,7 @@ public enum MessageOption {
             return this;
         }
 
-        if(sendValue.getClass() != getSendClass()) {
+        if(sendValue.getClass() != getSendClass() && !getSendClass().isAssignableFrom(sendValue.getClass())) {
             throw new IllegalMessageTypeException(
                     "Cannot set send object to class of type " + sendValue.getClass().getSimpleName() + ". " + "Sending " + this +
                             " requires a send value of type " + getSendClass().getSimpleName());

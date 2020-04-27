@@ -8,16 +8,16 @@ import org.firstinspires.ftc.teamcode.lib.physics.MecanumDriveModel;
 import org.firstinspires.ftc.teamcode.lib.physics.MotorModel;
 
 public class MecanumDriveMPC {
-    private static final int    HORIZON_STEP = 1500;
-    private static final double dt           = 0.001d;
+    private static final int    HORIZON_STEP = 1800;
+    private static final double dt           = 0.0015d;
 
     private static final SimpleMatrix TERMINATION_COST = new SimpleMatrix(6, 6, false, new double[] {
-            100, 0, 0, 0, 0, 0,
-            0, 100, 0, 0, 0, 0,
-            0, 0, 100, 0, 0, 0,
-            0, 0, 0, 100, 0, 0,
-            0, 0, 0, 0, 100, 0,
-            0, 0, 0, 0, 0, 100
+            10, 0, 0, 0, 0, 0,
+            0, 10, 0, 0, 0, 0,
+            0, 0, 10, 0, 0, 0,
+            0, 0, 0, 10, 0, 0,
+            0, 0, 0, 0, 10, 0,
+            0, 0, 0, 0, 0, 10
     });
 
     private static final SimpleMatrix INTERMEDIARY_STATE_COST = new SimpleMatrix(6, 6, false, new double[] {
