@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
 import org.firstinspires.ftc.teamcode.main.Robot;
 
 public class MecanumRunnableSLQ implements Runnable {
-    private static final int MAX_ITERATIONS = 10;
+    private static final int MAX_ITERATIONS = 5;
     private TimeProfiler timeProfiler;
     private TimeProfiler policyTimeProfiler;
     private volatile boolean readyToUpdate;
@@ -64,7 +64,7 @@ public class MecanumRunnableSLQ implements Runnable {
             }
 
             try {
-                Thread.sleep(100);
+                Thread.sleep(1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

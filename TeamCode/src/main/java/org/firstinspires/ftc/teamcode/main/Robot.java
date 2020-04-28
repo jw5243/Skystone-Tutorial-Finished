@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.main;
 
 import org.ejml.simple.SimpleMatrix;
+import org.firstinspires.ftc.teamcode.debugging.ComputerDebugger;
+import org.firstinspires.ftc.teamcode.debugging.MessageOption;
 import org.firstinspires.ftc.teamcode.debugging.RobotDebug;
 import org.firstinspires.ftc.teamcode.lib.control.MecanumDriveMPC;
 import org.firstinspires.ftc.teamcode.lib.control.MecanumDriveSLQ;
@@ -22,6 +24,7 @@ public abstract class Robot implements RobotDebug {
     });
 
     private static boolean isUsingComputer;
+    private boolean stopTimer = false;
 
     private TimeProfiler timeProfiler;
     private double dt;
@@ -57,6 +60,10 @@ public abstract class Robot implements RobotDebug {
 
     @Override
     public void loop_debug() {
+        if(!stopTimer) {
+            ComputerDebugger.send(MessageOption.TIME);
+        }
+
         setDt(getTimeProfiler().getDeltaTime(TimeUnits.SECONDS, true));
         setState(getDriveModel().simulate(getState(), getInput(), getDt()));
     }
@@ -153,5 +160,9 @@ public abstract class Robot implements RobotDebug {
 
     public void setMecanumRunnableSLQ(MecanumRunnableSLQ mecanumRunnableSLQ) {
         this.mecanumRunnableSLQ = mecanumRunnableSLQ;
+    }
+
+    public void stopTimer() {
+        this.stopTimer = true;
     }
 }

@@ -5,6 +5,7 @@ import org.firstinspires.ftc.teamcode.lib.control.MecanumRunnableLQR;
 import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Rotation2d;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
+import org.firstinspires.ftc.teamcode.lib.util.TimeUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,20 +15,20 @@ public class RobotMPC extends Robot {
 
     {
         //positions.add(new Pose2d(120d, 120d, new Rotation2d(Math.toRadians(180d * 3), false)));
-        /*positions.add(new Pose2d(100d, 50d, new Rotation2d(Math.toRadians(-135d), false)));
+        positions.add(new Pose2d(100d, 50d, new Rotation2d(Math.toRadians(-135d), false)));
         //positions.add(new Pose2d(116d, 120d, new Rotation2d(Math.toRadians(0d), false)));
         positions.add(new Pose2d(104d, 120d, new Rotation2d(Math.toRadians(0d), false)));
         positions.add(new Pose2d(112d, 40d, new Rotation2d(Math.toRadians(-135), false)));
         positions.add(new Pose2d(104d, 120d, new Rotation2d(Math.toRadians(0d), false)));
         positions.add(new Pose2d(108d, 46d, new Rotation2d(Math.toRadians(-135), false)));
-        positions.add(new Pose2d(104d, 120d, new Rotation2d(Math.toRadians(0d), false)));*/
+        positions.add(new Pose2d(104d, 120d, new Rotation2d(Math.toRadians(0d), false)));
 
-        positions.add(new Pose2d(144d - 100d, 50d, new Rotation2d(Math.toRadians(- -135d - 180), false)));
+        /*positions.add(new Pose2d(144d - 100d, 50d, new Rotation2d(Math.toRadians(- -135d - 180), false)));
         positions.add(new Pose2d(144d - 104d, 120d, new Rotation2d(Math.toRadians(-0d - 180), false)));
         positions.add(new Pose2d(144d - 112d, 40d, new Rotation2d(Math.toRadians(- -135 - 180), false)));
         positions.add(new Pose2d(144d - 104d, 120d, new Rotation2d(Math.toRadians(-0d - 180), false)));
         positions.add(new Pose2d(144d - 108d, 46d, new Rotation2d(Math.toRadians(- -135 - 180), false)));
-        positions.add(new Pose2d(144d - 104d, 120d, new Rotation2d(Math.toRadians(-0d - 180), false)));
+        positions.add(new Pose2d(144d - 104d, 120d, new Rotation2d(Math.toRadians(-0d - 180), false)));*/
     }
 
     @Override
@@ -49,7 +50,10 @@ public class RobotMPC extends Robot {
 
         if(getFieldPosition().getTranslation().epsilonEquals(positions.get(0).getTranslation(), 0.1d) && positions.size() > 1) {
             positions.remove(0);
-            getMecanumDriveMPC().runLQR(getState());
+        }
+
+        if(!(positions.size() == 1 && getFieldPosition().getTranslation().epsilonEquals(positions.get(0).getTranslation(), 0.1d))) {
+            System.out.println(30d - TimeUtil.getCurrentRuntime(TimeUnits.SECONDS));
         }
     }
 }

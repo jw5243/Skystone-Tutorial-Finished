@@ -24,6 +24,7 @@ public enum MessageOption {
     LIFT_ACCELERATION(Double.class, "LiftAcceleration,"),
     LIFT_JERK(Double.class, "LiftJerk,"),
     LIFT_INPUT(Double.class, "LiftInput,"),
+    TIME(null, "Time,"),
     STOP(null, null);
 
     private static final String END_MESSAGE_TAG = "%";

@@ -27,19 +27,26 @@ public class RobotSLQ extends Robot {
 
     static {
         //positions.add(new Pose2d(120, 120, new Rotation2d(Math.toRadians(180d), false)));
-        positions.add(new Pose2d(100d, 50d, new Rotation2d(Math.toRadians(-135d), false)));
+        positions.add(new Pose2d(100d, 51d, new Rotation2d(Math.toRadians(-135d), false)));
         positions.add(new Pose2d(104d, 120d, new Rotation2d(Math.toRadians(0d), false)));
-        positions.add(new Pose2d(112d, 40d, new Rotation2d(Math.toRadians(-135), false)));
-        positions.add(new Pose2d(104d, 120d, new Rotation2d(Math.toRadians(0d), false)));
-        positions.add(new Pose2d(108d, 46d, new Rotation2d(Math.toRadians(-135), false)));
-        positions.add(new Pose2d(104d, 120d, new Rotation2d(Math.toRadians(0d), false)));
+        positions.add(new Pose2d(120d, 116d, new Rotation2d(Math.toRadians(-90d), false)));
+        positions.add(new Pose2d(100d, 26d, new Rotation2d(Math.toRadians(-135), false)));
+        positions.add(new Pose2d(106d, 116d, new Rotation2d(Math.toRadians(-90d), false)));
+        positions.add(new Pose2d(102d, 42d, new Rotation2d(Math.toRadians(-135), false)));
+        positions.add(new Pose2d(106d, 116d, new Rotation2d(Math.toRadians(-90d), false)));
+        positions.add(new Pose2d(102d, 34d, new Rotation2d(Math.toRadians(-135), false)));
+        positions.add(new Pose2d(106d, 116d, new Rotation2d(Math.toRadians(-90d), false)));
+        positions.add(new Pose2d(102d, 18d, new Rotation2d(Math.toRadians(-135), false)));
+        positions.add(new Pose2d(106d, 116d, new Rotation2d(Math.toRadians(-90d), false)));
+        positions.add(new Pose2d(102d, 12d, new Rotation2d(Math.toRadians(-135), false)));
+        positions.add(new Pose2d(106d, 116d, new Rotation2d(Math.toRadians(-90d), false)));
+        positions.add(new Pose2d(110d, 72d, new Rotation2d(Math.toRadians(-90d), false)));
 
-        obstacles.add(new Obstacle(94d, 64d, 3d, 0.05d));
-        //obstacles.add(new Obstacle(94d, 70d, 3d, 0.01d));
-        //obstacles.add(new Obstacle(94d, 76d, 3d, 0.01d));
-        obstacles.add(new Obstacle(94d, 82d, 3d, 0.1d));
+        obstacles.add(new Obstacle(92d, 65d, 3d, 25d));
+        obstacles.add(new Obstacle(92d, 80d, 3d, 100d));
+        obstacles.add(new Obstacle(144d - 9d, 90d, 9d, 200d));
 
-        //obstacles.add(new Obstacle(88d, 45d, 3d, 1d));
+        //obstacles.add(new Obstacle(88d, 45d, 3d, 0.5d));
         //obstacles.add(new Obstacle(67d, 51d, 3d, 1d));
 
         /*waypoints.add(new Waypoint(new SimpleMatrix(6, 6, true, new double[] {
@@ -81,6 +88,11 @@ public class RobotSLQ extends Robot {
         if(getFieldPosition().getTranslation().epsilonEquals(positions.get(0).getTranslation(), 2d) && positions.size() > 1) {
             positions.remove(0);
             getMecanumRunnableSLQ().setDesiredState(positions.get(0));
+        } else if(getFieldPosition().getTranslation().epsilonEquals(positions.get(0).getTranslation(), 1d) && positions.size() == 1) {
+            stopTimer();
+            setInput(new SimpleMatrix(4, 1, true, new double[] {
+                    0, 0, 0, 0
+            }));
         }
 
         try {
@@ -94,6 +106,10 @@ public class RobotSLQ extends Robot {
                                 getMecanumDriveSLQ().getSimulatedStates()[i + 1].get(2) / 0.0254d
                         ))
                 ));
+            }
+
+            for(int i = 0; i < positions.size(); i++) {
+                //ComputerDebugger.send(MessageOption.KEY_POINT.setSendValue(positions.get(i).getTranslation()));
             }
 
             for(int j = 0; j < getObstacles().size(); j++) {

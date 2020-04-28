@@ -112,6 +112,8 @@ public class ComputerDebugger {
             getMessageBuilder().append(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append((double)(messageOption.getSendValue()));
         } else if(messageOption.equals(MessageOption.LIFT_INPUT)) {
             getMessageBuilder().append(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS)).append(",").append((double)(messageOption.getSendValue()));
+        } else if(messageOption.equals(MessageOption.TIME)) {
+            getMessageBuilder().append(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS));
         } else {
             getUdpServer().close();
         }

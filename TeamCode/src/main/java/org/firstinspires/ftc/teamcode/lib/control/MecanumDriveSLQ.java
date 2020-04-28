@@ -189,14 +189,12 @@ public class MecanumDriveSLQ {
             try {
                 SimpleMatrix inverse = MecanumDriveMPC.getInputCost().plus(B.transpose().mult(P[timeStep].mult(B))).invert();
                 K = inverse.mult(B.transpose()).mult(P[timeStep]).mult(A).negative();
+                return MecanumDriveMPC.limitInput(getSimulatedInputs()[timeStep].plus(K.mult(state.minus(getSimulatedStates()[timeStep]))).minus(
+                        MecanumDriveMPC.getInputCost().plus(getB()[timeStep].transpose().mult(P[timeStep])
+                                .mult(B)).invert().mult(B.transpose()).mult(l[timeStep]).scale(1 / 2d)));
             } catch(SingularMatrixException e) {
                 P[timeStep].print();
-                K = new SimpleMatrix(4, 6, true, new double[] {
-                        0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0
-                });
+                l[timeStep].print();
             }
 
             /*SimpleMatrix H = MecanumDriveMPC.getInputCost().plus(B.transpose().mult(P[timeStep].mult(B)));
@@ -206,11 +204,6 @@ public class MecanumDriveSLQ {
             return MecanumDriveMPC.limitInput(getSimulatedInputs()[timeStep].plus(l.scale(alpha)).plus(K.mult(state.minus(getSimulatedStates()[timeStep]))));*/
 
             //return MecanumDriveMPC.limitInput(getSimulatedInputs()[timeStep].plus(l[timeStep].scale(alpha)).plus(K[timeStep].mult(state.minus(getSimulatedStates()[timeStep]))));
-
-            return MecanumDriveMPC.limitInput(getSimulatedInputs()[timeStep].plus(K.mult(state.minus(getSimulatedStates()[timeStep]))).minus(
-                    MecanumDriveMPC.getInputCost().plus(getB()[timeStep].transpose().mult(P[timeStep])
-                            .mult(B)).invert().mult(B.transpose()).mult(l[timeStep]).scale(1 / 2d)
-            ));
         } else if(timeStep < getMecanumDriveMPC().getK().length - 1) {
             return getMecanumDriveMPC().getOptimalInput(timeStep, state, getDesiredState());
         }
