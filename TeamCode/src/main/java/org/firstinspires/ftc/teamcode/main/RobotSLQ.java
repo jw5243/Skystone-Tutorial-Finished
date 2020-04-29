@@ -85,7 +85,7 @@ public class RobotSLQ extends Robot {
         setInput(getMecanumDriveSLQ().getOptimalInput((int)((getMecanumRunnableSLQ().getTimeProfiler().getDeltaTime(TimeUnits.SECONDS, false) +
                 getMecanumRunnableSLQ().getPolicyLag()) / MecanumDriveMPC.getDt()), getState(), 0.001d));
 
-        if(getFieldPosition().getTranslation().epsilonEquals(positions.get(0).getTranslation(), 2d) && positions.size() > 1) {
+        if(getFieldPosition().getTranslation().epsilonEquals(positions.get(0).getTranslation(), 6d) && positions.size() > 1) {
             positions.remove(0);
             getMecanumRunnableSLQ().setDesiredState(positions.get(0));
         } else if(getFieldPosition().getTranslation().epsilonEquals(positions.get(0).getTranslation(), 1d) && positions.size() == 1) {

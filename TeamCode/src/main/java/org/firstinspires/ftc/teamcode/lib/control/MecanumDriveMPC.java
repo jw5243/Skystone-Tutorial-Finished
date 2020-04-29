@@ -22,7 +22,7 @@ public class MecanumDriveMPC {
 
     private static final SimpleMatrix INTERMEDIARY_STATE_COST = new SimpleMatrix(6, 6, false, new double[] {
             1000, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0,
+            0, 50, 0, 0, 0, 0,
             0, 0, 100, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 10, 0,
