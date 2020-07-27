@@ -28,7 +28,7 @@ public class ComputerDebugger {
 
     public static void main(String[] args) {
         Robot.setUsingComputer(true);
-        Robot robot = new RobotSLQ();
+        Robot robot = new RobotMPC();
         init(robot);
         robot.init_debug();
 
@@ -51,9 +51,9 @@ public class ComputerDebugger {
                 Thread.sleep(10);
 
                 send(MessageOption.ROBOT_LOCATION);
-                //send(MessageOption.LOG_POINT.setSendValue(robot.getFieldPosition().getTranslation()));
+                send(MessageOption.LOG_POINT.setSendValue(robot.getFieldPosition().getTranslation()));
                 sendMessage();
-            } catch (InterruptedException e) { //| IllegalMessageTypeException e) {
+            } catch (InterruptedException | IllegalMessageTypeException e) {
                 e.printStackTrace();
             }
         }

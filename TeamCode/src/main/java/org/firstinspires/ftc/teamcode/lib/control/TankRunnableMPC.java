@@ -4,21 +4,21 @@ import org.ejml.simple.SimpleMatrix;
 import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.lib.util.TimeProfiler;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
-import org.firstinspires.ftc.teamcode.main.Robot;
+import org.firstinspires.ftc.teamcode.main.TankDriveRobot;
 
-public class MecanumRunnableSLQ implements Runnable {
-    private static final int MAX_ITERATIONS = 5;
+public class TankRunnableMPC implements Runnable {
+    private static final int MAX_ITERATIONS = 25;
     private TimeProfiler timeProfiler;
     private TimeProfiler policyTimeProfiler;
     private volatile boolean readyToUpdate;
     private boolean stop;
 
-    private MecanumDriveSLQ slqDrivetrain;
+    private TankDriveMPC slqDrivetrain;
     private double policyLag;
 
     private SimpleMatrix desiredState;
 
-    public MecanumRunnableSLQ() {
+    public TankRunnableMPC() {
         setTimeProfiler(new TimeProfiler(false));
         setPolicyTimeProfiler(new TimeProfiler(false));
         setReadyToUpdate(false);
@@ -26,17 +26,17 @@ public class MecanumRunnableSLQ implements Runnable {
         setPolicyLag(0d);
     }
 
-    public MecanumDriveSLQ slq() {
+    public TankDriveMPC slq() {
         return slq(getDesiredState());
     }
 
-    public MecanumDriveSLQ slq(SimpleMatrix desiredState) {
-        MecanumDriveSLQ slq = new MecanumDriveSLQ(new MecanumDriveMPC(Robot.getDriveModel()));
+    public TankDriveMPC slq(SimpleMatrix desiredState) {
+        TankDriveMPC slq = new TankDriveMPC(new TankDriveILQR(TankDriveRobot.getTankDriveModel()));
         if(getDesiredState() == null) {
-            setDesiredState(Robot.getInitialState());
+            setDesiredState(TankDriveRobot.getTankState());
         }
 
-        slq.initialIteration(Robot.getState(), desiredState);
+        slq.initialIteration(TankDriveRobot.getTankState(), desiredState);
         for(int i = 0; i < getMaxIterations(); i++) {
             slq.simulateIteration();
             slq.runSLQ();
@@ -64,7 +64,7 @@ public class MecanumRunnableSLQ implements Runnable {
             }
 
             try {
-                Thread.sleep(1);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -73,7 +73,7 @@ public class MecanumRunnableSLQ implements Runnable {
 
     public void updateSLQ() {
         if(isReadyToUpdate() && getSlqDrivetrain() != null) {
-            Robot.setMecanumDriveSLQ(getSlqDrivetrain());
+            TankDriveRobot.setTankDriveMPC(getSlqDrivetrain());
             setPolicyLag(getPolicyTimeProfiler().getDeltaTime(TimeUnits.SECONDS, true));
             setReadyToUpdate(false);
         }
@@ -111,11 +111,11 @@ public class MecanumRunnableSLQ implements Runnable {
         this.stop = stop;
     }
 
-    public MecanumDriveSLQ getSlqDrivetrain() {
+    public TankDriveMPC getSlqDrivetrain() {
         return slqDrivetrain;
     }
 
-    public void setSlqDrivetrain(MecanumDriveSLQ slqDrivetrain) {
+    public void setSlqDrivetrain(TankDriveMPC slqDrivetrain) {
         this.slqDrivetrain = slqDrivetrain;
     }
 
@@ -140,9 +140,8 @@ public class MecanumRunnableSLQ implements Runnable {
     }
 
     public void setDesiredState(Pose2d desiredPose) {
-        this.desiredState = new SimpleMatrix(6, 1, true, new double[] {
-                desiredPose.getTranslation().x() * 0.0254d, 0d, desiredPose.getTranslation().y() * 0.0254d,
-                0d, desiredPose.getRotation().getRadians(), 0d
+        this.desiredState = new SimpleMatrix(5, 1, true, new double[] {
+                desiredPose.getTranslation().x() * 0.0254d, desiredPose.getTranslation().y() * 0.0254d, desiredPose.getRotation().getRadians(), 0d, 0d
         });
     }
 }

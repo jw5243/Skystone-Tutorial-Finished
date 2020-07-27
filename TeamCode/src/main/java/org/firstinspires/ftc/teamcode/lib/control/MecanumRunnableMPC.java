@@ -1,19 +1,24 @@
 package org.firstinspires.ftc.teamcode.lib.control;
 
+import org.ejml.simple.SimpleMatrix;
+import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.lib.util.TimeProfiler;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
 import org.firstinspires.ftc.teamcode.main.Robot;
 
-public class MecanumRunnableLQR implements Runnable {
+public class MecanumRunnableMPC implements Runnable {
+    private static final int MAX_ITERATIONS = 5;
     private TimeProfiler timeProfiler;
     private TimeProfiler policyTimeProfiler;
-    private boolean readyToUpdate;
+    private volatile boolean readyToUpdate;
     private boolean stop;
 
-    private MecanumDriveILQR lqrDrivetrain;
+    private MecanumDriveMPC slqDrivetrain;
     private double policyLag;
 
-    public MecanumRunnableLQR() {
+    private SimpleMatrix desiredState;
+
+    public MecanumRunnableMPC() {
         setTimeProfiler(new TimeProfiler(false));
         setPolicyTimeProfiler(new TimeProfiler(false));
         setReadyToUpdate(false);
@@ -21,10 +26,24 @@ public class MecanumRunnableLQR implements Runnable {
         setPolicyLag(0d);
     }
 
-    public MecanumDriveILQR lqr() {
-        MecanumDriveILQR mpc = new MecanumDriveILQR(Robot.getDriveModel());
-        mpc.runLQR(Robot.getState());
-        return mpc;
+    public MecanumDriveMPC slq() {
+        return slq(getDesiredState());
+    }
+
+    public MecanumDriveMPC slq(SimpleMatrix desiredState) {
+        MecanumDriveMPC slq = new MecanumDriveMPC(new MecanumDriveILQR(Robot.getDriveModel()));
+        if(getDesiredState() == null) {
+            setDesiredState(Robot.getInitialState());
+        }
+
+        slq.initialIteration(Robot.getState(), desiredState);
+        for(int i = 0; i < getMaxIterations(); i++) {
+            slq.simulateIteration();
+            slq.runSLQ();
+        }
+
+        slq.simulateIteration();
+        return slq;
     }
 
     @Override
@@ -33,7 +52,7 @@ public class MecanumRunnableLQR implements Runnable {
         while(!isStop()) {
             if(!isReadyToUpdate()) {
                 getPolicyTimeProfiler().start();
-                setLqrDrivetrain(lqr());
+                setSlqDrivetrain(slq(getDesiredState()));
                 getTimeProfiler().update(true);
                 try {
                     Thread.sleep(10);
@@ -52,9 +71,9 @@ public class MecanumRunnableLQR implements Runnable {
         }
     }
 
-    public void updateMPC() {
-        if(isReadyToUpdate() && getLqrDrivetrain() != null) {
-            Robot.setMecanumDriveILQR(getLqrDrivetrain());
+    public void updateSLQ() {
+        if(isReadyToUpdate() && getSlqDrivetrain() != null) {
+            Robot.setMecanumDriveMPC(getSlqDrivetrain());
             setPolicyLag(getPolicyTimeProfiler().getDeltaTime(TimeUnits.SECONDS, true));
             setReadyToUpdate(false);
         }
@@ -92,12 +111,12 @@ public class MecanumRunnableLQR implements Runnable {
         this.stop = stop;
     }
 
-    public MecanumDriveILQR getLqrDrivetrain() {
-        return lqrDrivetrain;
+    public MecanumDriveMPC getSlqDrivetrain() {
+        return slqDrivetrain;
     }
 
-    public void setLqrDrivetrain(MecanumDriveILQR lqrDrivetrain) {
-        this.lqrDrivetrain = lqrDrivetrain;
+    public void setSlqDrivetrain(MecanumDriveMPC slqDrivetrain) {
+        this.slqDrivetrain = slqDrivetrain;
     }
 
     public double getPolicyLag() {
@@ -106,5 +125,24 @@ public class MecanumRunnableLQR implements Runnable {
 
     public void setPolicyLag(double policyLag) {
         this.policyLag = policyLag;
+    }
+
+    public static int getMaxIterations() {
+        return MAX_ITERATIONS;
+    }
+
+    public SimpleMatrix getDesiredState() {
+        return desiredState;
+    }
+
+    public void setDesiredState(SimpleMatrix desiredState) {
+        this.desiredState = desiredState;
+    }
+
+    public void setDesiredState(Pose2d desiredPose) {
+        this.desiredState = new SimpleMatrix(6, 1, true, new double[] {
+                desiredPose.getTranslation().x() * 0.0254d, 0d, desiredPose.getTranslation().y() * 0.0254d,
+                0d, desiredPose.getRotation().getRadians(), 0d
+        });
     }
 }

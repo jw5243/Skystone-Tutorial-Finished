@@ -249,6 +249,11 @@ public class MecanumDriveModel {
         }).divide(wheelRadius);
     }
 
+    public SimpleMatrix updateWheelAngularPositions(SimpleMatrix angularPositions, SimpleMatrix state, double dt) {
+        SimpleMatrix wheelVelocities = getWheelVelocities(state);
+        return angularPositions.plus(wheelVelocities.scale(dt));
+    }
+
     private SimpleMatrix getMotorVelocities(SimpleMatrix state) {
         return getWheelVelocities(state).scale(getCompoundGearRatio());
     }

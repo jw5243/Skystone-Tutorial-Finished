@@ -2,18 +2,19 @@ package org.firstinspires.ftc.teamcode.lib.control;
 
 import org.firstinspires.ftc.teamcode.lib.util.TimeProfiler;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
-import org.firstinspires.ftc.teamcode.main.Robot;
+import org.firstinspires.ftc.teamcode.main.TankDriveAutonomousILQR;
+import org.firstinspires.ftc.teamcode.main.TankDriveRobot;
 
-public class MecanumRunnableLQR implements Runnable {
+public class TankRunnableLQR implements Runnable {
     private TimeProfiler timeProfiler;
     private TimeProfiler policyTimeProfiler;
     private boolean readyToUpdate;
     private boolean stop;
 
-    private MecanumDriveILQR lqrDrivetrain;
+    private TankDriveILQR lqrDrivetrain;
     private double policyLag;
 
-    public MecanumRunnableLQR() {
+    public TankRunnableLQR() {
         setTimeProfiler(new TimeProfiler(false));
         setPolicyTimeProfiler(new TimeProfiler(false));
         setReadyToUpdate(false);
@@ -21,9 +22,9 @@ public class MecanumRunnableLQR implements Runnable {
         setPolicyLag(0d);
     }
 
-    public MecanumDriveILQR lqr() {
-        MecanumDriveILQR mpc = new MecanumDriveILQR(Robot.getDriveModel());
-        mpc.runLQR(Robot.getState());
+    public TankDriveILQR lqr() {
+        TankDriveILQR mpc = new TankDriveILQR(TankDriveRobot.getTankDriveModel());
+        mpc.runLQR(TankDriveRobot.getTankState(), TankDriveAutonomousILQR.getPositions().get(0));
         return mpc;
     }
 
@@ -54,7 +55,7 @@ public class MecanumRunnableLQR implements Runnable {
 
     public void updateMPC() {
         if(isReadyToUpdate() && getLqrDrivetrain() != null) {
-            Robot.setMecanumDriveILQR(getLqrDrivetrain());
+            TankDriveRobot.setTankDriveILQR(getLqrDrivetrain());
             setPolicyLag(getPolicyTimeProfiler().getDeltaTime(TimeUnits.SECONDS, true));
             setReadyToUpdate(false);
         }
@@ -92,11 +93,11 @@ public class MecanumRunnableLQR implements Runnable {
         this.stop = stop;
     }
 
-    public MecanumDriveILQR getLqrDrivetrain() {
+    public TankDriveILQR getLqrDrivetrain() {
         return lqrDrivetrain;
     }
 
-    public void setLqrDrivetrain(MecanumDriveILQR lqrDrivetrain) {
+    public void setLqrDrivetrain(TankDriveILQR lqrDrivetrain) {
         this.lqrDrivetrain = lqrDrivetrain;
     }
 

@@ -92,7 +92,7 @@ public class TrapezoidalMotionProfileGenerator implements IMotionProfile {
 
     @Override
     public double getDuration() {
-        return getDuration();
+        return duration;
     }
 
     @Override
