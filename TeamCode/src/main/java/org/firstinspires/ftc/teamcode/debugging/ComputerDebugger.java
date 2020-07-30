@@ -28,7 +28,7 @@ public class ComputerDebugger {
 
     public static void main(String[] args) {
         Robot.setUsingComputer(true);
-        Robot robot = new RobotMPC();
+        Robot robot = new CascadeLinearlyExtendingRobotPractice();
         init(robot);
         robot.init_debug();
 

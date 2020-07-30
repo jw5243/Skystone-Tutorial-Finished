@@ -31,19 +31,19 @@ public class RobotMPC extends Robot {
         positions.add(new Pose2d(38d, 144d - 11d, new Rotation2d(Math.toRadians(-90d), false)));
         positions.add(new Pose2d(38d, 10d, new Rotation2d(Math.toRadians(-90d), false)));
         positions.add(new Pose2d(38d, 144d - 24d, new Rotation2d(Math.toRadians(-90d), false)));
-        positions.add(new Pose2d(46d, 44d, new Rotation2d(Math.toRadians(-45d), false)));
+        positions.add(new Pose2d(46d, 40d, new Rotation2d(Math.toRadians(-45d), false)));
         positions.add(new Pose2d(40d, 144d - 24d, new Rotation2d(Math.toRadians(-180d), false)));
-        positions.add(new Pose2d(36d, 144d - 36d, new Rotation2d(Math.toRadians(-90), false)));
+        positions.add(new Pose2d(36d, 144d - 40d, new Rotation2d(Math.toRadians(-90), false)));
         positions.add(new Pose2d(46d, 34d, new Rotation2d(Math.toRadians(-45d), false)));
-        positions.add(new Pose2d(30d, 144d - 19d - 9d, new Rotation2d(Math.toRadians(-90), false)));
+        positions.add(new Pose2d(30d, 144d - 19d - 9d - 6d, new Rotation2d(Math.toRadians(-90), false)));
         positions.add(new Pose2d(46d, 26d, new Rotation2d(Math.toRadians(-45d), false)));
-        positions.add(new Pose2d(30d, 144d - 19d - 9d, new Rotation2d(Math.toRadians(-90), false)));
+        positions.add(new Pose2d(30d, 144d - 19d - 9d - 6d, new Rotation2d(Math.toRadians(-90), false)));
         positions.add(new Pose2d(46d, 14d, new Rotation2d(Math.toRadians(-45d), false)));
-        positions.add(new Pose2d(30d, 144d - 19d - 9d, new Rotation2d(Math.toRadians(-90), false)));
+        positions.add(new Pose2d(30d, 144d - 19d - 9d - 6d, new Rotation2d(Math.toRadians(-90), false)));
         positions.add(new Pose2d(110d, 72d, new Rotation2d(Math.toRadians(-90d), false)));
 
-        obstacles.add(new Obstacle(144d - 94d, 63d, 3d, 300d));
-        obstacles.add(new Obstacle(144d - 94d, 82d, 3d, 300d));
+        obstacles.add(new Obstacle(144d - 99d, 61d, 3d, 300d));
+        obstacles.add(new Obstacle(144d - 99d, 84d, 3d, 300d));
         obstacles.add(new Obstacle(144d - (144d - 9d), 90d, 10.5d, 300d));
 
         //positions.add(new Pose2d(120, 120, new Rotation2d(Math.toRadians(180d), false)));
@@ -145,10 +145,10 @@ public class RobotMPC extends Robot {
         setInput(getMecanumDriveMPC().getOptimalInput((int)((getMecanumRunnableMPC().getTimeProfiler().getDeltaTime(TimeUnits.SECONDS, false) +
                 getMecanumRunnableMPC().getPolicyLag()) / MecanumDriveILQR.getDt()), getState(), 0.001d));
 
-        if(getFieldPosition().getTranslation().epsilonEquals(positions.get(0).getTranslation(), 2d) && positions.size() > 1) {
+        if(getFieldPosition().getTranslation().epsilonEquals(positions.get(0).getTranslation(), 2.5d) && positions.size() > 1) {
             positions.remove(0);
             getMecanumRunnableMPC().setDesiredState(positions.get(0));
-        } else if(getFieldPosition().getTranslation().epsilonEquals(positions.get(0).getTranslation(), 0.25d) && positions.size() == 1) {
+        } else if(getFieldPosition().getTranslation().epsilonEquals(positions.get(0).getTranslation(), 1d) && positions.size() == 1) {
             stopTimer();
             setInput(new SimpleMatrix(4, 1, true, new double[] {
                     0, 0, 0, 0
