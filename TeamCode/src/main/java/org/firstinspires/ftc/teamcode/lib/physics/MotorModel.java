@@ -140,7 +140,7 @@ public class MotorModel {
         System.out.println("Time\tθ\tω\tα");
         final double dt = 0.001d;
         for(int i = 1; i < 500; i++) {
-            motorModel.update(dt, 1d);
+            motorModel.update(dt, 12d);
             System.out.print((int) (dt * i * 1000d) / 1000d + "\t");
             System.out.println(motorModel);
         }

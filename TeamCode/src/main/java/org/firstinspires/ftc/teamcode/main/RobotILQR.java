@@ -13,8 +13,8 @@ public class RobotILQR extends Robot {
     private List<Pose2d> positions = new ArrayList<>();
 
     {
-        //positions.add(new Pose2d(120d, 120d, new Rotation2d(Math.toRadians(180d * 3), false)));
-        positions.add(new Pose2d(100d, 51d, new Rotation2d(Math.toRadians(-135d), false)));
+        positions.add(new Pose2d(120d, 120d, new Rotation2d(Math.toRadians(180d), false)));
+        /*positions.add(new Pose2d(100d, 51d, new Rotation2d(Math.toRadians(-135d), false)));
         positions.add(new Pose2d(116d, 80d, new Rotation2d(Math.toRadians(-90d), false)));
         positions.add(new Pose2d(104d, 120d, new Rotation2d(Math.toRadians(0d), false)));
         positions.add(new Pose2d(120d, 116d, new Rotation2d(Math.toRadians(-90d), false)));
@@ -28,7 +28,7 @@ public class RobotILQR extends Robot {
         positions.add(new Pose2d(106d, 116d, new Rotation2d(Math.toRadians(-90d), false)));
         positions.add(new Pose2d(102d, 12d, new Rotation2d(Math.toRadians(-135), false)));
         positions.add(new Pose2d(106d, 116d, new Rotation2d(Math.toRadians(-90d), false)));
-        positions.add(new Pose2d(110d, 72d, new Rotation2d(Math.toRadians(-90d), false)));
+        positions.add(new Pose2d(110d, 72d, new Rotation2d(Math.toRadians(-90d), false)));*/
 
         /*positions.add(new Pose2d(144d - 100d, 51d, new Rotation2d(Math.toRadians(135d - 180d), false)));
         positions.add(new Pose2d(144d - 116d, 80d, new Rotation2d(Math.toRadians(0d - 180d), false)));

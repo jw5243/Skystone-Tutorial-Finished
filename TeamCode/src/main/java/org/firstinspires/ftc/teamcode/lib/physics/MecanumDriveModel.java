@@ -115,14 +115,14 @@ public class MecanumDriveModel {
         });
 
         SimpleMatrix input = new SimpleMatrix(4, 1, false, new double[] {
-                1, 1, 1, 1
+                1, 0, 1, 0
         });
 
         System.out.println("Time\tx\tVx\ty\tVy\tpsi\tVpsi");
         System.out.println(0 + "\t" + state.get(0) + "\t" + state.get(1) + "\t" + state.get(2) + "\t" + state.get(3) + "\t" + state.get(4) + "\t" + state.get(5));
         for(int i = 1; i <= 3000; i++) {
-            //state = model.simulate(state, input);
-            state = model.stateTransitionMatrix(state, true).mult(state).plus(model.inputTransitionMatrix(state, false).mult(input));
+            state = model.simulate(state, input, model.dt);
+            //state = model.stateTransitionMatrix(state, true).mult(state).plus(model.inputTransitionMatrix(state, false).mult(input));
             if(i % 10 == 0) {
                 System.out.println((int) (i * model.dt * 100000) / 100000d + "\t" + state.get(0) / 0.0254d + "\t" + state.get(1) / 0.0254d + "\t" + state.get(2) / 0.0254d + "\t" + state.get(3) / 0.0254d +
                         "\t" + state.get(4) + "\t" + state.get(5));
@@ -260,7 +260,7 @@ public class MecanumDriveModel {
 
     private SimpleMatrix getMotorTorques(SimpleMatrix state, SimpleMatrix input) {
         //return input.scale(nominalVoltage).plus(getMotorVelocities(state).scale(internalGearRatio * kV)).scale(efficiency * internalGearRatio * kT / resistance);
-        return input.scale(getNominalVoltage()).minus(getMotorVelocities(state).scale(getkV() * getCompoundGearRatio()))
+        return input.scale(getNominalVoltage()).minus(getMotorVelocities(state).scale(getkV()))
                 .scale(getkT() * getEfficiency() * getCompoundGearRatio() / getResistance());
     }
 
@@ -286,6 +286,7 @@ public class MecanumDriveModel {
 
     public SimpleMatrix simulate(SimpleMatrix state, SimpleMatrix input, double dt) {
         SimpleMatrix torques = getMotorTorques(state, input);
+
         double heading = state.get(4);
 
         coefficientManager.updateVariables(heading);
@@ -327,16 +328,16 @@ public class MecanumDriveModel {
     }
 
     public SimpleMatrix simulateRungeKutta(SimpleMatrix state, SimpleMatrix input, double dt) {
-        SimpleMatrix A = stateTransitionMatrix(state, dt, true);
+        /*SimpleMatrix A = stateTransitionMatrix(state, dt, true);
         SimpleMatrix B = inputTransitionMatrix(state, dt, false);
         SimpleMatrix k1 = A.mult(state).plus(B.mult(input));
         SimpleMatrix k2 = A.mult(state.plus(k1.scale(1 / 2d))).plus(B.mult(input));
         SimpleMatrix k3 = A.mult(state.plus(k2.scale(1 / 2d))).plus(B.mult(input));
-        SimpleMatrix k4 = A.mult(state.plus(k3)).plus(B.mult(input));
-        //SimpleMatrix k1 = simulate(state, input, dt);
-        //SimpleMatrix k2 = simulate(state.plus(k1.scale(dt / 2)), input, dt / 2);
-        //SimpleMatrix k3 = simulate(state.plus(k2.scale(dt / 2)), input, dt / 2);
-        //SimpleMatrix k4 = simulate(state.plus(k3.scale(dt)), input, dt);
+        SimpleMatrix k4 = A.mult(state.plus(k3)).plus(B.mult(input));*/
+        SimpleMatrix k1 = simulate(state, input, dt);
+        SimpleMatrix k2 = simulate(state.plus(k1.scale(dt / 2)), input, dt / 2);
+        SimpleMatrix k3 = simulate(state.plus(k2.scale(dt / 2)), input, dt / 2);
+        SimpleMatrix k4 = simulate(state.plus(k3.scale(dt)), input, dt);
         return state.plus(k1.plus(k2.scale(2).plus(k3.scale(2).plus(k4))).scale(dt / 6));
     }
 

@@ -55,7 +55,7 @@ public class MecanumRunnableMPC implements Runnable {
                 setSlqDrivetrain(slq(getDesiredState()));
                 getTimeProfiler().update(true);
                 try {
-                    Thread.sleep(10);
+                    Thread.sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
