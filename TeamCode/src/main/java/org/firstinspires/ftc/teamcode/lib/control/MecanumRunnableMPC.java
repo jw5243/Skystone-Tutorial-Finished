@@ -18,6 +18,9 @@ public class MecanumRunnableMPC implements Runnable {
 
     private SimpleMatrix desiredState;
 
+    private static SimpleMatrix stateCost;
+    private static SimpleMatrix inputCost;
+
     public MecanumRunnableMPC() {
         setTimeProfiler(new TimeProfiler(false));
         setPolicyTimeProfiler(new TimeProfiler(false));
@@ -32,6 +35,14 @@ public class MecanumRunnableMPC implements Runnable {
 
     public MecanumDriveMPC slq(SimpleMatrix desiredState) {
         MecanumDriveMPC slq = new MecanumDriveMPC(new MecanumDriveILQR(Robot.getDriveModel()));
+        if(getStateCost() != null) {
+            MecanumDriveILQR.setIntermediaryStateCost(getStateCost());
+        }
+
+        if(getInputCost() != null) {
+            MecanumDriveILQR.setInputCost(getInputCost());
+        }
+
         if(getDesiredState() == null) {
             setDesiredState(Robot.getInitialState());
         }
@@ -144,5 +155,21 @@ public class MecanumRunnableMPC implements Runnable {
                 desiredPose.getTranslation().x() * 0.0254d, 0d, desiredPose.getTranslation().y() * 0.0254d,
                 0d, desiredPose.getRotation().getRadians(), 0d
         });
+    }
+
+    public static SimpleMatrix getStateCost() {
+        return stateCost;
+    }
+
+    public static void setStateCost(SimpleMatrix stateCost) {
+        MecanumRunnableMPC.stateCost = stateCost;
+    }
+
+    public static SimpleMatrix getInputCost() {
+        return inputCost;
+    }
+
+    public static void setInputCost(SimpleMatrix inputCost) {
+        MecanumRunnableMPC.inputCost = inputCost;
     }
 }

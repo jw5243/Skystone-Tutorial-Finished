@@ -21,11 +21,11 @@ import org.firstinspires.ftc.teamcode.lib.util.TimeUtil;
 public abstract class Robot implements RobotDebug {
     private static final SimpleMatrix INITIAL_STATE = new SimpleMatrix(6, 1, false, new double[] {
             //(12d * 12d - 9d) * 0.0254d, 0d, 48d * 0.0254d, 0d, Math.toRadians(-180d), 0d
-            9d * 0.0254d, 0d, 9d * 0.0254d, 0d, Math.toRadians(0d), 0d
+            //9d * 0.0254d, 0d, 9d * 0.0254d, 0d, Math.toRadians(0d), 0d
 
             //9d * 0.0254d, 0d, 48d * 0.0254d, 0d, Math.toRadians(0d), 0d
             //9d * 0.0254d, 0d, (4d + 8d * 5d) * 0.0254d, 0d, Math.toRadians(0d), 0d
-            //9d * 0.0254d, 0d, 40d * 0.0254d, 0d, Math.toRadians(-90d), 0d
+            9d * 0.0254d, 0d, 40d * 0.0254d, 0d, Math.toRadians(-90d), 0d
     });
 
     private static final Translation2d frontLeftWheel  = new Translation2d(-0.18d, 0.1805d);
@@ -33,7 +33,7 @@ public abstract class Robot implements RobotDebug {
     private static final Translation2d backLeftWheel   = new Translation2d(-0.1805d, -0.15d);
     private static final Translation2d backRightWheel  = new Translation2d(0.18d, -0.1505d);
 
-    private static boolean isUsingComputer;
+    private static boolean isUsingComputer = true;
     private boolean stopTimer = false;
 
     private TimeProfiler timeProfiler;
@@ -80,7 +80,7 @@ public abstract class Robot implements RobotDebug {
 
         setDt(getTimeProfiler().getDeltaTime(TimeUnits.SECONDS, true));
         //setDt(1 / 240d);
-        setState(getDriveModel().simulate(getState(), getInput(), getDt()));
+        setState(getDriveModel().simulate(getState(), getInput(), getDt(), 10d));
         //setState(getDriveModel().simulateDynamics(getState(), getInput(), getDt()));
 
         /*if(!stopTimer) {

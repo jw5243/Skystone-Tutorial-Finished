@@ -8,10 +8,10 @@ import org.firstinspires.ftc.teamcode.lib.physics.MecanumDriveModel;
 import org.firstinspires.ftc.teamcode.lib.physics.MotorModel;
 
 public class MecanumDriveILQR {
-    private static final int    HORIZON_STEP = 1500;//1800;
+    private static final int    HORIZON_STEP = 1000;//1800;
     private static final double dt           = 0.002d;
 
-    private static final SimpleMatrix TERMINATION_COST = new SimpleMatrix(6, 6, false, new double[] {
+    private static SimpleMatrix TERMINATION_COST = new SimpleMatrix(6, 6, false, new double[] {
             100, 0, 0, 0, 0, 0,
             0, 100, 0, 0, 0, 0,
             0, 0, 100, 0, 0, 0,
@@ -20,7 +20,7 @@ public class MecanumDriveILQR {
             0, 0, 0, 0, 0, 100
     });
 
-    private static final SimpleMatrix INTERMEDIARY_STATE_COST = new SimpleMatrix(6, 6, false, new double[] {
+    private static SimpleMatrix INTERMEDIARY_STATE_COST = new SimpleMatrix(6, 6, false, new double[] {
             1000, 0, 0, 0, 0, 0,
             0, 50, 0, 0, 0, 0,
             0, 0, 100, 0, 0, 0,
@@ -29,7 +29,7 @@ public class MecanumDriveILQR {
             0, 0, 0, 0, 0, 0,
     });
 
-    private static final SimpleMatrix INPUT_COST = new SimpleMatrix(4, 4, false, new double[] {
+    private static SimpleMatrix INPUT_COST = new SimpleMatrix(4, 4, false, new double[] {
             1, 0, 0, 0,
             0, 1, 0, 0,
             0, 0, 1, 0,
@@ -151,5 +151,17 @@ public class MecanumDriveILQR {
 
     public static SimpleMatrix getInputCost() {
         return INPUT_COST;
+    }
+
+    public static void setTerminationCost(SimpleMatrix terminationCost) {
+        TERMINATION_COST = terminationCost;
+    }
+
+    public static void setIntermediaryStateCost(SimpleMatrix intermediaryStateCost) {
+        INTERMEDIARY_STATE_COST = intermediaryStateCost;
+    }
+
+    public static void setInputCost(SimpleMatrix inputCost) {
+        INPUT_COST = inputCost;
     }
 }

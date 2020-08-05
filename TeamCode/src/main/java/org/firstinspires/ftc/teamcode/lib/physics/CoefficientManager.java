@@ -44,4 +44,12 @@ public class CoefficientManager {
                 model.A34(heading), model.A35(heading)
         };
     }
+
+    public double[] getCoefficients() {
+        return coefficients;
+    }
+
+    public double getHeading() {
+        return heading;
+    }
 }

@@ -306,6 +306,15 @@ public class MecanumDriveModel {
         double A34 = coefficientManager.get(3, 4);
         double A35 = coefficientManager.get(3, 5);
 
+        A14 = A14(heading);
+        A15 = A15(heading);
+        A16 = A16(heading);
+        A24 = A24(heading);
+        A25 = A25(heading);
+        A26 = A26(heading);
+        A34 = A34(heading);
+        A35 = A35(heading);
+
         return state.plus(new SimpleMatrix(6, 6, false, new double[] {
                 1, 0, 0, 0, 0, 0,
                 0, A11(heading), 0, A21(heading), 0, A31(heading),
@@ -320,6 +329,54 @@ public class MecanumDriveModel {
                 motorTorqueAccelerationY(torques, heading) - state.get(5) * (A24 * state.get(1) + A25 * state.get(3) + A26 * state.get(5)),
                 state.get(5),
                 motorTorqueAccelerationHeading(torques, heading) - state.get(5) * (A34 * state.get(1) + A35 * state.get(3))
+        }).scale(dt)));
+    }
+
+    public SimpleMatrix simulate(SimpleMatrix state, SimpleMatrix input, double dt, double noiseFactor) {
+        SimpleMatrix torques = getMotorTorques(state, input);
+
+        double heading = state.get(4);
+
+        coefficientManager.updateVariables(heading);
+        double A11 = coefficientManager.get(1, 1);
+        double A13 = coefficientManager.get(1, 3);
+        double A14 = coefficientManager.get(1, 4);
+        double A15 = coefficientManager.get(1, 5);
+        double A16 = coefficientManager.get(1, 6);
+        double A22 = coefficientManager.get(2, 2);
+        double A23 = coefficientManager.get(2, 3);
+        double A24 = coefficientManager.get(2, 4);
+        double A25 = coefficientManager.get(2, 5);
+        double A26 = coefficientManager.get(2, 6);
+        double A31 = coefficientManager.get(3, 1);
+        double A32 = coefficientManager.get(3, 2);
+        double A33 = coefficientManager.get(3, 3);
+        double A34 = coefficientManager.get(3, 4);
+        double A35 = coefficientManager.get(3, 5);
+
+        A14 = A14(heading);
+        A15 = A15(heading);
+        A16 = A16(heading);
+        A24 = A24(heading);
+        A25 = A25(heading);
+        A26 = A26(heading);
+        A34 = A34(heading);
+        A35 = A35(heading);
+
+        return state.plus(new SimpleMatrix(6, 6, false, new double[] {
+                1, 0, 0, 0, 0, 0,
+                0, A11(heading), 0, A21(heading), 0, A31(heading),
+                0, 0, 1, 0, 0, 0,
+                0, A12(heading), 0, A22(heading), 0, A32(heading),
+                0, 0, 0, 0, 1, 0,
+                0, A13(heading), 0, A23(heading), 0, A33(heading)
+        }).invert().mult(new SimpleMatrix(6, 1, false, new double[] {
+                state.get(1),
+                motorTorqueAccelerationX(torques, heading) + 2d * (Math.pow(Math.random(), 2) - 0.5d) * noiseFactor - state.get(5) * (A14 * state.get(1) + A15 * state.get(3) + A16 * state.get(5)),
+                state.get(3),
+                motorTorqueAccelerationY(torques, heading) + 2d * (Math.pow(Math.random(), 2) - 0.5d) * noiseFactor - state.get(5) * (A24 * state.get(1) + A25 * state.get(3) + A26 * state.get(5)),
+                state.get(5),
+                motorTorqueAccelerationHeading(torques, heading) + 2d * (Math.pow(Math.random(), 2) - 0.5d) * noiseFactor - state.get(5) * (A34 * state.get(1) + A35 * state.get(3))
         }).scale(dt)));
     }
 
@@ -367,6 +424,22 @@ public class MecanumDriveModel {
         double A33 = coefficientManager.get(3, 3);
         double A34 = coefficientManager.get(3, 4);
         double A35 = coefficientManager.get(3, 5);
+
+        A11 = A11(heading);
+        A13 = A13(heading);
+        A14 = A14(heading);
+        A15 = A15(heading);
+        A16 = A16(heading);
+        A22 = A22(heading);
+        A23 = A23(heading);
+        A24 = A24(heading);
+        A25 = A25(heading);
+        A26 = A26(heading);
+        A31 = A31(heading);
+        A32 = A32(heading);
+        A33 = A33(heading);
+        A34 = A34(heading);
+        A35 = A35(heading);
 
         final double v = (A13 * A22 * A31 + A11 * A23 * A32 - A11 * A22 * A33) * resistance * wheelRadius * wheelRadius;
         final double v11 = cosPsi * (D1 - D2) + (L1 - L2) * sinPsi;
@@ -436,6 +509,14 @@ public class MecanumDriveModel {
         double A31 = coefficientManager.get(3, 1);
         double A32 = coefficientManager.get(3, 2);
         double A33 = coefficientManager.get(3, 3);
+
+        A11 = A11(heading);
+        A13 = A13(heading);
+        A22 = A22(heading);
+        A23 = A23(heading);
+        A31 = A31(heading);
+        A32 = A32(heading);
+        A33 = A33(heading);
 
         final double v = (A13 * A22 * A31 + A11 * A23 * A32 - A11 * A22 * A33) * resistance * wheelRadius;
         final double v1 = (A23 * A32 - A22 * A33) * (cosPsi + sinPsi);

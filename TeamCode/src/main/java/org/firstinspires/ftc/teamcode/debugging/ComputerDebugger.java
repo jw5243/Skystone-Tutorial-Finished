@@ -28,7 +28,7 @@ public class ComputerDebugger {
 
     public static void main(String[] args) {
         Robot.setUsingComputer(true);
-        Robot robot = new PurePursuitRobot();
+        Robot robot = new RobotMPC();
         init(robot);
         robot.init_debug();
 
@@ -128,7 +128,6 @@ public class ComputerDebugger {
 
         getMessageBuilder().append("CLEAR,%");
         getUdpServer().addMessage(getMessageBuilder().toString());
-        //System.out.println(getMessageBuilder());
         setMessageBuilder(new StringBuilder());
     }
 

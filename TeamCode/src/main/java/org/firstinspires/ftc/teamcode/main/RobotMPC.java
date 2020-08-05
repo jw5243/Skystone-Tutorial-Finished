@@ -27,7 +27,7 @@ public class RobotMPC extends Robot {
 
     static {
         //GF Path
-        /*positions.add(new Pose2d(38d, 34d, new Rotation2d(Math.toRadians(-90d), false)));
+        positions.add(new Pose2d(38d, 34d, new Rotation2d(Math.toRadians(-90d), false)));
         positions.add(new Pose2d(38d, 144d - 11d, new Rotation2d(Math.toRadians(-90d), false)));
         positions.add(new Pose2d(38d, 10d, new Rotation2d(Math.toRadians(-90d), false)));
         positions.add(new Pose2d(38d, 144d - 24d, new Rotation2d(Math.toRadians(-90d), false)));
@@ -44,11 +44,11 @@ public class RobotMPC extends Robot {
 
         obstacles.add(new Obstacle(144d - 99d, 61d, 3d, 300d));
         obstacles.add(new Obstacle(144d - 99d, 84d, 3d, 300d));
-        obstacles.add(new Obstacle(144d - (144d - 9d), 90d, 10.5d, 300d));*/
+        obstacles.add(new Obstacle(144d - (144d - 9d), 90d, 10.5d, 300d));
 
         ///////////////////////////////////////////////////////////////////////////////////////////
 
-        positions.add(new Pose2d(120, 120, new Rotation2d(Math.toRadians(90d), false)));
+        //positions.add(new Pose2d(120, 120, new Rotation2d(Math.toRadians(90d), false)));
 
         /*positions.add(new Pose2d(100d, 51d, new Rotation2d(Math.toRadians(-135d), false)));
         positions.add(new Pose2d(104d, 120d, new Rotation2d(Math.toRadians(0d), false)));
@@ -159,15 +159,20 @@ public class RobotMPC extends Robot {
 
         try {
             for(int i = 0; i < getMecanumDriveMPC().getSimulatedStates().length - 1; i++) {
-                ComputerDebugger.send(MessageOption.LINE.setSendValue(
-                        new Line2d(new Translation2d(
-                                getMecanumDriveMPC().getSimulatedStates()[i].get(0) / 0.0254d,
-                                getMecanumDriveMPC().getSimulatedStates()[i].get(2) / 0.0254d
-                        ), new Translation2d(
-                                getMecanumDriveMPC().getSimulatedStates()[i + 1].get(0) / 0.0254d,
-                                getMecanumDriveMPC().getSimulatedStates()[i + 1].get(2) / 0.0254d
-                        ))
-                ));
+                if(!Double.isNaN(getMecanumDriveMPC().getSimulatedStates()[i].get(0)) &&
+                        !Double.isNaN(getMecanumDriveMPC().getSimulatedStates()[i].get(2)) &&
+                        !Double.isNaN(getMecanumDriveMPC().getSimulatedStates()[i + 1].get(0)) &&
+                        !Double.isNaN(getMecanumDriveMPC().getSimulatedStates()[i + 1].get(2))) {
+                    ComputerDebugger.send(MessageOption.LINE.setSendValue(
+                            new Line2d(new Translation2d(
+                                    getMecanumDriveMPC().getSimulatedStates()[i].get(0) / 0.0254d,
+                                    getMecanumDriveMPC().getSimulatedStates()[i].get(2) / 0.0254d
+                            ), new Translation2d(
+                                    getMecanumDriveMPC().getSimulatedStates()[i + 1].get(0) / 0.0254d,
+                                    getMecanumDriveMPC().getSimulatedStates()[i + 1].get(2) / 0.0254d
+                            ))
+                    ));
+                }
             }
 
             for(int i = 0; i < positions.size(); i++) {
