@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
 import org.firstinspires.ftc.teamcode.main.Robot;
 
 public class MecanumRunnableMPC implements Runnable {
-    private static final int MAX_ITERATIONS = 5;
+    private static int maxIterations = 5;
     private TimeProfiler timeProfiler;
     private TimeProfiler policyTimeProfiler;
     private volatile boolean readyToUpdate;
@@ -21,6 +21,8 @@ public class MecanumRunnableMPC implements Runnable {
     private static SimpleMatrix stateCost;
     private static SimpleMatrix inputCost;
 
+    private static int horizonStep = MecanumDriveILQR.getHorizonStep();
+
     public MecanumRunnableMPC() {
         setTimeProfiler(new TimeProfiler(false));
         setPolicyTimeProfiler(new TimeProfiler(false));
@@ -29,12 +31,13 @@ public class MecanumRunnableMPC implements Runnable {
         setPolicyLag(0d);
     }
 
-    public MecanumDriveMPC slq() {
-        return slq(getDesiredState());
+    public MecanumDriveMPC mpc() {
+        return mpc(getDesiredState());
     }
 
-    public MecanumDriveMPC slq(SimpleMatrix desiredState) {
-        MecanumDriveMPC slq = new MecanumDriveMPC(new MecanumDriveILQR(Robot.getDriveModel()));
+    public MecanumDriveMPC mpc(SimpleMatrix desiredState) {
+        MecanumDriveMPC mpc = new MecanumDriveMPC(new MecanumDriveILQR(Robot.getDriveModel()));
+        MecanumDriveILQR.setHorizonStep(getHorizonStep());
         if(getStateCost() != null) {
             MecanumDriveILQR.setIntermediaryStateCost(getStateCost());
         }
@@ -47,14 +50,14 @@ public class MecanumRunnableMPC implements Runnable {
             setDesiredState(Robot.getInitialState());
         }
 
-        slq.initialIteration(Robot.getState(), desiredState);
+        mpc.initialIteration(Robot.getState(), desiredState);
         for(int i = 0; i < getMaxIterations(); i++) {
-            slq.simulateIteration();
-            slq.runSLQ();
+            mpc.simulateIteration();
+            mpc.runMPCIteration();
         }
 
-        slq.simulateIteration();
-        return slq;
+        mpc.simulateIteration();
+        return mpc;
     }
 
     @Override
@@ -63,7 +66,7 @@ public class MecanumRunnableMPC implements Runnable {
         while(!isStop()) {
             if(!isReadyToUpdate()) {
                 getPolicyTimeProfiler().start();
-                setSlqDrivetrain(slq(getDesiredState()));
+                setSlqDrivetrain(mpc(getDesiredState()));
                 getTimeProfiler().update(true);
                 try {
                     Thread.sleep(1);
@@ -138,8 +141,12 @@ public class MecanumRunnableMPC implements Runnable {
         this.policyLag = policyLag;
     }
 
+    public static void setMaxIterations(int maxIterations) {
+        MecanumRunnableMPC.maxIterations = maxIterations;
+    }
+
     public static int getMaxIterations() {
-        return MAX_ITERATIONS;
+        return maxIterations;
     }
 
     public SimpleMatrix getDesiredState() {
@@ -171,5 +178,13 @@ public class MecanumRunnableMPC implements Runnable {
 
     public static void setInputCost(SimpleMatrix inputCost) {
         MecanumRunnableMPC.inputCost = inputCost;
+    }
+
+    public static int getHorizonStep() {
+        return horizonStep;
+    }
+
+    public static void setHorizonStep(int horizonStep) {
+        MecanumRunnableMPC.horizonStep = horizonStep;
     }
 }

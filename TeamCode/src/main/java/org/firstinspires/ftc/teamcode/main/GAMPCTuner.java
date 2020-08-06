@@ -9,7 +9,13 @@ import org.firstinspires.ftc.teamcode.lib.util.Time;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUtil;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GAMPCTuner {
     private static final Time timeout = new Time(10d, TimeUnits.SECONDS);
@@ -20,7 +26,7 @@ public class GAMPCTuner {
     private static final double MIN_TUNE_VALUE = 0d;
     private static final double MAX_TUNE_VALUE = 100d;
 
-    private static final int TERMS_TO_TUNE = 6; //6 for state cost + 4 for input cost
+    private static final int TERMS_TO_TUNE = 6; //6 for state cost + 1 for iteration count + 1 for timestep count //4 for input cost
 
     private static final int elitismCount = 2;
     private static final double crossoverProbability = 0.9d;
@@ -30,17 +36,73 @@ public class GAMPCTuner {
 
     private int currentGeneration;
 
+    private boolean importedData;
+
     public static void main(String... args) {
         GAMPCTuner tuner = new GAMPCTuner();
         Robot.setUsingComputer(true);
         ComputerDebugger.init(new RobotGAMPC());
-        tuner.init();
-        tuner.simulateGenerations(50);
+        tuner.init(true);
+        tuner.simulateGenerations(8);
     }
 
-    public void init() {
+    public static void saveData() {
+        if(getPopulationValues() == null) {
+            return;
+        }
+
+        try {
+            BufferedWriter out = new BufferedWriter(new FileWriter("TuningData.dat"));
+            StringBuilder stringBuilder = new StringBuilder();
+            for(int i = 0; i < getPopulationValues().length; i++) {
+                for(int j = 0; j < getPopulationValues()[i].length; j++) {
+                    stringBuilder.append(getPopulationValues()[i][j]).append(",");
+                }
+
+                out.write(stringBuilder.append('\n').toString());
+                stringBuilder = new StringBuilder();
+            }
+
+            out.close();
+            System.out.println("-------------------------------- Successfully saved data --------------------------------");
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void importData() {
+        try {
+            BufferedReader in = new BufferedReader(new FileReader("TuningData.dat"));
+            AtomicInteger runningIndex = new AtomicInteger(0);
+            in.lines().forEach((line) -> {
+                String[] chromosomeRawData = line.split(",");
+                Double[] chromosomeData = Arrays.stream(chromosomeRawData).map(Double::parseDouble).toArray(Double[]::new);
+                for(int i = 0; i < chromosomeData.length; i++) {
+                    getPopulationValues()[runningIndex.get()][i] = chromosomeData[i];
+                }
+
+                runningIndex.incrementAndGet();
+            });
+
+            in.close();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("-------------------------------- Importing previous data --------------------------------");
+        for(int i = 0; i < getPopulationValues().length; i++) {
+            Arrays.stream(getPopulationValues()[i]).forEach((value) -> System.out.print(value + ", "));
+            System.out.println();
+        }
+    }
+
+    public void init(boolean importData) {
         setPopulationValues(new double[getPopulationSize()][getTermsToTune() + 1]); //Additional value for storing the cost
         setCurrentGeneration(1);
+        setImportedData(importData);
+        if(importData) {
+            importData();
+        }
     }
 
     public void runIteration(int index) {
@@ -93,6 +155,10 @@ public class GAMPCTuner {
         double normalizedDistanceCost = 10d;
         double normalizedTimeCost = 20;
 
+        if(Double.isNaN(distanceAwayFromGoal)) {
+            distanceAwayFromGoal = normalizedDistanceCost * Math.sqrt(2d) * 144d;
+        }
+
         //Update cost value which is set equal to the time elapsed for the iteration
         getPopulationValues()[index][getPopulationValues()[index].length - 1] =
                 normalizedDistanceCost * (distanceAwayFromGoal / 144d) + normalizedTimeCost * (elapsedTime / getTimeout().getTimeValue(TimeUnits.SECONDS));
@@ -103,7 +169,7 @@ public class GAMPCTuner {
 
     public void simulateGeneration() {
         System.out.println("-------------------------------- Generation " + getCurrentGeneration() + " --------------------------------");
-        if(getCurrentGeneration() == 1) {
+        if(getCurrentGeneration() == 1 && !isImportedData()) {
             //Take initial generation to be random values
             for(int i = 0; i < getPopulationValues().length; i++) {
                 for(int j = 0; j < getPopulationValues()[i].length - 1; j++) {
@@ -149,6 +215,7 @@ public class GAMPCTuner {
             runIteration(i);
         }
 
+        saveData();
         setCurrentGeneration(getCurrentGeneration() + 1);
     }
 
@@ -253,5 +320,13 @@ public class GAMPCTuner {
 
     public void setCurrentGeneration(int currentGeneration) {
         this.currentGeneration = currentGeneration;
+    }
+
+    public boolean isImportedData() {
+        return importedData;
+    }
+
+    public void setImportedData(boolean importedData) {
+        this.importedData = importedData;
     }
 }

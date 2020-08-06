@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.lib.physics.MecanumDriveModel;
 import org.firstinspires.ftc.teamcode.lib.physics.MotorModel;
 
 public class MecanumDriveILQR {
-    private static final int    HORIZON_STEP = 1000;//1800;
+    private static int    HORIZON_STEP = 1000;//1800;
     private static final double dt           = 0.002d;
 
     private static SimpleMatrix TERMINATION_COST = new SimpleMatrix(6, 6, false, new double[] {
@@ -185,5 +185,9 @@ public class MecanumDriveILQR {
 
     public static void setInputCost(SimpleMatrix inputCost) {
         INPUT_COST = inputCost;
+    }
+
+    public static void setHorizonStep(int horizonStep) {
+        HORIZON_STEP = horizonStep;
     }
 }

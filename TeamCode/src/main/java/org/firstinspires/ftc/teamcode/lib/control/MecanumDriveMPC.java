@@ -53,7 +53,7 @@ public class MecanumDriveMPC {
         slq.initialIteration(state, desiredState);
         for(int i = 0; i < iterations; i++) {
             slq.simulateIteration();
-            slq.runSLQ();
+            slq.runMPCIteration();
         }
 
         System.out.println("t\tx\tvx\ty\tvy\tpsi\tvpsi");
@@ -131,7 +131,7 @@ public class MecanumDriveMPC {
         }
     }
 
-    public void runSLQ() {
+    public void runMPCIteration() {
         P = new SimpleMatrix[MecanumDriveILQR.getHorizonStep()];
         p = new SimpleMatrix[MecanumDriveILQR.getHorizonStep()];
         P[P.length - 1] = MecanumDriveILQR.getTerminationCost();

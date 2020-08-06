@@ -132,7 +132,7 @@ public class RobotMPC extends Robot {
         getMecanumDriveMPC().initialIteration(getState(), positions.get(0));
         for(int i = 0; i < MecanumRunnableMPC.getMaxIterations(); i++) {
             getMecanumDriveMPC().simulateIteration(getState(), positions.get(0));
-            getMecanumDriveMPC().runSLQ();
+            getMecanumDriveMPC().runMPCIteration();
         }
 
         setMecanumRunnableMPC(new MecanumRunnableMPC());
