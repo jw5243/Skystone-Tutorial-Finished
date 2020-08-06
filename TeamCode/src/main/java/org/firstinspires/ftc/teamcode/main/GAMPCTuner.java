@@ -15,7 +15,7 @@ public class GAMPCTuner {
     private static final Time timeout = new Time(10d, TimeUnits.SECONDS);
 
     private static final int MAX_GENERATIONS = 10;
-    private static final int POPULATION_SIZE = 10;
+    private static final int POPULATION_SIZE = 30;
 
     private static final double MIN_TUNE_VALUE = 0d;
     private static final double MAX_TUNE_VALUE = 100d;
@@ -44,7 +44,6 @@ public class GAMPCTuner {
     }
 
     public void runIteration(int index) {
-        //System.out.println(Arrays.toString(getPopulationValues()[index]));
         MecanumRunnableMPC.setStateCost(SimpleMatrix.diag(Arrays.copyOfRange(getPopulationValues()[index], 0, getPopulationValues()[index].length - 1 /*- 4*/)));
         //MecanumRunnableMPC.setInputCost(SimpleMatrix.diag(Arrays.copyOfRange(getPopulationValues()[index], 6, getPopulationValues()[index].length - 1)).scale(1d / getMaxTuneValue()));
 
@@ -57,14 +56,20 @@ public class GAMPCTuner {
         ComputerDebugger.sendMessage();
 
         try {
-            Thread.sleep(1000);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         robot.start_debug();
+        boolean failed = false;
         while(!robot.isDone() && TimeUtil.getCurrentRuntime().compareTo(getTimeout()) < 0) {
             try {
+                if(robot.getFieldPosition().getTranslation().distance(Robot.getInitialPose().getTranslation()) <  1E-6 && TimeUtil.getCurrentRuntime(TimeUnits.SECONDS) > 2d) {
+                    failed = true;
+                    break;
+                }
+
                 robot.loop_debug();
 
                 ComputerDebugger.send(MessageOption.ROBOT_LOCATION);
@@ -76,10 +81,24 @@ public class GAMPCTuner {
             }
         }
 
+        if(failed) {
+            for(int i = 0; i < getPopulationValues()[index].length - 1; i++) {
+                getPopulationValues()[index][i] = getRandomTuneValue();
+            }
+        }
+
+        double distanceAwayFromGoal = robot.getFieldPosition().getTranslation().distance(RobotGAMPC.getPositions().get(RobotGAMPC.getPositions().size() - 1).getTranslation());
+        double elapsedTime = (robot.getRuntime() == 0d || failed) ? getTimeout().getTimeValue(TimeUnits.SECONDS) : robot.getRuntime();
+
+        double normalizedDistanceCost = 10d;
+        double normalizedTimeCost = 20;
+
         //Update cost value which is set equal to the time elapsed for the iteration
-        getPopulationValues()[index][getPopulationValues()[index].length - 1] = robot.getRuntime() == 0d ? getTimeout().getTimeValue(TimeUnits.SECONDS) : robot.getRuntime();
+        getPopulationValues()[index][getPopulationValues()[index].length - 1] =
+                normalizedDistanceCost * (distanceAwayFromGoal / 144d) + normalizedTimeCost * (elapsedTime / getTimeout().getTimeValue(TimeUnits.SECONDS));
         System.out.print("Iteration: " + index + "\t");
-        System.out.println(Arrays.toString(getPopulationValues()[index]));
+        System.out.print(Arrays.toString(getPopulationValues()[index]));
+        System.out.println("\t Took " + elapsedTime + " seconds to finish");
     }
 
     public void simulateGeneration() {
@@ -106,11 +125,12 @@ public class GAMPCTuner {
                     int index1 = getRandomChromosomeIndex();
                     int index2 = getRandomChromosomeIndex();
                     while(index2 == index1) {
+                        System.out.println("Recomputing indices");
                         index2 = getRandomChromosomeIndex();
                     }
 
                     crossover(nextPopulationValues, k, index1, index2);
-                    System.out.println("Crossing over " + index1 + " with " + index2 + "\tReplacing index " + k + " and " + k + 1);
+                    System.out.println("Crossing over " + index1 + " with " + index2 + "\tReplacing index " + k + " and " + (k + 1));
                     k++;
                 } else {//if(generationTransitionType <= getCrossoverProbability() + getMutationProbability()) {
                     int index = getRandomChromosomeIndex();
@@ -139,11 +159,12 @@ public class GAMPCTuner {
     }
 
     public void crossover(double[][] nextPopulationValues, int nextPopulationIndex, int index1, int index2) {
+        int crossoverIndex = getRandomGeneIndex();
         double crossoverValue = Math.random();
-        for(int i = 0; i < getPopulationValues()[0].length - 1; i++) { //To length minus one since last index is cost
-            nextPopulationValues[nextPopulationIndex][i] = crossoverValue * getPopulationValues()[index1][i] + (1d - crossoverValue) * getPopulationValues()[index2][i];
-            nextPopulationValues[nextPopulationIndex + 1][i] = (1d - crossoverValue) * getPopulationValues()[index1][i] + crossoverValue * getPopulationValues()[index2][i];
-        }
+        nextPopulationValues[nextPopulationIndex] = getPopulationValues()[index1];
+        nextPopulationValues[nextPopulationIndex + 1] = getPopulationValues()[index2];
+        nextPopulationValues[nextPopulationIndex][crossoverIndex] = crossoverValue * getPopulationValues()[index1][crossoverIndex] + (1d - crossoverValue) * getPopulationValues()[index2][crossoverIndex];
+        nextPopulationValues[nextPopulationIndex + 1][crossoverIndex] = (1d - crossoverValue) * getPopulationValues()[index1][crossoverIndex] + crossoverValue * getPopulationValues()[index2][crossoverIndex];
     }
 
     public void mutation(double[][] nextPopulationValues, int nextPopulationIndex, int index) {
@@ -163,8 +184,8 @@ public class GAMPCTuner {
         }
 
         double totalCost = Arrays.stream(getPopulationValues()).mapToDouble(chromosome -> chromosome[chromosome.length - 1]).sum();
-        double totalNonnormalizedProbability = Arrays.stream(getPopulationValues()).mapToDouble(chromosome -> totalCost - chromosome[chromosome.length - 1]).sum();
-        double[] selectionProbability = Arrays.stream(getPopulationValues()).mapToDouble(chromosome -> (totalCost - chromosome[chromosome.length - 1]) / totalNonnormalizedProbability).toArray();
+        double totalNonnormalizedProbability = Arrays.stream(getPopulationValues()).mapToDouble(chromosome -> Math.pow(totalCost - chromosome[chromosome.length - 1], 4)).sum();
+        double[] selectionProbability = Arrays.stream(getPopulationValues()).mapToDouble(chromosome -> Math.pow(totalCost - chromosome[chromosome.length - 1], 4) / totalNonnormalizedProbability).toArray();
         double randomValue = Math.random();
         double currentProbabilitySum = 0d;
         for(int i = 0; i < selectionProbability.length; i++) {

@@ -1,18 +1,12 @@
 package org.firstinspires.ftc.teamcode.main;
 
 import org.ejml.simple.SimpleMatrix;
-import org.firstinspires.ftc.teamcode.debugging.ComputerDebugger;
-import org.firstinspires.ftc.teamcode.debugging.IllegalMessageTypeException;
-import org.firstinspires.ftc.teamcode.debugging.MessageOption;
 import org.firstinspires.ftc.teamcode.lib.control.MecanumDriveILQR;
 import org.firstinspires.ftc.teamcode.lib.control.MecanumDriveMPC;
 import org.firstinspires.ftc.teamcode.lib.control.MecanumRunnableMPC;
 import org.firstinspires.ftc.teamcode.lib.control.Obstacle;
-import org.firstinspires.ftc.teamcode.lib.geometry.Circle2d;
-import org.firstinspires.ftc.teamcode.lib.geometry.Line2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Rotation2d;
-import org.firstinspires.ftc.teamcode.lib.geometry.Translation2d;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUtil;
 
@@ -135,5 +129,9 @@ public class RobotGAMPC extends Robot {
 
     public void setDone(boolean done) {
         isDone = done;
+    }
+
+    public static List<Pose2d> getPositions() {
+        return positions;
     }
 }

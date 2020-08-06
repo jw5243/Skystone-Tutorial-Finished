@@ -86,10 +86,13 @@ public class MecanumDriveILQR {
         if(timeStep < K.length) {
             SimpleMatrix A = getModel().stateTransitionMatrix(state, getDt(), true);
             SimpleMatrix B = getModel().inputTransitionMatrix(state, getDt(), false);
-            SimpleMatrix inverse = INPUT_COST.plus(B.transpose().mult(P[timeStep].mult(B))).pseudoInverse();
-            SimpleMatrix K = inverse.mult(B.transpose()).mult(P[timeStep]).mult(A).negative();
-            return limitInput(K.mult(state.minus(desiredState)));
-            //return limitInput(K[timeStep].mult(state.minus(desiredState)));
+            try {
+                SimpleMatrix inverse = INPUT_COST.plus(B.transpose().mult(P[timeStep].mult(B))).invert();
+                SimpleMatrix K = inverse.mult(B.transpose()).mult(P[timeStep]).mult(A).negative();
+                return limitInput(K.mult(state.minus(desiredState)));
+            } catch(Exception e) {
+                return limitInput(K[timeStep].mult(state.minus(desiredState)));
+            }
         }
 
         return new SimpleMatrix(4, 1);
@@ -102,9 +105,28 @@ public class MecanumDriveILQR {
 
         SimpleMatrix Q = getStateCost(timeStep);
         SimpleMatrix R = INPUT_COST;
-        SimpleMatrix inverse = R.plus(B.transpose().mult(P[timeStep].mult(B))).pseudoInverse();
-        P[timeStep - 1] = Q.plus(A.transpose().mult(P[timeStep].mult(A))).minus(A.transpose().mult(P[timeStep].mult(B.mult(inverse).mult(B.transpose().mult(P[timeStep].mult(A))))));
-        K[timeStep - 1] = inverse.mult(B.transpose()).mult(P[timeStep]).mult(A).negative();
+        try {
+            SimpleMatrix inverse = R.plus(B.transpose().mult(P[timeStep].mult(B))).invert();
+            P[timeStep - 1] = Q.plus(A.transpose().mult(P[timeStep].mult(A))).minus(A.transpose().mult(P[timeStep].mult(B.mult(inverse).mult(B.transpose().mult(P[timeStep].mult(A))))));
+            K[timeStep - 1] = inverse.mult(B.transpose()).mult(P[timeStep]).mult(A).negative();
+        } catch(Exception e) {
+            P[timeStep - 1] = new SimpleMatrix(6, 6, false, new double[] {
+                    0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0
+            });
+
+            K[timeStep - 1] = new SimpleMatrix(4, 6, false, new double[] {
+                    0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0
+            });
+        }
+
         solveRiccatiEquation(--timeStep, A, B);
     }
 

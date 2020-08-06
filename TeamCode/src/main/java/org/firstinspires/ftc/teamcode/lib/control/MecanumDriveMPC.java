@@ -117,16 +117,16 @@ public class MecanumDriveMPC {
                 getA()[i - 1] = getMecanumDriveILQR().getModel().stateTransitionMatrix(getSimulatedStates()[i - 1], MecanumDriveILQR.getDt(), true);
                 getB()[i - 1] = getMecanumDriveILQR().getModel().inputTransitionMatrix(getSimulatedStates()[i - 1], MecanumDriveILQR.getDt(), false);
                 getSimulatedInputs()[i - 1] = getMecanumDriveILQR().getOptimalInput(i - 1, getSimulatedStates()[i - 1], desiredState);
-                getSimulatedStates()[i] = getMecanumDriveILQR().getModel().simulate(getSimulatedStates()[i - 1], getSimulatedInputs()[i - 1], 0.002d);
-                //getSimulatedStates()[i] = getA()[i - 1].mult(getSimulatedStates()[i - 1]).plus(getB()[i - 1].mult(getSimulatedInputs()[i - 1]));
+                //getSimulatedStates()[i] = getMecanumDriveILQR().getModel().simulate(getSimulatedStates()[i - 1], getSimulatedInputs()[i - 1], 0.002d);
+                getSimulatedStates()[i] = getA()[i - 1].mult(getSimulatedStates()[i - 1]).plus(getB()[i - 1].mult(getSimulatedInputs()[i - 1]));
             }
         } else {
             for(int i = 1; i <= MecanumDriveILQR.getHorizonStep(); i++) {
                 getA()[i - 1] = getMecanumDriveILQR().getModel().stateTransitionMatrix(getSimulatedStates()[i - 1], MecanumDriveILQR.getDt(), true);
                 getB()[i - 1] = getMecanumDriveILQR().getModel().inputTransitionMatrix(getSimulatedStates()[i - 1], MecanumDriveILQR.getDt(), false);
                 getSimulatedInputs()[i - 1] = getOptimalInput(i - 1, getSimulatedStates()[i - 1], 0.001d);
-                getSimulatedStates()[i] = getMecanumDriveILQR().getModel().simulate(getSimulatedStates()[i - 1], getSimulatedInputs()[i - 1], 0.002d);
-                //getSimulatedStates()[i] = getA()[i - 1].mult(getSimulatedStates()[i - 1]).plus(getB()[i - 1].mult(getSimulatedInputs()[i - 1]));
+                //getSimulatedStates()[i] = getMecanumDriveILQR().getModel().simulate(getSimulatedStates()[i - 1], getSimulatedInputs()[i - 1], 0.002d);
+                getSimulatedStates()[i] = getA()[i - 1].mult(getSimulatedStates()[i - 1]).plus(getB()[i - 1].mult(getSimulatedInputs()[i - 1]));
             }
         }
     }

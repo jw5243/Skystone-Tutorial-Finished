@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.lib.physics;
 
+import org.ejml.data.SingularMatrixException;
 import org.ejml.simple.SimpleMatrix;
 
 public class MecanumDriveModel {
@@ -315,21 +316,25 @@ public class MecanumDriveModel {
         A34 = A34(heading);
         A35 = A35(heading);
 
-        return state.plus(new SimpleMatrix(6, 6, false, new double[] {
-                1, 0, 0, 0, 0, 0,
-                0, A11(heading), 0, A21(heading), 0, A31(heading),
-                0, 0, 1, 0, 0, 0,
-                0, A12(heading), 0, A22(heading), 0, A32(heading),
-                0, 0, 0, 0, 1, 0,
-                0, A13(heading), 0, A23(heading), 0, A33(heading)
-        }).invert().mult(new SimpleMatrix(6, 1, false, new double[] {
-                state.get(1),
-                motorTorqueAccelerationX(torques, heading) - state.get(5) * (A14 * state.get(1) + A15 * state.get(3) + A16 * state.get(5)),
-                state.get(3),
-                motorTorqueAccelerationY(torques, heading) - state.get(5) * (A24 * state.get(1) + A25 * state.get(3) + A26 * state.get(5)),
-                state.get(5),
-                motorTorqueAccelerationHeading(torques, heading) - state.get(5) * (A34 * state.get(1) + A35 * state.get(3))
-        }).scale(dt)));
+        try {
+            return state.plus(new SimpleMatrix(6, 6, false, new double[] {
+                    1, 0, 0, 0, 0, 0,
+                    0, A11(heading), 0, A21(heading), 0, A31(heading),
+                    0, 0, 1, 0, 0, 0,
+                    0, A12(heading), 0, A22(heading), 0, A32(heading),
+                    0, 0, 0, 0, 1, 0,
+                    0, A13(heading), 0, A23(heading), 0, A33(heading)
+            }).invert().mult(new SimpleMatrix(6, 1, false, new double[] {
+                    state.get(1),
+                    motorTorqueAccelerationX(torques, heading) - state.get(5) * (A14 * state.get(1) + A15 * state.get(3) + A16 * state.get(5)),
+                    state.get(3),
+                    motorTorqueAccelerationY(torques, heading) - state.get(5) * (A24 * state.get(1) + A25 * state.get(3) + A26 * state.get(5)),
+                    state.get(5),
+                    motorTorqueAccelerationHeading(torques, heading) - state.get(5) * (A34 * state.get(1) + A35 * state.get(3))
+            }).scale(dt)));
+        } catch(SingularMatrixException e) {
+            return state;
+        }
     }
 
     public SimpleMatrix simulate(SimpleMatrix state, SimpleMatrix input, double dt, double noiseFactor) {
