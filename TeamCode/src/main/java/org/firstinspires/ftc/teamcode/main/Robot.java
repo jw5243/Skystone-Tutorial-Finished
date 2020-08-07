@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.lib.control.MecanumDriveILQR;
 import org.firstinspires.ftc.teamcode.lib.control.MecanumDriveMPC;
 import org.firstinspires.ftc.teamcode.lib.control.MecanumRunnableLQR;
 import org.firstinspires.ftc.teamcode.lib.control.MecanumRunnableMPC;
+import org.firstinspires.ftc.teamcode.lib.control.Obstacle;
 import org.firstinspires.ftc.teamcode.lib.drivers.Motor;
 import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Rotation2d;
@@ -18,14 +19,17 @@ import org.firstinspires.ftc.teamcode.lib.util.TimeProfiler;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class Robot implements RobotDebug {
     private static final SimpleMatrix INITIAL_STATE = new SimpleMatrix(6, 1, false, new double[] {
             //(12d * 12d - 9d) * 0.0254d, 0d, 48d * 0.0254d, 0d, Math.toRadians(-180d), 0d
-            9d * 0.0254d, 0d, 9d * 0.0254d, 0d, Math.toRadians(0d), 0d
+            //9d * 0.0254d, 0d, 9d * 0.0254d, 0d, Math.toRadians(0d), 0d
 
             //9d * 0.0254d, 0d, 48d * 0.0254d, 0d, Math.toRadians(0d), 0d
             //9d * 0.0254d, 0d, (4d + 8d * 5d) * 0.0254d, 0d, Math.toRadians(0d), 0d
-            //9d * 0.0254d, 0d, 40d * 0.0254d, 0d, Math.toRadians(-90d), 0d
+            9d * 0.0254d, 0d, 40d * 0.0254d, 0d, Math.toRadians(-90d), 0d
     });
 
     private static final Pose2d INITIAL_POSE = new Pose2d(getInitialState().get(0) / 0.0254d, getInitialState().get(2) / 0.0254d, new Rotation2d(getInitialState().get(4), false));
@@ -51,6 +55,8 @@ public abstract class Robot implements RobotDebug {
 
     private static MecanumDriveMPC mecanumDriveMPC;
     private MecanumRunnableMPC mecanumRunnableMPC;
+
+    private static List<Obstacle> obstacles = new ArrayList<>();
 
     @Override
     public void init_debug() {
@@ -216,5 +222,13 @@ public abstract class Robot implements RobotDebug {
 
     public static Pose2d getInitialPose() {
         return INITIAL_POSE;
+    }
+
+    public static List<Obstacle> getObstacles() {
+        return obstacles;
+    }
+
+    public static void setObstacles(List<Obstacle> obstacles) {
+        Robot.obstacles = obstacles;
     }
 }

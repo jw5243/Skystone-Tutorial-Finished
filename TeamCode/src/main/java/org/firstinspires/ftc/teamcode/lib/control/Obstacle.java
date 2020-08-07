@@ -44,6 +44,10 @@ public class Obstacle {
         return distance(new Translation2d(state.get(0) / 0.0254d, state.get(2) / 0.0254d));
     }
 
+    public boolean hittingObstacle(Translation2d other) {
+        return (distance(other) - getRobotRadius() * 0.9d) / 0.0254d < 0d;
+    }
+
     public SimpleMatrix stateRepresentation() {
         return new SimpleMatrix(6, 1, true, new double[] {
                 getLocation().x() * 0.0254d, 0d, getLocation().y() * 0.0254d, 0d, 0d, 0d

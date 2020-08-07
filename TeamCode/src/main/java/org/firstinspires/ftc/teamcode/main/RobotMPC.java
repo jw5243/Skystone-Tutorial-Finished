@@ -22,7 +22,6 @@ import java.util.List;
 
 public class RobotMPC extends Robot {
     private static List<Pose2d> positions   = new ArrayList<>();
-    private static List<Obstacle> obstacles = new ArrayList<>();
     private static List<Waypoint> waypoints = new ArrayList<>();
 
     static {
@@ -41,10 +40,6 @@ public class RobotMPC extends Robot {
         positions.add(new Pose2d(46d, 14d, new Rotation2d(Math.toRadians(-45d), false)));
         positions.add(new Pose2d(30d, 144d - 19d - 9d - 6d, new Rotation2d(Math.toRadians(-90), false)));
         positions.add(new Pose2d(110d, 72d, new Rotation2d(Math.toRadians(-90d), false)));
-
-        obstacles.add(new Obstacle(144d - 99d, 61d, 3d, 300d));
-        obstacles.add(new Obstacle(144d - 99d, 84d, 3d, 300d));
-        obstacles.add(new Obstacle(144d - (144d - 9d), 90d, 10.5d, 300d));
 
         ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -126,6 +121,11 @@ public class RobotMPC extends Robot {
     @Override
     public void init_debug() {
         super.init_debug();
+        getObstacles().clear();
+        getObstacles().add(new Obstacle(144d - 99d, 61d, 3d, 300d));
+        getObstacles().add(new Obstacle(144d - 99d, 84d, 3d, 300d));
+        getObstacles().add(new Obstacle(144d - (144d - 9d), 90d, 10.5d, 300d));
+
         setMecanumDriveILQR(new MecanumDriveILQR(getDriveModel()));
         setMecanumDriveMPC(new MecanumDriveMPC(getMecanumDriveILQR()));
 
@@ -197,10 +197,6 @@ public class RobotMPC extends Robot {
         } catch (IllegalMessageTypeException e) {
             e.printStackTrace();
         }
-    }
-
-    public static List<Obstacle> getObstacles() {
-        return obstacles;
     }
 
     public static List<Waypoint> getWaypoints() {

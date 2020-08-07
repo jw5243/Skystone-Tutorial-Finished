@@ -1,12 +1,20 @@
 package org.firstinspires.ftc.teamcode.main;
 
 import org.ejml.simple.SimpleMatrix;
+import org.firstinspires.ftc.teamcode.debugging.ComputerDebugger;
+import org.firstinspires.ftc.teamcode.debugging.IllegalMessageTypeException;
+import org.firstinspires.ftc.teamcode.debugging.MessageOption;
 import org.firstinspires.ftc.teamcode.lib.control.MecanumDriveILQR;
 import org.firstinspires.ftc.teamcode.lib.control.MecanumDriveMPC;
 import org.firstinspires.ftc.teamcode.lib.control.MecanumRunnableMPC;
 import org.firstinspires.ftc.teamcode.lib.control.Obstacle;
+import org.firstinspires.ftc.teamcode.lib.geometry.Circle2d;
+import org.firstinspires.ftc.teamcode.lib.geometry.Line2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Rotation2d;
+import org.firstinspires.ftc.teamcode.lib.geometry.Translation2d;
+import org.firstinspires.ftc.teamcode.lib.util.Time;
+import org.firstinspires.ftc.teamcode.lib.util.TimeProfiler;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUtil;
 
@@ -14,15 +22,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RobotGAMPC extends Robot {
-    private static List<Pose2d> positions   = new ArrayList<>();
-    private static List<Obstacle> obstacles = new ArrayList<>();
+    private final int setpointCount;
+
+    private List<Pose2d> positions   = new ArrayList<>();
 
     private double runtime = 0d;
     private boolean isDone = false;
+    private int timesHittingObstacle = 0;
+    private boolean lastTimestepHittingObstacle = false;
 
-    static {
+    private Pose2d poseCheck = getInitialPose();
+    private Time poseCheckTime;
+
+    private double closestDistanceToObstacle = Double.POSITIVE_INFINITY;
+
+    private TimeProfiler obstacleProfiler = new TimeProfiler(false);
+
+    {
         //GF Path
-        /*positions.add(new Pose2d(38d, 34d, new Rotation2d(Math.toRadians(-90d), false)));
+        positions.add(new Pose2d(38d, 34d, new Rotation2d(Math.toRadians(-90d), false)));
         positions.add(new Pose2d(38d, 144d - 11d, new Rotation2d(Math.toRadians(-90d), false)));
         positions.add(new Pose2d(38d, 10d, new Rotation2d(Math.toRadians(-90d), false)));
         positions.add(new Pose2d(38d, 144d - 24d, new Rotation2d(Math.toRadians(-90d), false)));
@@ -37,18 +55,22 @@ public class RobotGAMPC extends Robot {
         positions.add(new Pose2d(30d, 144d - 19d - 9d - 6d, new Rotation2d(Math.toRadians(-90), false)));
         positions.add(new Pose2d(110d, 72d, new Rotation2d(Math.toRadians(-90d), false)));
 
-        obstacles.add(new Obstacle(144d - 99d, 61d, 3d, 300d));
-        obstacles.add(new Obstacle(144d - 99d, 84d, 3d, 300d));
-        obstacles.add(new Obstacle(144d - (144d - 9d), 90d, 10.5d, 300d));*/
+        setpointCount = getPositions().size();
 
         ///////////////////////////////////////////////////////////////////////////////////////////
 
-        positions.add(new Pose2d(120, 120, new Rotation2d(Math.toRadians(90d), false)));
+        //positions.add(new Pose2d(120, 120, new Rotation2d(Math.toRadians(90d), false)));
     }
 
     @Override
     public void init_debug() {
         super.init_debug();
+        getObstacles().clear();
+        getObstacles().add(new Obstacle(144d - 97d, 63d, 3d, 300d));
+        getObstacles().add(new Obstacle(144d - 97d, 82d, 3d, 300d));
+        getObstacles().add(new Obstacle(144d - (144d - 9d), 90d, 10.5d, 300d));
+
+        setTimesHittingObstacle(0);
         setMecanumDriveILQR(new MecanumDriveILQR(getDriveModel()));
         setMecanumDriveMPC(new MecanumDriveMPC(getMecanumDriveILQR()));
 
@@ -61,6 +83,12 @@ public class RobotGAMPC extends Robot {
         setMecanumRunnableMPC(new MecanumRunnableMPC());
         getMecanumRunnableMPC().setDesiredState(positions.get(0));
         new Thread(getMecanumRunnableMPC()).start();
+    }
+
+    @Override
+    public void start_debug() {
+        super.start_debug();
+        setPoseCheckTime(TimeUtil.getCurrentRuntime());
     }
 
     @Override
@@ -83,12 +111,37 @@ public class RobotGAMPC extends Robot {
             }));
         }
 
-        /*try {
+        for(Obstacle obstacle : getObstacles()) {
+            double distanceToObstacle = obstacle.distance(getFieldPosition().getTranslation());
+            if(distanceToObstacle < getClosestDistanceToObstacle()) {
+                setClosestDistanceToObstacle(distanceToObstacle);
+            }
+
+            if(obstacle.hittingObstacle(getFieldPosition().getTranslation())) {
+                if(!isLastTimestepHittingObstacle()) {
+                    setTimesHittingObstacle(getTimesHittingObstacle() + 1);
+                    setLastTimestepHittingObstacle(true);
+                    obstacleProfiler.start();
+                }
+            } else {
+                if(obstacleProfiler.getDeltaTime(TimeUnits.SECONDS, false) > 0.5d) {
+                    obstacleProfiler.getDeltaTime(true);
+                    setLastTimestepHittingObstacle(false);
+                }
+            }
+        }
+
+        if(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS) - getPoseCheckTime().getTimeValue(TimeUnits.SECONDS) > 5d) {
+            setPoseCheck(getFieldPosition());
+            setPoseCheckTime(TimeUtil.getCurrentRuntime());
+        }
+
+        try {
             for(int i = 0; i < getMecanumDriveMPC().getSimulatedStates().length - 1; i++) {
-                if(Double.isFinite(getMecanumDriveMPC().getSimulatedStates()[i].get(0)) &&
-                        Double.isFinite(getMecanumDriveMPC().getSimulatedStates()[i].get(2)) &&
-                        Double.isFinite(getMecanumDriveMPC().getSimulatedStates()[i + 1].get(0)) &&
-                        Double.isFinite(getMecanumDriveMPC().getSimulatedStates()[i + 1].get(2))) {
+                if(!Double.isNaN(getMecanumDriveMPC().getSimulatedStates()[i].get(0)) &&
+                        !Double.isNaN(getMecanumDriveMPC().getSimulatedStates()[i].get(2)) &&
+                        !Double.isNaN(getMecanumDriveMPC().getSimulatedStates()[i + 1].get(0)) &&
+                        !Double.isNaN(getMecanumDriveMPC().getSimulatedStates()[i + 1].get(2))) {
                     ComputerDebugger.send(MessageOption.LINE.setSendValue(
                             new Line2d(new Translation2d(
                                     getMecanumDriveMPC().getSimulatedStates()[i].get(0) / 0.0254d,
@@ -108,11 +161,7 @@ public class RobotGAMPC extends Robot {
             }
         } catch (IllegalMessageTypeException e) {
             e.printStackTrace();
-        }*/
-    }
-
-    public static List<Obstacle> getObstacles() {
-        return obstacles;
+        }
     }
 
     public double getRuntime() {
@@ -131,7 +180,51 @@ public class RobotGAMPC extends Robot {
         isDone = done;
     }
 
-    public static List<Pose2d> getPositions() {
+    public List<Pose2d> getPositions() {
         return positions;
+    }
+
+    public int getTimesHittingObstacle() {
+        return timesHittingObstacle;
+    }
+
+    public void setTimesHittingObstacle(int timesHittingObstacle) {
+        this.timesHittingObstacle = timesHittingObstacle;
+    }
+
+    public boolean isLastTimestepHittingObstacle() {
+        return lastTimestepHittingObstacle;
+    }
+
+    public void setLastTimestepHittingObstacle(boolean lastTimestepHittingObstacle) {
+        this.lastTimestepHittingObstacle = lastTimestepHittingObstacle;
+    }
+
+    public int getSetpointCount() {
+        return setpointCount;
+    }
+
+    public Pose2d getPoseCheck() {
+        return poseCheck;
+    }
+
+    public void setPoseCheck(Pose2d poseCheck) {
+        this.poseCheck = poseCheck;
+    }
+
+    public Time getPoseCheckTime() {
+        return poseCheckTime;
+    }
+
+    public void setPoseCheckTime(Time poseCheckTime) {
+        this.poseCheckTime = poseCheckTime;
+    }
+
+    public double getClosestDistanceToObstacle() {
+        return closestDistanceToObstacle;
+    }
+
+    public void setClosestDistanceToObstacle(double closestDistanceToObstacle) {
+        this.closestDistanceToObstacle = closestDistanceToObstacle;
     }
 }

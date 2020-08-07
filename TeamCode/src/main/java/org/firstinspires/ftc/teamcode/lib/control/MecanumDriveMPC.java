@@ -8,8 +8,10 @@ import org.firstinspires.ftc.teamcode.lib.physics.MecanumDriveModel;
 import org.firstinspires.ftc.teamcode.lib.physics.MotorModel;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUnits;
 import org.firstinspires.ftc.teamcode.lib.util.TimeUtil;
+import org.firstinspires.ftc.teamcode.main.Robot;
 import org.firstinspires.ftc.teamcode.main.RobotMPC;
 
+import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 public class MecanumDriveMPC {
@@ -288,8 +290,12 @@ public class MecanumDriveMPC {
                 0, 0, 0, 0, 0, 0
         });
 
-        for(Obstacle obstacle : RobotMPC.getObstacles()) {
-            Q = Q.plus(obstacle.getQuadraticCost(getSimulatedStates()[timeStep]));
+        try {
+            for(Obstacle obstacle : Robot.getObstacles()) {
+                Q = Q.plus(obstacle.getQuadraticCost(getSimulatedStates()[timeStep]));
+            }
+        } catch(ConcurrentModificationException | NullPointerException e) {
+
         }
 
         return Q;
@@ -300,8 +306,12 @@ public class MecanumDriveMPC {
                 0, 0, 0, 0, 0, 0
         });
 
-        for(Obstacle obstacle : RobotMPC.getObstacles()) {
-            Q = Q.plus(obstacle.getLinearCost(getSimulatedStates()[timeStep]));
+        try {
+            for(Obstacle obstacle : Robot.getObstacles()) {
+                Q = Q.plus(obstacle.getLinearCost(getSimulatedStates()[timeStep]));
+            }
+        } catch(ConcurrentModificationException | NullPointerException e) {
+
         }
 
         return Q;

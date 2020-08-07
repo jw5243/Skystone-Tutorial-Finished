@@ -18,15 +18,15 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GAMPCTuner {
-    private static final Time timeout = new Time(10d, TimeUnits.SECONDS);
+    private static final Time timeout = new Time(60d, TimeUnits.SECONDS);
 
     private static final int MAX_GENERATIONS = 10;
     private static final int POPULATION_SIZE = 30;
 
     private static final double MIN_TUNE_VALUE = 0d;
-    private static final double MAX_TUNE_VALUE = 100d;
+    private static final double MAX_TUNE_VALUE = 200d;
 
-    private static final int TERMS_TO_TUNE = 6; //6 for state cost + 1 for iteration count + 1 for timestep count //4 for input cost
+    private static final int TERMS_TO_TUNE = 10; //6 for state cost + 1 for iteration count + /*1 for timestep count*/ + 3 obstacles //4 for input cost
 
     private static final int elitismCount = 2;
     private static final double crossoverProbability = 0.9d;
@@ -43,7 +43,7 @@ public class GAMPCTuner {
         Robot.setUsingComputer(true);
         ComputerDebugger.init(new RobotGAMPC());
         tuner.init(true);
-        tuner.simulateGenerations(8);
+        tuner.simulateGenerations(2);
     }
 
     public static void saveData() {
@@ -106,12 +106,16 @@ public class GAMPCTuner {
     }
 
     public void runIteration(int index) {
-        MecanumRunnableMPC.setStateCost(SimpleMatrix.diag(Arrays.copyOfRange(getPopulationValues()[index], 0, getPopulationValues()[index].length - 1 /*- 4*/)));
+        MecanumRunnableMPC.setStateCost(SimpleMatrix.diag(Arrays.copyOfRange(getPopulationValues()[index], 0, getPopulationValues()[index].length - 1 - 4 /*- 4*/)));
+        MecanumRunnableMPC.setMaxIterations((int)((20d / getMaxTuneValue()) * getPopulationValues()[index][6]) + 1);
         //MecanumRunnableMPC.setInputCost(SimpleMatrix.diag(Arrays.copyOfRange(getPopulationValues()[index], 6, getPopulationValues()[index].length - 1)).scale(1d / getMaxTuneValue()));
 
         RobotGAMPC robot = new RobotGAMPC();
         ComputerDebugger.setRobot(robot);
         robot.init_debug();
+        for(int i = 0; i < Robot.getObstacles().size(); i++) {
+            Robot.getObstacles().get(i).setCostFactor((300d / 200d) * getPopulationValues()[index][7 + i]);
+        }
 
         ComputerDebugger.send(MessageOption.CLEAR_LOG_POINTS);
         ComputerDebugger.send(MessageOption.CLEAR_MOTION_PROFILE);
@@ -125,10 +129,18 @@ public class GAMPCTuner {
 
         robot.start_debug();
         boolean failed = false;
+        boolean failedLess = false;
         while(!robot.isDone() && TimeUtil.getCurrentRuntime().compareTo(getTimeout()) < 0) {
             try {
-                if(robot.getFieldPosition().getTranslation().distance(Robot.getInitialPose().getTranslation()) <  1E-6 && TimeUtil.getCurrentRuntime(TimeUnits.SECONDS) > 2d) {
+                if(robot.getFieldPosition().getTranslation().distance(Robot.getInitialPose().getTranslation()) <  1E-6 &&
+                        TimeUtil.getCurrentRuntime(TimeUnits.SECONDS) > 2d) {
                     failed = true;
+                    break;
+                }
+
+                if(robot.getFieldPosition().getTranslation().distance(robot.getPoseCheck().getTranslation()) < 1E-1 &&
+                        (TimeUtil.getCurrentRuntime(TimeUnits.SECONDS) - robot.getPoseCheckTime().getTimeValue(TimeUnits.SECONDS) > 4d)) {
+                    failedLess = true;
                     break;
                 }
 
@@ -143,28 +155,46 @@ public class GAMPCTuner {
             }
         }
 
-        if(failed) {
+        double distanceAwayFromGoal = robot.getFieldPosition().getTranslation().distance(robot.getPositions().get(0).getTranslation());
+        double elapsedTime = (robot.getRuntime() == 0d || failed || failedLess) ? getTimeout().getTimeValue(TimeUnits.SECONDS) : robot.getRuntime();
+        int remainingSetpoints = robot.getPositions().size() - 1;
+        int timesHittingObstacles = robot.getTimesHittingObstacle();
+        double closestDistanceToObstacle = robot.getClosestDistanceToObstacle();
+        double angularOffset = Math.abs(robot.getFieldPosition().getRotation().rotateBy(robot.getPositions().get(0).getRotation().inverse()).getDegrees());
+        timesHittingObstacles = Math.min(13 * 3, timesHittingObstacles);
+
+        if(failed || (failedLess && robot.getSetpointCount() - 1 <= remainingSetpoints)) {
+            timesHittingObstacles = 13 * 3 + 1;
             for(int i = 0; i < getPopulationValues()[index].length - 1; i++) {
                 getPopulationValues()[index][i] = getRandomTuneValue();
             }
+        } else if(elapsedTime != getTimeout().getTimeValue(TimeUnits.SECONDS)) {
+            distanceAwayFromGoal = 0d; //The robot has reached the final position
+        } else {
+            timesHittingObstacles = 13 * 3;
         }
 
-        double distanceAwayFromGoal = robot.getFieldPosition().getTranslation().distance(RobotGAMPC.getPositions().get(RobotGAMPC.getPositions().size() - 1).getTranslation());
-        double elapsedTime = (robot.getRuntime() == 0d || failed) ? getTimeout().getTimeValue(TimeUnits.SECONDS) : robot.getRuntime();
-
-        double normalizedDistanceCost = 10d;
-        double normalizedTimeCost = 20;
+        double normalizedDistanceCost = 0.01d;
+        double normalizedTimeCost = 50d;
+        double normalizedRemainingSetpointsCost = 50d;
+        double normalizedHittingObstacleCost = 50;
+        double normalizedClosestDistanceToObstacleCost = 200d;
+        double normalizedAngularOffsetCost = 100d;
 
         if(Double.isNaN(distanceAwayFromGoal)) {
-            distanceAwayFromGoal = normalizedDistanceCost * Math.sqrt(2d) * 144d;
+            distanceAwayFromGoal = normalizedDistanceCost * 144d;
         }
 
         //Update cost value which is set equal to the time elapsed for the iteration
         getPopulationValues()[index][getPopulationValues()[index].length - 1] =
-                normalizedDistanceCost * (distanceAwayFromGoal / 144d) + normalizedTimeCost * (elapsedTime / getTimeout().getTimeValue(TimeUnits.SECONDS));
+                normalizedDistanceCost * ((double)(remainingSetpoints) / robot.getSetpointCount()) * (distanceAwayFromGoal / 144d) +
+                        normalizedTimeCost * Math.pow(elapsedTime / getTimeout().getTimeValue(TimeUnits.SECONDS), 1d) +
+                        normalizedRemainingSetpointsCost * Math.pow((double)(remainingSetpoints) / robot.getSetpointCount(), 2d) +
+                        normalizedHittingObstacleCost * (144d / (closestDistanceToObstacle + (144d / 4d))) * Math.pow(timesHittingObstacles / (13 * 3d), 1d) +
+                        normalizedAngularOffsetCost * (angularOffset / 5d);
         System.out.print("Iteration: " + index + "\t");
         System.out.print(Arrays.toString(getPopulationValues()[index]));
-        System.out.println("\t Took " + elapsedTime + " seconds to finish");
+        System.out.println("\t Took " + elapsedTime + " seconds to finish and hit obstacles " + timesHittingObstacles + " times");
     }
 
     public void simulateGeneration() {
@@ -191,30 +221,30 @@ public class GAMPCTuner {
                     int index1 = getRandomChromosomeIndex();
                     int index2 = getRandomChromosomeIndex();
                     while(index2 == index1) {
-                        System.out.println("Recomputing indices");
                         index2 = getRandomChromosomeIndex();
                     }
 
                     crossover(nextPopulationValues, k, index1, index2);
-                    System.out.println("Crossing over " + index1 + " with " + index2 + "\tReplacing index " + k + " and " + (k + 1));
+                    //System.out.println("Crossing over " + index1 + " with " + index2 + "\tReplacing index " + k + " and " + (k + 1));
                     k++;
                 } else {//if(generationTransitionType <= getCrossoverProbability() + getMutationProbability()) {
                     int index = getRandomChromosomeIndex();
                     mutation(nextPopulationValues, k, index);
-                    System.out.println("Mutating " + index + "\tReplacing index " + k);
+                    //System.out.println("Mutating " + index + "\tReplacing index " + k);
                 }
 
                 k++;
             }
 
             setPopulationValues(nextPopulationValues);
-            System.out.println("//////////////////////////////////////////////////////////////////////////////////");
+            //System.out.println("//////////////////////////////////////////////////////////////////////////////////");
         }
 
         for(int i = 0; i < getPopulationValues().length; i++) {
             runIteration(i);
         }
 
+        System.out.println("Average cost: " + Arrays.stream(getPopulationValues()).mapToDouble(chromosome -> chromosome[chromosome.length - 1]).average().getAsDouble());
         saveData();
         setCurrentGeneration(getCurrentGeneration() + 1);
     }
