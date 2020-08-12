@@ -15,6 +15,12 @@ public class SplineGenerator {
             return null;
         }
 
+        if(initialPose.getRotation().cos() >= 0) {
+            values[0] = Math.abs(values[0]);
+        } else {
+            values[0] = -Math.abs(values[0]);
+        }
+
         List<Double> coefficients = new LinkedList<>(Arrays.asList(initialPose.getTranslation().x(), initialPose.getTranslation().y(), //Constant term
                 values[0], values[0] * initialPose.getRotation().tan(), //Linear term
                 2d * (terminationPoint.x() - initialPose.getTranslation().x() - values[0] - IntStream //Quadratic term
@@ -39,6 +45,12 @@ public class SplineGenerator {
     public static Spline getTerminatingSpline(int degree, Spline previousSpline, Rotation2d initialHeading, Translation2d previousPoint, Pose2d terminationPose, double... values) {
         if(values.length % 2 == 0 && degree == previousSpline.getPolynomialDegree()) {
             return null;
+        }
+
+        if(terminationPose.getRotation().cos() >= 0) {
+            values[0] = -Math.abs(values[0]);
+        } else {
+            values[0] = Math.abs(values[0]);
         }
 
         List<Double> coefficients = new LinkedList<>(Arrays.asList(terminationPose.getTranslation().x(), terminationPose.getTranslation().y(), //Constant term
@@ -78,20 +90,13 @@ public class SplineGenerator {
     }
 
     public static void main(String... args) {
-        Spline spline = SplineGenerator.getInitialSpline(4, new Pose2d(0, 0, new Rotation2d(Math.PI / 2.1d, false)),
+        Spline spline = SplineGenerator.getInitialSpline(4, new Pose2d(0, 0, new Rotation2d(Math.PI / 4d, false)),
                 new Translation2d(5d, 5d), 1, 1, 1, 1, 1);
-        System.out.println(spline.evaluate(1));
-        System.out.println(Arrays.toString(spline.getCoefficients()));
+        Spline finalSpline = SplineGenerator.getTerminatingSpline(4, spline, new Rotation2d(Math.PI / 4d, false),
+                new Translation2d(5d, 5d), new Pose2d(10d, 10d, new Rotation2d(Math.PI - Math.PI / 2.1d, false)), -1, 1, 1);
 
-        Spline finalSpline = SplineGenerator.getTerminatingSpline(4, spline, new Rotation2d(Math.PI / 2.1d, false),
-                new Translation2d(5d, 5d), new Pose2d(10d, 10d, new Rotation2d(0 * Math.PI / 4d, false)), 1, 1, 1);
-        System.out.println(finalSpline.evaluate(0));
-        System.out.println(finalSpline.evaluate(1));
-        System.out.println(Arrays.toString(finalSpline.getCoefficients()));
-
-        System.out.println(spline.getCurvature(1));
-        System.out.println(spline.getMeanCurvature());
-        System.out.println(spline.getMeanDCurvature());
+        System.out.println(spline);
+        System.out.println(finalSpline);
     }
 
     private static int factorial(int value, int result) {

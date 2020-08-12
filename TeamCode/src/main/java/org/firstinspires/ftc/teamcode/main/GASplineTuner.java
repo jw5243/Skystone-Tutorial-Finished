@@ -114,21 +114,8 @@ public class GASplineTuner {
                 Arrays.copyOfRange(getPopulationValues()[index], 4 + 1 + (getTermsToTune() - 8) / 2, getPopulationValues()[index].length - 1));
 
         if(isPrintSpline()) {
-            double[] initialSplineCoefficients = initialSpline.getCoefficients();
-            System.out.print("{");
-            for(int i = 0; i < initialSplineCoefficients.length; i += 2) {
-                System.out.print("{" + initialSplineCoefficients[i] + "," + initialSplineCoefficients[i + 1] + ((i + 2 < initialSplineCoefficients.length) ? "}," : "}"));
-            }
-
-            System.out.println("}");
-
-            double[] finalSplineCoefficients = finalSpline.getCoefficients();
-            System.out.print("{");
-            for(int i = 0; i < initialSplineCoefficients.length; i += 2) {
-                System.out.print("{" + finalSplineCoefficients[i] + "," + finalSplineCoefficients[i + 1] + ((i + 2 < finalSplineCoefficients.length) ? "}," : "}"));
-            }
-
-            System.out.println("}");
+            System.out.println(initialSpline);
+            System.out.println(finalSpline);
         }
 
         //Update cost value which is set equal to the mean curvature
@@ -205,21 +192,8 @@ public class GASplineTuner {
                 new Translation2d(2d, 10d), new Pose2d(10d, 0d, new Rotation2d(0 * Math.PI / 4d, false)),
                 Arrays.copyOfRange(getPopulationValues()[0], 4 + 1 + (getTermsToTune() - 8) / 2, getPopulationValues()[0].length - 1));
 
-        double[] initialSplineCoefficients = initialSpline.getCoefficients();
-        System.out.print("{");
-        for(int i = 0; i < initialSplineCoefficients.length; i += 2) {
-            System.out.print("{" + initialSplineCoefficients[i] + "," + initialSplineCoefficients[i + 1] + ((i + 2 < initialSplineCoefficients.length) ? "}," : "}"));
-        }
-
-        System.out.println("}");
-
-        double[] finalSplineCoefficients = finalSpline.getCoefficients();
-        System.out.print("{");
-        for(int i = 0; i < initialSplineCoefficients.length; i += 2) {
-            System.out.print("{" + finalSplineCoefficients[i] + "," + finalSplineCoefficients[i + 1] + ((i + 2 < finalSplineCoefficients.length) ? "}," : "}"));
-        }
-
-        System.out.println("}");
+        System.out.println(initialSpline);
+        System.out.println(finalSpline);
     }
 
     public void crossover(double[][] nextPopulationValues, int nextPopulationIndex, int index1, int index2) {

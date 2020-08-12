@@ -68,6 +68,17 @@ public class Spline implements ParametricFunction {
     }
 
     @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder("{");
+        for(int i = 0; i < getCoefficients().length; i += 2) {
+            stringBuilder.append("{").append(getCoefficients()[i]).append(",").append(getCoefficients()[i + 1]).append((i + 2 < getCoefficients().length) ? "}," : "}");
+        }
+
+        stringBuilder.append("}");
+        return stringBuilder.toString();
+    }
+
+    @Override
     public Translation2d evaluate(double parameter) {
         Translation2d vector = new Translation2d();
         for(int i = 0; i <= getPolynomialDegree(); i++) {
