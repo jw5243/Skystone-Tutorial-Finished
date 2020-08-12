@@ -24,7 +24,7 @@ import java.util.List;
 public class RobotGAMPC extends Robot {
     private final int setpointCount;
 
-    private List<Pose2d> positions   = new ArrayList<>();
+    private List<Pose2d> positions = new ArrayList<>();
 
     private double runtime = 0d;
     private boolean isDone = false;

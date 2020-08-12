@@ -65,8 +65,7 @@ public class CascadeLinearlyExtendingRobotPractice extends Robot {
             super.loop_debug();
             double dt = getDt();
             if(dt != 0) {
-                //ComputerDebugger.send(MessageOption.LIFT_INPUT.setSendValue(output));
-                linearExtensionModel.update(dt, 0d);
+                linearExtensionModel.update(dt, 0);
             }
 
             ComputerDebugger.send(MessageOption.LINEAR_POSITION.setSendValue((int)(1000d * linearExtensionModel.getPosition() * 6d / 0.0254d) / 1000d));
@@ -81,13 +80,7 @@ public class CascadeLinearlyExtendingRobotPractice extends Robot {
         try {
             ComputerDebugger.send(MessageOption.LIFT_POSITION.setSendValue((int)(1000d * linearExtensionModel.getPosition() / 0.0254d) / 1000d));
             ComputerDebugger.send(MessageOption.LIFT_VELOCITY.setSendValue((int)(1000d * linearExtensionModel.getVelocity() / 0.0254d) / 1000d));
-            //ComputerDebugger.send(MessageOption.LIFT_ACCELERATION.setSendValue((int)(1000d * linearExtensionModel.getAcceleration() * 6d / 0.0254d) / 1000d));
-            //ComputerDebugger.send(MessageOption.LIFT_JERK.setSendValue((int)(1000d * linearExtensionModel.getJerk() * 6d / 0.0254d) / 1000d));
-
-            //ComputerDebugger.send(MessageOption.LIFT_JERK.setSendValue(setpoint));
-            ComputerDebugger.send(MessageOption.LIFT_JERK.setSendValue((int)(1000d * motionProfile.getVelocity()) / 1000d));
-            //ComputerDebugger.send(MessageOption.LIFT_ACCELERATION.setSendValue((int)(1000d * motionProfile3.getVelocity()) / 1000d));
-            //System.out.println(TimeUtil.getCurrentRuntime(TimeUnits.SECONDS) + "\t" + (int)(1000d * linearExtensionModel.getAcceleration() * 6d / 0.0254d) / 1000d);
+            //ComputerDebugger.send(MessageOption.LIFT_JERK.setSendValue((int)(1000d * motionProfile.getVelocity()) / 1000d));
         } catch (IllegalMessageTypeException e) {
             e.printStackTrace();
         }

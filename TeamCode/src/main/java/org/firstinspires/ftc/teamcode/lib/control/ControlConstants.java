@@ -25,6 +25,10 @@ public class ControlConstants {
         this(kP, kI, kD, 0, 0, 0);
     }
 
+    public ControlConstants(final double kP, final double kI, final double kD, final double kS) {
+        this(kP, kI, kD, kS, 0, 0);
+    }
+
     public ControlConstants(final double kP, final double kI, final double kD,
                             final double kS, final double kV, final double kA) {
         this.kP = kP;

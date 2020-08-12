@@ -68,6 +68,7 @@ public class MotorModel {
      *                       output shaft, this parameter is made a {@code DoubleSupplier}, enabling
      *                       custom inputs for the inertia value based on the angular rotation of the
      *                       motor output shaft.
+     *
      * @see DoubleUnaryOperator
      */
     public MotorModel(double gearRatio, double nominalVoltage, double stallTorque,
@@ -146,10 +147,28 @@ public class MotorModel {
         }
     }
 
+    /**
+     *
+     *
+     * @param dt
+     * @param voltageInput
+     */
     public void update(double dt, double voltageInput) {
         update(dt, voltageInput, 0d);
     }
 
+    /**
+     * Updates the motor model by calculating the theoretically angular acceleration/torque generated
+     * by the motor for a given voltage input. Thereafter, we can calculate the angular velocity and
+     * angular displacement (position) via riemann integration or simply the kinematic equations for
+     * constant angular acceleration. We can use the constant acceleration kinematic equations since
+     * we assume for a small time dt, the angular acceleration of the motor is approximately constant.
+     *
+     * @param dt The elapsed time in seconds since the last time this {@code method} was called.
+     * @param voltageInput The amount of volts supplied to the motor model.
+     * @param externalFriction The frictional torque caused by external sources, such as that coming from
+     *                         surface contact of a mechanism run by a motor.
+     */
     public void update(double dt, double voltageInput, double externalFriction) {
         if(dt == 0d) {
             return;
