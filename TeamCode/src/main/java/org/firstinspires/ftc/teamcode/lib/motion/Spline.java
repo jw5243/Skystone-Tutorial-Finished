@@ -5,7 +5,7 @@ import org.firstinspires.ftc.teamcode.lib.geometry.Translation2d;
 import java.util.stream.IntStream;
 
 public class Spline implements ParametricFunction {
-    private static final int PARAMETER_STEPS = 1000;
+    private static final int PARAMETER_STEPS = 2000;
 
     private int polynomialDegree;
     private double[] coefficients;
@@ -140,12 +140,23 @@ public class Spline implements ParametricFunction {
 
     @Override
     public double getMeanCurvature() {
-        return IntStream.range(0, getParameterSteps()).mapToDouble(i -> getCurvature((double)(i) / getParameterSteps()) / getParameterSteps()).sum();
+        return IntStream.range(0, getParameterSteps()).mapToDouble(i ->
+                (getCurvature((double)(i) / getParameterSteps()) + getCurvature((double)(i + 1) / getParameterSteps())) / (2d * getParameterSteps())).sum();
     }
 
     @Override
     public double getMeanDCurvature() {
-        return IntStream.range(0, getParameterSteps()).mapToDouble(i -> getDCurvature((double)(i) / getParameterSteps()) / getParameterSteps()).sum();
+        return IntStream.range(0, getParameterSteps()).mapToDouble(i ->
+                (getDCurvature((double)(i) / getParameterSteps()) + getDCurvature((double)(i + 1) / getParameterSteps())) / (2d * getParameterSteps())).sum();
+    }
+
+    public double getArcLength() {
+        return IntStream.range(0, getParameterSteps()).mapToDouble(i ->
+                (getDerivative((double)(i) / getParameterSteps()).norm() + getDerivative((double)(i + 1) / getParameterSteps()).norm()) / (2d * getParameterSteps())).sum();
+    }
+
+    public double getMinDistanceFromPoint(Translation2d point) {
+        return IntStream.range(0, getParameterSteps()).mapToDouble(i -> evaluate((double)(i) / getParameterSteps()).distance(point)).min().getAsDouble();
     }
 
     public int getPolynomialDegree() {

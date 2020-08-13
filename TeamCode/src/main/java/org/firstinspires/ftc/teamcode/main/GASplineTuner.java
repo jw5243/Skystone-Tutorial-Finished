@@ -1,5 +1,11 @@
 package org.firstinspires.ftc.teamcode.main;
 
+import org.firstinspires.ftc.teamcode.debugging.ComputerDebugger;
+import org.firstinspires.ftc.teamcode.debugging.IllegalMessageTypeException;
+import org.firstinspires.ftc.teamcode.debugging.MessageOption;
+import org.firstinspires.ftc.teamcode.lib.control.Obstacle;
+import org.firstinspires.ftc.teamcode.lib.geometry.Circle2d;
+import org.firstinspires.ftc.teamcode.lib.geometry.Line2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Rotation2d;
 import org.firstinspires.ftc.teamcode.lib.geometry.Translation2d;
@@ -22,7 +28,7 @@ public class GASplineTuner {
     private static final double MIN_TUNE_VALUE = -25d;
     private static final double MAX_TUNE_VALUE = 25d;
 
-    private static final int TERMS_TO_TUNE = 4 * 7; //Must be some multiple of 4
+    private static final int TERMS_TO_TUNE = 4 * 7 + 2; //Must be some multiple of 4
 
     private static final int elitismCount = 2;
     private static final double crossoverProbability = 0.9d;
@@ -42,9 +48,12 @@ public class GASplineTuner {
             e.printStackTrace();
         }
 
+        Robot.setUsingComputer(true);
+        ComputerDebugger.init(new RobotGAMPC());
+        ComputerDebugger.getRobot().init_debug();
         GASplineTuner tuner = new GASplineTuner();
         tuner.init(false);
-        tuner.simulateGenerations(200);
+        tuner.simulateGenerations(100);
     }
 
     public static void saveData() {
@@ -107,20 +116,58 @@ public class GASplineTuner {
     }
 
     public void runIteration(int index) {
-        Spline initialSpline = SplineGenerator.getInitialSpline(2 + getTermsToTune() / 4, new Pose2d(0, 0, new Rotation2d(Math.PI / 2.1d, false)),
-                new Translation2d(2d, 10d), Arrays.copyOfRange(getPopulationValues()[index], 0, getPopulationValues()[index].length - 1 - 3 - (getTermsToTune() - 8) / 2));
-        Spline finalSpline = SplineGenerator.getTerminatingSpline(2 + getTermsToTune() / 4, initialSpline, new Rotation2d(Math.PI / 2.1d, false),
-                new Translation2d(2d, 10d), new Pose2d(10d, 0d, new Rotation2d(0 * Math.PI / 4d, false)),
-                Arrays.copyOfRange(getPopulationValues()[index], 4 + 1 + (getTermsToTune() - 8) / 2, getPopulationValues()[index].length - 1));
+        Spline initialSpline = SplineGenerator.getInitialSpline(2 + getTermsToTune() / 4, new Pose2d(9, 9, new Rotation2d(0d, false)),
+                new Translation2d(4d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 2], 4d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 1]), Arrays.copyOfRange(getPopulationValues()[index], 0, getPopulationValues()[index].length - 1 - 3 - (getTermsToTune() - 8 - 2) / 2 - 2));
+        Spline finalSpline = SplineGenerator.getTerminatingSpline(2 + getTermsToTune() / 4, initialSpline, new Rotation2d(0d, false),
+                new Translation2d(4d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 2], 4d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 1]),
+                new Pose2d(144d - 9d, 144d - 9d, new Rotation2d(0d, false)),
+                Arrays.copyOfRange(getPopulationValues()[index], 4 + 1 + (getTermsToTune() - 8 - 2) / 2, getPopulationValues()[index].length - 1 - 2));
 
         if(isPrintSpline()) {
             System.out.println(initialSpline);
             System.out.println(finalSpline);
         }
 
+        int steps = 500;
+        Translation2d[] values = new Translation2d[2 * steps];
+        for(int i = 0; i < steps; i++) {
+            values[i] = initialSpline.evaluate((double)(i) / steps);
+            values[i + steps] = finalSpline.evaluate((double)(i) / steps);
+        }
+
+        for(int i = 0; i < values.length - 1; i++) {
+            try {
+                ComputerDebugger.send(MessageOption.LINE.setSendValue(new Line2d(values[i], values[i + 1])));
+            } catch (IllegalMessageTypeException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Translation2d obstacle = new Translation2d(144d / 2d, 144d / 2d);
+        Obstacle obstacleObject = new Obstacle(obstacle, 9d, 1d);
+        double minDistanceToObstacle = Math.min(initialSpline.getMinDistanceFromPoint(obstacle), finalSpline.getMinDistanceFromPoint(obstacle));
+
+        double obstacleCost = 0d;
+        if(minDistanceToObstacle < 18d) {
+            obstacleCost = 1E9d;
+            for(int i = 0; i < getPopulationValues()[index].length - 1; i++) {
+                getPopulationValues()[index][i] = getRandomTuneValue();
+            }
+        }
+
+        try {
+            ComputerDebugger.send(MessageOption.KEY_POINT.setSendValue(new Circle2d(
+                    obstacleObject.getLocation(), obstacleObject.getObstacleRadius() / 0.0254d
+            )));
+        } catch (IllegalMessageTypeException e) {
+            e.printStackTrace();
+        }
+
+        ComputerDebugger.sendMessage();
+
         //Update cost value which is set equal to the mean curvature
-        getPopulationValues()[index][getPopulationValues()[index].length - 1] = 10000d * Math.pow(initialSpline.getMeanCurvature() + finalSpline.getMeanCurvature(), 2d) +
-                Math.pow(initialSpline.getMeanDCurvature() + finalSpline.getMeanDCurvature(), 2d);
+        getPopulationValues()[index][getPopulationValues()[index].length - 1] = 10d * (Math.pow(initialSpline.getMeanCurvature() + finalSpline.getMeanCurvature(), 2d) +
+                Math.pow(initialSpline.getMeanDCurvature() + finalSpline.getMeanDCurvature(), 2d)) + (initialSpline.getArcLength() + finalSpline.getArcLength()) + obstacleCost;
         System.out.print("Iteration: " + index + "\t");
         System.out.print(Arrays.toString(getPopulationValues()[index]));
         System.out.println("\t" + getPopulationValues()[index][getPopulationValues()[index].length - 1]);
@@ -186,11 +233,30 @@ public class GASplineTuner {
             simulateGeneration();
         }
 
-        Spline initialSpline = SplineGenerator.getInitialSpline(2 + getTermsToTune() / 4, new Pose2d(0, 0, new Rotation2d(Math.PI / 2.1d, false)),
-                new Translation2d(2d, 10d), Arrays.copyOfRange(getPopulationValues()[0], 0, getPopulationValues()[0].length - 1 - 3 - (getTermsToTune() - 8) / 2));
-        Spline finalSpline = SplineGenerator.getTerminatingSpline(2 + getTermsToTune() / 4, initialSpline, new Rotation2d(Math.PI / 2.1d, false),
-                new Translation2d(2d, 10d), new Pose2d(10d, 0d, new Rotation2d(0 * Math.PI / 4d, false)),
-                Arrays.copyOfRange(getPopulationValues()[0], 4 + 1 + (getTermsToTune() - 8) / 2, getPopulationValues()[0].length - 1));
+        int index = 0;
+        Spline initialSpline = SplineGenerator.getInitialSpline(2 + getTermsToTune() / 4, new Pose2d(9, 9, new Rotation2d(0d, false)),
+                new Translation2d(4d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 2], 4d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 1]), Arrays.copyOfRange(getPopulationValues()[index], 0, getPopulationValues()[index].length - 1 - 3 - (getTermsToTune() - 8 - 2) / 2 - 2));
+        Spline finalSpline = SplineGenerator.getTerminatingSpline(2 + getTermsToTune() / 4, initialSpline, new Rotation2d(0d, false),
+                new Translation2d(4d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 2], 4d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 1]),
+                new Pose2d(144d - 9d, 144d - 9d, new Rotation2d(0d, false)),
+                Arrays.copyOfRange(getPopulationValues()[index], 4 + 1 + (getTermsToTune() - 8 - 2) / 2, getPopulationValues()[index].length - 1 - 2));
+
+        int steps = 500;
+        Translation2d[] values = new Translation2d[2 * steps];
+        for(int i = 0; i < steps; i++) {
+            values[i] = initialSpline.evaluate((double)(i) / steps);
+            values[i + steps] = finalSpline.evaluate((double)(i) / steps);
+        }
+
+        for(int i = 0; i < values.length - 1; i++) {
+            try {
+                ComputerDebugger.send(MessageOption.LINE.setSendValue(new Line2d(values[i], values[i + 1])));
+            } catch (IllegalMessageTypeException e) {
+                e.printStackTrace();
+            }
+        }
+
+        ComputerDebugger.sendMessage();
 
         System.out.println(initialSpline);
         System.out.println(finalSpline);

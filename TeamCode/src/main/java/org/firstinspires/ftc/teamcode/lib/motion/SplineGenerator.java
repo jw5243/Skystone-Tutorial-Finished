@@ -90,13 +90,17 @@ public class SplineGenerator {
     }
 
     public static void main(String... args) {
-        Spline spline = SplineGenerator.getInitialSpline(4, new Pose2d(0, 0, new Rotation2d(Math.PI / 4d, false)),
+        Spline spline = SplineGenerator.getInitialSpline(4, new Pose2d(0, 0, new Rotation2d(Math.PI / 2.1d, false)),
                 new Translation2d(5d, 5d), 1, 1, 1, 1, 1);
-        Spline finalSpline = SplineGenerator.getTerminatingSpline(4, spline, new Rotation2d(Math.PI / 4d, false),
+        Spline finalSpline = SplineGenerator.getTerminatingSpline(4, spline, new Rotation2d(Math.PI / 2.1d, false),
                 new Translation2d(5d, 5d), new Pose2d(10d, 10d, new Rotation2d(Math.PI - Math.PI / 2.1d, false)), -1, 1, 1);
 
         System.out.println(spline);
         System.out.println(finalSpline);
+        System.out.println(spline.getMeanCurvature());
+        System.out.println(spline.getMeanDCurvature());
+        System.out.println(spline.getArcLength());
+        System.out.println(spline.getMinDistanceFromPoint(new Translation2d(6, 6)));
     }
 
     private static int factorial(int value, int result) {
