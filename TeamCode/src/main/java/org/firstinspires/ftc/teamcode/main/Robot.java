@@ -25,11 +25,11 @@ import java.util.List;
 public abstract class Robot implements RobotDebug {
     private static final SimpleMatrix INITIAL_STATE = new SimpleMatrix(6, 1, false, new double[] {
             //(12d * 12d - 9d) * 0.0254d, 0d, 48d * 0.0254d, 0d, Math.toRadians(-180d), 0d
-            //9d * 0.0254d, 0d, 9d * 0.0254d, 0d, Math.toRadians(0d), 0d
+            9d * 0.0254d, 0d, 9d * 0.0254d, 0d, Math.toRadians(0d), 0d
 
             //9d * 0.0254d, 0d, 48d * 0.0254d, 0d, Math.toRadians(0d), 0d
             //9d * 0.0254d, 0d, (4d + 8d * 5d) * 0.0254d, 0d, Math.toRadians(0d), 0d
-            9d * 0.0254d, 0d, 40d * 0.0254d, 0d, Math.toRadians(-90d), 0d
+            //9d * 0.0254d, 0d, 40d * 0.0254d, 0d, Math.toRadians(-90d), 0d
     });
 
     private static final Pose2d INITIAL_POSE = new Pose2d(getInitialState().get(0) / 0.0254d, getInitialState().get(2) / 0.0254d, new Rotation2d(getInitialState().get(4), false));

@@ -159,6 +159,21 @@ public class Spline implements ParametricFunction {
         return IntStream.range(0, getParameterSteps()).mapToDouble(i -> evaluate((double)(i) / getParameterSteps()).distance(point)).min().getAsDouble();
     }
 
+    public double[] getParameterAndMinDistanceFromPoint(Translation2d point) {
+        double parameterValue = 0d;
+        double minDistance = Double.MAX_VALUE;
+        for(int i = 0; i < getParameterSteps(); i++) {
+            double parameter = (double)(i) / getParameterSteps();
+            double distance = evaluate(parameter).distance(point);
+            if(minDistance > distance) {
+                parameterValue = parameter;
+                minDistance = distance;
+            }
+        }
+
+        return new double[] {parameterValue, minDistance};
+    }
+
     public int getPolynomialDegree() {
         return polynomialDegree;
     }

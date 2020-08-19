@@ -19,16 +19,16 @@ public class CascadeLinearlyExtendingRobotPractice extends Robot {
     private LinearExtensionModel linearExtensionModel;
 
     private final double kS = 0d; //V
-    private final double kV = 0d; //V s / in
-    private final double kA = 0d; //V s^2 / in
-    private final double kP = 0d; //V / in
-    private final double kI = 0d; //V / (in s)
+    private final double kV = 0.8d * (12d - kS) / 15d; //V s / in
+    private final double kA = 0.22d; //V s^2 / in
+    private final double kP = 10d; //V / in
+    private final double kI = 2d; //V / (in s)
     private final double kD = 0d; //V s / in
 
     private double lastError = 0d;
     private double runningSum = 0d;
 
-    private double setpoint = 15d;//5d; //in
+    private double setpoint = 15d / 2d;//5d; //in
 
     private IMotionProfile motionProfile;
 
@@ -51,6 +51,7 @@ public class CascadeLinearlyExtendingRobotPractice extends Robot {
         );
 
         //linearExtensionModel.overridePosition(15d * 0.0254d);
+        motionProfile = new ResidualVibrationReductionMotionProfilerGenerator(0, 15, 15, 20);
     }
 
     @Override
@@ -65,7 +66,19 @@ public class CascadeLinearlyExtendingRobotPractice extends Robot {
             super.loop_debug();
             double dt = getDt();
             if(dt != 0) {
-                linearExtensionModel.update(dt, 0);
+                double liftHeightInches = linearExtensionModel.getPosition() / 0.0254d;
+                double error = setpoint - liftHeightInches;
+                runningSum += error * dt;
+                double output =
+                        kS +
+                        kP * error +
+                        kI * runningSum +
+                        kD * ((error - lastError) / dt - motionProfile.getVelocity());
+                output = Math.min(12d, Math.max(-12d, output));
+
+                lastError = error;
+
+                linearExtensionModel.update(dt, output);
             }
 
             ComputerDebugger.send(MessageOption.LINEAR_POSITION.setSendValue((int)(1000d * linearExtensionModel.getPosition() * 6d / 0.0254d) / 1000d));

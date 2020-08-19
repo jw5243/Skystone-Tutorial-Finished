@@ -117,9 +117,9 @@ public class GASplineTuner {
 
     public void runIteration(int index) {
         Spline initialSpline = SplineGenerator.getInitialSpline(2 + getTermsToTune() / 4, new Pose2d(9, 9, new Rotation2d(0d, false)),
-                new Translation2d(4d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 2], 4d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 1]), Arrays.copyOfRange(getPopulationValues()[index], 0, getPopulationValues()[index].length - 1 - 3 - (getTermsToTune() - 8 - 2) / 2 - 2));
+                new Translation2d(2d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 2] + 50d, 2d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 1] + 50d), Arrays.copyOfRange(getPopulationValues()[index], 0, getPopulationValues()[index].length - 1 - 3 - (getTermsToTune() - 8 - 2) / 2 - 2));
         Spline finalSpline = SplineGenerator.getTerminatingSpline(2 + getTermsToTune() / 4, initialSpline, new Rotation2d(0d, false),
-                new Translation2d(4d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 2], 4d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 1]),
+                new Translation2d(2d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 2] + 50d, 2d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 1] + 50d),
                 new Pose2d(144d - 9d, 144d - 9d, new Rotation2d(0d, false)),
                 Arrays.copyOfRange(getPopulationValues()[index], 4 + 1 + (getTermsToTune() - 8 - 2) / 2, getPopulationValues()[index].length - 1 - 2));
 
@@ -235,9 +235,9 @@ public class GASplineTuner {
 
         int index = 0;
         Spline initialSpline = SplineGenerator.getInitialSpline(2 + getTermsToTune() / 4, new Pose2d(9, 9, new Rotation2d(0d, false)),
-                new Translation2d(4d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 2], 4d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 1]), Arrays.copyOfRange(getPopulationValues()[index], 0, getPopulationValues()[index].length - 1 - 3 - (getTermsToTune() - 8 - 2) / 2 - 2));
+                new Translation2d(2d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 2] + 50d, 2d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 1] + 50d), Arrays.copyOfRange(getPopulationValues()[index], 0, getPopulationValues()[index].length - 1 - 3 - (getTermsToTune() - 8 - 2) / 2 - 2));
         Spline finalSpline = SplineGenerator.getTerminatingSpline(2 + getTermsToTune() / 4, initialSpline, new Rotation2d(0d, false),
-                new Translation2d(4d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 2], 4d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 1]),
+                new Translation2d(2d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 2] + 50d, 2d * getPopulationValues()[index][getPopulationValues()[index].length - 1 - 1] + 50d),
                 new Pose2d(144d - 9d, 144d - 9d, new Rotation2d(0d, false)),
                 Arrays.copyOfRange(getPopulationValues()[index], 4 + 1 + (getTermsToTune() - 8 - 2) / 2, getPopulationValues()[index].length - 1 - 2));
 
