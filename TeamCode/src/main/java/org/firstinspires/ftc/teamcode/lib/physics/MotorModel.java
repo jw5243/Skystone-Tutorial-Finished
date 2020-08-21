@@ -6,28 +6,123 @@ import java.util.function.DoubleUnaryOperator;
 
 /**
  * This {@code class} simulates and stores the basic components of a motor, including torque, speed,
- * and currently four types of friction. 
+ * and currently four types of friction. This model of the motor has currently been used to simulate
+ * voltage input of the motor, rather than PWM type inputs based on an input power that is used in
+ * FTC. Nevertheless, the difference between these two methods of powering a motor are assumed to be
+ * close enough to the same that this simulation is negligibly different.
+ *
+ * At the very least, any controller based on a model should be robust, and such a difference in motor
+ * powering should be compensated by the control system implemented.
+ *
+ * It is also important to note that this class uses International Standard (SI) units whenever possible.
+ * The only exception is for wheel velocities as conversions between RPM and rad / s is common.
+ *
+ * @see LinearExtensionModel
  */
 public class MotorModel {
+    /**
+     * This value converts a value in units of RPM to the corresponding value in radians per second
+     * upon multiplication. Analogously, division by this number converts radians per second to RPM.
+     */
     private static final double RPM_TO_RAD_PER_SECOND = Math.PI / 30d; //rad min / (rot s)
 
+    /**
+     * This value represents the amount of gearing to slow down and increase the torque of the motor.
+     * Motors without any gearbox run at very high RPM, so gear ratios are an integral part of any
+     * motorized mechanism.
+     */
     private final double gearRatio;
 
+    /**
+     * The nominal voltage is most commonly 12 V in FTC, representing the voltage at which the motor
+     * is tagged to be powered.
+     */
     private final double nominalVoltage; //V
+
+    /**
+     * This value represents the max amount of torque output from the motor. More precisely, the stall
+     * torque is the amount of torque the motor supplies when running at zero speed. The stall torque
+     * value stored in this variable is that of the output shaft of the gearings of the motor, so
+     * the torque here is that from the motor specifications multiplied by the external gear ratio.
+     */
     private final double stallTorque; //N m
+
+    /**
+     * This value denotes the amount of current draw by the motor when stalled. Specifically, the motor
+     * is stalled when applying voltage does not cause the motor to start moving.
+     */
     private final double stallCurrent; //A
+
+    /**
+     * This value represents the current draw when the motor is running at full speed with no load on
+     * the shaft.
+     */
     private final double freeCurrent; //A
+
+    /**
+     * This value represents how fast the motor runs when no load is placed on the output shaft. Thus,
+     * the free speed is the speed in rad / s after the gearing is applied.
+     */
     private final double freeSpeed; //rad / s
+
+    /**
+     * This value represents the ratio between the power of the output shaft versus the internal rotor.
+     * This value will generally be below 0.8 (80%), especially for brushed motors.
+     */
     private final double efficiency;
+
+    /**
+     * Motors must have some sort of resistor to ensure that the current draw is not excessively high.
+     * The resistance relates the voltage input to the current draw via the equation V = IR.
+     */
     private final double resistance; //ohms
 
+    /**
+     * This value is the conversion factor from angular velocity (rad / s) to voltage (V). The
+     * determination of this value depends on the specifications of the motor that is being described.
+     * Thus, based on parameters supplied to the constructor, this value is automatically determined
+     * for convenience.
+     */
     private final double kV; //V rad / s
+
+    /**
+     * This value converts current (A) to torque (N m). This value is determined from the parameters
+     * supplied in the constructor, and thereby calculated automatically for convenience. Like kV,
+     * kT depends on motor specifications.
+     *
+     * @see #getkV()
+     */
     private final double kT; //N m / A
 
+    /**
+     * This operator determines the amount of inertia the motor must overcome when running. Specifically,
+     * we are using a {@code DoubleUnaryOperator} as a way to allow for different inertia values for
+     * different angular displacements. This value is likely to be constant, so unchanging for varying
+     * angular displacements. The {@code weightAppliedTorque} is more likely to be varying.
+     *
+     * @see DoubleUnaryOperator
+     * @see #getCurrentAngularPosition()
+     * @see #getWeightAppliedTorque()
+     */
     private final DoubleUnaryOperator inertia; //kg m^2
+
+    /**
+     * This operator determines the amount of 'weight' that the motor must overcome when running. Based
+     * on the current angular displacement of the motor as input for this operator, what should return
+     * is the amount of torque induced by the weight of the mechanism for which the motor is running.
+     * The value being returned here need not be the torque from weight, but that is the most likely
+     * use of this parameter, and thus we call it the {@code weightAppliedTorque}.
+     *
+     * @see #getCurrentAngularPosition()
+     */
     private final DoubleUnaryOperator weightAppliedTorque; //N m
 
     //Define friction coefficients
+
+    /**
+     * This value is the amount of torque required to start spinning the motor (minus backdrive torque).
+     * This value is should be greater than or equal to the {@see coulombFriction} coefficient.
+     */
     private final double staticFriction; //N m
     private final double coulombFriction; //N m
     private final double viscousFriction; //N s
